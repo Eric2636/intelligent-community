@@ -1,0 +1,43 @@
+<nav title-text="{{post ? post.title : '帖子'}}" show-back="{{true}}" />
+<view class="post-page">
+  <view wx:if="{{loading}}" class="post-loading">
+    <t-loading theme="dots" size="48rpx" />
+  </view>
+  <block wx:elif="{{post}}">
+    <view class="post-card">
+      <view class="post-card__head">
+        <view class="post-card__author">
+          <text>{{post.authorName}}</text>
+          <text class="post-card__time">{{post.createTime}}</text>
+        </view>
+      </view>
+      <text class="post-card__title">{{post.title}}</text>
+      <text class="post-card__content">{{post.content}}</text>
+      <view class="post-card__meta">
+        <text>浏览 {{post.viewCount}}</text>
+        <text>回复 {{post.replyCount}}</text>
+      </view>
+    </view>
+    <view class="post-replies">
+      <view class="post-replies__title">全部回复 ({{post.replies.length}})</view>
+      <view class="reply-item" wx:for="{{post.replies}}" wx:key="id">
+        <view class="reply-item__head">
+          <text class="reply-item__author">{{item.authorName}}</text>
+          <text class="reply-item__time">{{item.createTime}}</text>
+        </view>
+        <text class="reply-item__content">{{item.content}}</text>
+      </view>
+      <view wx:if="{{post.replies.length === 0}}" class="post-replies__empty">暂无回复</view>
+    </view>
+    <view class="post-reply-bar">
+      <input
+        class="post-reply-bar__input"
+        placeholder="说点什么..."
+        value="{{replyContent}}"
+        bindinput="onReplyInput"
+      />
+      <t-button theme="primary" size="small" bindtap="submitReply" loading="{{submitting}}">发送</t-button>
+    </view>
+  </block>
+  <view wx:else class="post-loading">帖子不存在</view>
+</view>

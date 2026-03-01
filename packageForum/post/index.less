@@ -1,0 +1,135 @@
+@import '/variable.less';
+
+.post-page {
+  min-height: calc(100vh - 56px);
+  padding-bottom: 120rpx;
+  background-color: @bg-color;
+}
+
+.post-loading {
+  padding: 80rpx;
+  text-align: center;
+  color: @gy2;
+}
+
+.post-card {
+  margin: 24rpx;
+  padding: 28rpx;
+  background: @bg-color-white;
+  border-radius: 16rpx;
+
+  &__head {
+    margin-bottom: 16rpx;
+  }
+
+  &__author {
+    font-size: 24rpx;
+    color: @gy3;
+  }
+
+  &__time {
+    margin-left: 12rpx;
+  }
+
+  &__title {
+    display: block;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: @gy1;
+    margin-bottom: 16rpx;
+  }
+
+  &__content {
+    display: block;
+    font-size: 28rpx;
+    color: @gy2;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  &__meta {
+    margin-top: 20rpx;
+    font-size: 24rpx;
+    color: @gy3;
+
+    text + text {
+      margin-left: 24rpx;
+    }
+  }
+}
+
+.post-replies {
+  margin: 24rpx;
+  padding: 24rpx;
+  background: @bg-color-white;
+  border-radius: 16rpx;
+
+  &__title {
+    font-size: 28rpx;
+    font-weight: 600;
+    color: @gy1;
+    margin-bottom: 20rpx;
+  }
+
+  &__empty {
+    padding: 40rpx;
+    text-align: center;
+    color: @gy3;
+    font-size: 26rpx;
+  }
+}
+
+.reply-item {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid @gray3;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__head {
+    margin-bottom: 8rpx;
+  }
+
+  &__author {
+    font-size: 26rpx;
+    color: @gy1;
+    font-weight: 500;
+  }
+
+  &__time {
+    font-size: 22rpx;
+    color: @gy3;
+    margin-left: 16rpx;
+  }
+
+  &__content {
+    font-size: 26rpx;
+    color: @gy2;
+    line-height: 1.5;
+  }
+}
+
+.post-reply-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx 24rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  background: @bg-color-white;
+  border-top: 1rpx solid @gray3;
+
+  &__input {
+    flex: 1;
+    height: 72rpx;
+    padding: 0 24rpx;
+    font-size: 28rpx;
+    background: @bg-color;
+    border-radius: 36rpx;
+  }
+}

@@ -1,0 +1,26 @@
+@import '/variable.less';
+
+.notice-page {
+  min-height: calc(100vh - 56px);
+  padding: 48rpx;
+  background-color: @bg-color;
+}
+
+.notice-placeholder {
+  padding: 80rpx 32rpx;
+  text-align: center;
+  background: @bg-color-white;
+  border-radius: 16rpx;
+
+  &__text {
+    display: block;
+    font-size: 30rpx;
+    color: @gy2;
+    margin-bottom: 16rpx;
+  }
+
+  &__hint {
+    font-size: 26rpx;
+    color: @gy3;
+  }
+}

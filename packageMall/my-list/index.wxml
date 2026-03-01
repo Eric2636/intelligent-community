@@ -1,0 +1,12 @@
+<nav title-text="我发布的" show-back="{{true}}" />
+<view class="my-list-page">
+  <view wx:if="{{loading}}" class="my-list-loading"><t-loading theme="dots" size="48rpx" /></view>
+  <view wx:else class="my-list-list">
+    <view class="my-list-card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+      <view class="my-list-card__reward" wx:if="{{item.price}}">¥{{item.price}}{{item.unit}}</view>
+      <text class="my-list-card__title">{{item.title}}</text>
+      <view class="my-list-card__meta">{{item.createTime}}</view>
+    </view>
+    <view wx:if="{{list.length === 0}}" class="my-list-empty">暂无发布</view>
+  </view>
+</view>

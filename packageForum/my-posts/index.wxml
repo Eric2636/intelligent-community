@@ -1,0 +1,11 @@
+<nav title-text="我的帖子" show-back="{{true}}" />
+<view class="my-posts-page">
+  <view wx:if="{{loading}}" class="my-posts-loading"><t-loading theme="dots" size="48rpx" /></view>
+  <view wx:else class="my-posts-list">
+    <view class="my-posts-card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+      <text class="my-posts-card__title">{{item.title}}</text>
+      <view class="my-posts-card__meta">{{item.createTime}} · {{item.replyCount}} 回复</view>
+    </view>
+    <view wx:if="{{list.length === 0}}" class="my-posts-empty">暂无发帖</view>
+  </view>
+</view>

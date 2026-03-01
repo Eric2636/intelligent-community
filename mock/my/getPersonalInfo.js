@@ -15,12 +15,12 @@ export default {
       brief: '在你身边，为你设计',
       photos: [
         {
-          url: getLocalUrl('/static/img_td.png', 'uploaded1.png'),
+          url: getLocalUrl('/static/img_td.jpg', 'uploaded1.png'),
           name: 'uploaded1.png',
           type: 'image',
         },
         {
-          url: getLocalUrl('/static/img_td.png', 'uploaded2.png'),
+          url: getLocalUrl('/static/img_td.jpg', 'uploaded2.png'),
           name: 'uploaded2.png',
           type: 'image',
         },

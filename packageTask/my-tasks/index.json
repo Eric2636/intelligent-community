@@ -1,0 +1,8 @@
+{
+  "navigationStyle": "custom",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "nav": "/components/nav",
+    "t-loading": "tdesign-miniprogram/loading/loading"
+  }
+}

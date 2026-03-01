@@ -1,0 +1,24 @@
+<nav title-text="我的任务" show-back="{{true}}" />
+<view class="my-tasks-page">
+  <view class="my-tasks-tabs">
+    <view class="my-tasks-tabs__item {{tab === 'published' ? 'my-tasks-tabs__item--active' : ''}}" data-tab="published" bindtap="onTabChange">我发布的</view>
+    <view class="my-tasks-tabs__item {{tab === 'taken' ? 'my-tasks-tabs__item--active' : ''}}" data-tab="taken" bindtap="onTabChange">我领取的</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="my-tasks-loading"><t-loading theme="dots" size="48rpx" /></view>
+  <view wx:else class="my-tasks-list">
+    <view wx:if="{{tab === 'published'}}" wx:for="{{publishedList}}" wx:key="id" class="my-tasks-card" data-id="{{item.id}}" bindtap="goDetail">
+      <view class="my-tasks-card__tag my-tasks-card__tag--{{item.status}}">{{STATUS_TEXT[item.status]}}</view>
+      <view class="my-tasks-card__reward">¥{{item.reward}}</view>
+      <text class="my-tasks-card__title">{{item.title}}</text>
+      <view class="my-tasks-card__meta">{{item.createdAt}}</view>
+    </view>
+    <view wx:if="{{tab === 'taken'}}" wx:for="{{takenList}}" wx:key="id" class="my-tasks-card" data-id="{{item.id}}" bindtap="goDetail">
+      <view class="my-tasks-card__tag my-tasks-card__tag--{{item.status}}">{{STATUS_TEXT[item.status]}}</view>
+      <view class="my-tasks-card__reward">¥{{item.reward}}</view>
+      <text class="my-tasks-card__title">{{item.title}}</text>
+      <view class="my-tasks-card__meta">{{item.createdAt}}</view>
+    </view>
+    <view wx:if="{{(tab === 'published' && publishedList.length === 0) || (tab === 'taken' && takenList.length === 0)}}" class="my-tasks-empty">暂无</view>
+  </view>
+</view>

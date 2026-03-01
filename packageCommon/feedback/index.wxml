@@ -1,0 +1,20 @@
+<nav title-text="意见反馈" show-back="{{true}}" />
+<view class="feedback-page">
+  <view class="feedback-form">
+    <view class="feedback-field">
+      <text class="feedback-field__label">反馈类型</text>
+      <picker mode="selector" range="{{['功能建议','问题反馈','其他']}}" value="{{typeIndex}}" bindchange="onTypeChange">
+        <view class="feedback-field__picker">{{typeText}}</view>
+      </picker>
+    </view>
+    <view class="feedback-field">
+      <text class="feedback-field__label">反馈内容 <text class="required">*</text></text>
+      <textarea class="feedback-field__textarea" placeholder="请描述您的意见或问题" value="{{content}}" bindinput="onContentInput" maxlength="500" />
+    </view>
+    <view class="feedback-field">
+      <text class="feedback-field__label">联系方式</text>
+      <input class="feedback-field__input" placeholder="选填，便于我们回复" value="{{contact}}" bindinput="onContactInput" />
+    </view>
+    <button class="feedback-submit" bindtap="submit" disabled="{{submitting}}">提交</button>
+  </view>
+</view>

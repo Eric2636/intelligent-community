@@ -1,0 +1,49 @@
+<nav title-text="发布" show-back="{{true}}" />
+<view class="publish-page">
+  <view class="publish-form">
+    <view class="publish-field">
+      <view class="publish-field__label">分类</view>
+      <picker mode="selector" range="{{categories}}" range-key="name" value="{{categoryIndex}}" bindchange="onCategoryChange">
+        <view class="publish-field__picker">{{categoryName}}</view>
+      </picker>
+    </view>
+    <view class="publish-field">
+      <input
+        class="publish-field__input"
+        placeholder="标题（必填）"
+        value="{{title}}"
+        maxlength="40"
+        bindinput="onTitleInput"
+      />
+    </view>
+    <view class="publish-field">
+      <input
+        class="publish-field__input"
+        type="digit"
+        placeholder="价格（选填，元）"
+        value="{{price}}"
+        bindinput="onPriceInput"
+      />
+    </view>
+    <view class="publish-field">
+      <textarea
+        class="publish-field__input publish-field__textarea"
+        placeholder="描述（选填）"
+        value="{{desc}}"
+        maxlength="500"
+        bindinput="onDescInput"
+      />
+    </view>
+    <view class="publish-field">
+      <input
+        class="publish-field__input"
+        placeholder="联系方式（选填）"
+        value="{{contact}}"
+        bindinput="onContactInput"
+      />
+    </view>
+    <t-button class="publish-submit" theme="primary" size="large" block bindtap="submit" loading="{{submitting}}">
+      发布
+    </t-button>
+  </view>
+</view>

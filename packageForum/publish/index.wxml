@@ -1,0 +1,34 @@
+<nav title-text="发帖" show-back="{{true}}" />
+<view class="publish-page">
+  <view class="publish-form">
+    <view class="publish-field">
+      <input
+        class="publish-field__input publish-field__input--title"
+        placeholder="请输入标题（必填）"
+        value="{{title}}"
+        maxlength="60"
+        bindinput="onTitleInput"
+      />
+    </view>
+    <view class="publish-field">
+      <textarea
+        class="publish-field__input publish-field__textarea"
+        placeholder="请输入内容（必填）"
+        value="{{content}}"
+        maxlength="2000"
+        auto-height
+        bindinput="onContentInput"
+      />
+    </view>
+    <t-button
+      class="publish-submit"
+      theme="primary"
+      size="large"
+      block
+      bindtap="submit"
+      loading="{{submitting}}"
+    >
+      发布
+    </t-button>
+  </view>
+</view>

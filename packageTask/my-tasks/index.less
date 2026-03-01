@@ -1,0 +1,88 @@
+@import '/variable.less';
+
+.my-tasks-page {
+  min-height: calc(100vh - 56px);
+  padding-bottom: 48rpx;
+  background-color: @bg-color;
+}
+
+.my-tasks-tabs {
+  display: flex;
+  background: @bg-color-white;
+  border-bottom: 1rpx solid @gray3;
+
+  &__item {
+    flex: 1;
+    height: 88rpx;
+    line-height: 88rpx;
+    text-align: center;
+    font-size: 28rpx;
+    color: @gy2;
+
+    &--active {
+      color: @brand7-normal;
+      font-weight: 600;
+      border-bottom: 4rpx solid @brand7-normal;
+    }
+  }
+}
+
+.my-tasks-loading {
+  padding: 80rpx;
+  text-align: center;
+}
+
+.my-tasks-list {
+  padding: 24rpx;
+}
+
+.my-tasks-card {
+  position: relative;
+  padding: 24rpx;
+  padding-top: 48rpx;
+  margin-bottom: 16rpx;
+  background: @bg-color-white;
+  border-radius: 12rpx;
+
+  &__tag {
+    position: absolute;
+    top: 16rpx;
+    right: 16rpx;
+    font-size: 22rpx;
+    padding: 4rpx 12rpx;
+    border-radius: 8rpx;
+
+    &--pending_take { background: #e8f0fe; color: @brand7-normal; }
+    &--in_progress { background: #fff7e6; color: #ed7b2f; }
+    &--pending_confirm { background: #e6f7ff; color: #0d8ff2; }
+    &--completed { background: #e8f5e9; color: #52c41a; }
+    &--cancelled { background: @gray3; color: @gy2; }
+  }
+
+  &__reward {
+    font-size: 36rpx;
+    font-weight: 700;
+    color: #f5222d;
+    margin-bottom: 8rpx;
+  }
+
+  &__title {
+    display: block;
+    font-size: 30rpx;
+    font-weight: 600;
+    color: @gy1;
+    margin-bottom: 8rpx;
+  }
+
+  &__meta {
+    font-size: 22rpx;
+    color: @gy3;
+  }
+}
+
+.my-tasks-empty {
+  padding: 80rpx;
+  text-align: center;
+  color: @gy3;
+  font-size: 28rpx;
+}
