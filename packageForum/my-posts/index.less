@@ -1,0 +1,43 @@
+@import '/variable.less';
+
+.my-posts-page {
+  min-height: calc(100vh - 56px);
+  padding-bottom: 48rpx;
+  background-color: @bg-color;
+}
+
+.my-posts-loading {
+  padding: 80rpx;
+  text-align: center;
+}
+
+.my-posts-list {
+  padding: 24rpx;
+}
+
+.my-posts-card {
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  background: @bg-color-white;
+  border-radius: 12rpx;
+
+  &__title {
+    display: block;
+    font-size: 30rpx;
+    font-weight: 500;
+    color: @gy1;
+    margin-bottom: 8rpx;
+  }
+
+  &__meta {
+    font-size: 24rpx;
+    color: @gy3;
+  }
+}
+
+.my-posts-empty {
+  padding: 80rpx;
+  text-align: center;
+  color: @gy3;
+  font-size: 28rpx;
+}

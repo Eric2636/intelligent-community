@@ -1,0 +1,22 @@
+<nav title-text="{{item ? item.title : '详情'}}" show-back="{{true}}" />
+<view class="detail-page">
+  <view wx:if="{{loading}}" class="detail-loading">
+    <t-loading theme="dots" size="48rpx" />
+  </view>
+  <block wx:elif="{{item}}">
+    <view class="detail-card">
+      <view class="detail-card__thumb">
+        <t-icon name="image" size="120rpx" color="#999" />
+      </view>
+      <view class="detail-card__price" wx:if="{{item.price}}">{{item.price}}{{item.unit}}</view>
+      <view class="detail-card__title">{{item.title}}</view>
+      <view class="detail-card__meta">{{item.createTime}}</view>
+      <view class="detail-card__desc">{{item.desc}}</view>
+      <view class="detail-card__contact">联系：{{item.contact}}</view>
+    </view>
+    <view class="detail-bar">
+      <t-button theme="primary" size="large" block bindtap="onContact">联系 TA</t-button>
+    </view>
+  </block>
+  <view wx:else class="detail-loading">信息不存在</view>
+</view>

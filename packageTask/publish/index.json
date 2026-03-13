@@ -1,0 +1,7 @@
+{
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "nav": "/components/nav",
+    "t-button": "tdesign-miniprogram/button/button"
+  }
+}

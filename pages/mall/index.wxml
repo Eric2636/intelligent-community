@@ -1,0 +1,42 @@
+<nav title-text="商城" />
+<view class="mall-page">
+  <view class="mall-tabs">
+    <view
+      wx:for="{{categories}}"
+      wx:key="id"
+      class="mall-tabs__item {{currentCategory === item.id ? 'mall-tabs__item--active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onCategoryTap"
+    >
+      {{item.name}}
+    </view>
+  </view>
+  <view wx:if="{{loading}}" class="mall-loading">
+    <t-loading theme="dots" size="48rpx" />
+  </view>
+  <view wx:else class="mall-list">
+    <view
+      class="mall-card"
+      wx:for="{{list}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="goDetail"
+    >
+      <view class="mall-card__thumb">
+        <t-icon name="image" size="64rpx" color="#999" />
+      </view>
+      <view class="mall-card__main">
+        <text class="mall-card__title">{{item.title}}</text>
+        <view class="mall-card__meta">
+          <text wx:if="{{item.price}}" class="mall-card__price">{{item.price}}{{item.unit}}</text>
+          <text class="mall-card__time">{{item.createTime}}</text>
+        </view>
+      </view>
+      <t-icon name="chevron-right" size="32rpx" class="mall-card__arrow" />
+    </view>
+    <view wx:if="{{list.length === 0}}" class="mall-empty">暂无信息</view>
+  </view>
+  <view class="mall-fab" bindtap="goPublish">
+    <t-icon name="add" size="48rpx" color="#fff" />
+  </view>
+</view>

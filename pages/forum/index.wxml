@@ -1,0 +1,48 @@
+<nav title-text="论坛" />
+<view class="forum-page">
+  <view wx:if="{{loading}}" class="forum-loading">
+    <t-loading theme="dots" size="48rpx" />
+  </view>
+  <block wx:else>
+    <view class="forum-section" wx:if="{{pinned.length > 0}}">
+      <view class="forum-section__title">
+        <t-icon name="pushpin" size="28rpx" /> 置顶
+      </view>
+      <view
+        class="post-item post-item--pinned"
+        wx:for="{{pinned}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="goPost"
+      >
+        <text class="post-item__title">{{item.title}}</text>
+        <view class="post-item__meta">
+          <text>{{item.authorName}}</text>
+          <text>{{item.replyCount}} 回复</text>
+          <text>{{item.createTime}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="forum-section">
+      <view class="forum-section__title" wx:if="{{pinned.length > 0}}">最新</view>
+      <view
+        class="post-item"
+        wx:for="{{list}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="goPost"
+      >
+        <text class="post-item__title">{{item.title}}</text>
+        <view class="post-item__meta">
+          <text>{{item.authorName}}</text>
+          <text>{{item.replyCount}} 回复</text>
+          <text>{{item.createTime}}</text>
+        </view>
+      </view>
+      <view wx:if="{{list.length === 0 && pinned.length === 0}}" class="forum-empty">暂无帖子，快来发帖吧</view>
+    </view>
+  </block>
+  <view class="forum-fab" bindtap="goPublish">
+    <t-icon name="add" size="48rpx" color="#fff" />
+  </view>
+</view>

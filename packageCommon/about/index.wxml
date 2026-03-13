@@ -1,0 +1,6 @@
+<nav title-text="关于我们" show-back="{{true}}" />
+<view class="about-page">
+  <view class="about-logo">{{appName}}</view>
+  <view class="about-version">版本 {{version}}</view>
+  <view class="about-intro">{{intro}}</view>
+</view>

@@ -1,0 +1,50 @@
+@import '/variable.less';
+
+.my-list-page {
+  min-height: calc(100vh - 56px);
+  padding-bottom: 48rpx;
+  background-color: @bg-color;
+}
+
+.my-list-loading {
+  padding: 80rpx;
+  text-align: center;
+}
+
+.my-list-list {
+  padding: 24rpx;
+}
+
+.my-list-card {
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  background: @bg-color-white;
+  border-radius: 12rpx;
+
+  &__reward {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: #ff6b00;
+    margin-bottom: 8rpx;
+  }
+
+  &__title {
+    display: block;
+    font-size: 30rpx;
+    font-weight: 500;
+    color: @gy1;
+    margin-bottom: 8rpx;
+  }
+
+  &__meta {
+    font-size: 24rpx;
+    color: @gy3;
+  }
+}
+
+.my-list-empty {
+  padding: 80rpx;
+  text-align: center;
+  color: @gy3;
+  font-size: 28rpx;
+}

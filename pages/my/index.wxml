@@ -1,0 +1,44 @@
+<t-toast id="t-toast" />
+
+<view class="my">
+  <image class="my__bg" src="/static/bg_navbar.png" />
+  <nav title-text="我的" />
+  <view class="my-head">
+    <view wx:if="{{isLoad}}" class="my-head__user" bindtap="onNavigateTo">
+      <t-avatar image="{{personalInfo.image}}" size="large" class="my-head__avatar" />
+      <view class="my-head__info">
+        <view class="my-head__name">{{personalInfo.name || '业主'}}</view>
+        <view class="my-head__tags" wx:if="{{personalInfo.star || personalInfo.city}}">
+          <t-tag wx:if="{{personalInfo.star}}" variant="light" size="small">{{personalInfo.star}}</t-tag>
+          <t-tag wx:if="{{personalInfo.city}}" variant="light" size="small">{{personalInfo.city}}</t-tag>
+        </view>
+      </view>
+      <t-icon name="chevron-right" size="40rpx" color="#999" />
+    </view>
+    <view wx:else class="my-head__guest" bindtap="onLogin">
+      <t-avatar icon="user" size="large" class="my-head__avatar" />
+      <view class="my-head__info">
+        <view class="my-head__name">登录 / 注册</view>
+        <view class="my-head__desc">登录后使用完整功能</view>
+      </view>
+      <t-icon name="chevron-right" size="40rpx" color="#999" />
+    </view>
+  </view>
+
+  <view class="my-menu">
+    <view
+      class="my-menu__card"
+      wx:for="{{menuList}}"
+      wx:key="name"
+      data-url="{{item.url}}"
+      data-name="{{item.name}}"
+      bindtap="onMenuTap"
+    >
+      <view class="my-menu__card-inner">
+        <t-icon name="{{item.icon}}" size="48rpx" class="my-menu__card-icon" />
+        <text class="my-menu__card-title">{{item.name}}</text>
+        <text class="my-menu__card-desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,51 @@
+@import '/variable.less';
+
+.publish-page {
+  min-height: calc(100vh - 56px);
+  background-color: @bg-color;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.publish-form {
+  background: @bg-color-white;
+  border-radius: 16rpx;
+  padding: 32rpx;
+}
+
+.publish-field {
+  margin-bottom: 32rpx;
+
+  &__label {
+    font-size: 26rpx;
+    color: @gy2;
+    margin-bottom: 12rpx;
+  }
+
+  &__picker {
+    padding: 28rpx 32rpx;
+    font-size: 30rpx;
+    color: @gy1;
+    background: @bg-color;
+    border-radius: 16rpx;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 28rpx 32rpx;
+    font-size: 30rpx;
+    color: @gy1;
+    background: @bg-color;
+    border-radius: 16rpx;
+    box-sizing: border-box;
+    min-height: 96rpx;
+  }
+
+  &__textarea {
+    min-height: 200rpx;
+  }
+}
+
+.publish-submit {
+  margin-top: 48rpx;
+}

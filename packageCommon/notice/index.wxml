@@ -1,0 +1,7 @@
+<nav title-text="消息通知" show-back="{{true}}" />
+<view class="notice-page">
+  <view class="notice-placeholder">
+    <text class="notice-placeholder__text">暂无消息</text>
+    <text class="notice-placeholder__hint">任务状态、系统通知将在此展示</text>
+  </view>
+</view>

@@ -1,0 +1,41 @@
+<nav title-text="{{task ? task.title : '任务详情'}}" show-back="{{true}}" />
+<view class="detail-page">
+  <view wx:if="{{loading}}" class="detail-loading"><t-loading theme="dots" size="48rpx" /></view>
+  <block wx:elif="{{task}}">
+    <view class="detail-card">
+      <view class="detail-card__reward">佣金 ¥{{task.reward}}</view>
+      <view class="detail-card__tag detail-card__tag--{{task.status}}">{{STATUS_TEXT[task.status]}}</view>
+      <view class="detail-card__title">{{task.title}}</view>
+      <view class="detail-card__desc">{{task.desc}}</view>
+      <view class="detail-card__row"><text class="detail-card__label">地点</text>{{task.location}}</view>
+      <view class="detail-card__row"><text class="detail-card__label">发布者</text>{{task.publisherName}}</view>
+      <view class="detail-card__row" wx:if="{{task.takerName}}"><text class="detail-card__label">接单人</text>{{task.takerName}}</view>
+      <view class="detail-card__row"><text class="detail-card__label">发布时间</text>{{task.createdAt}}</view>
+      <view wx:if="{{task.status === 'in_progress' && task.claimedAt}}" class="detail-card__row"><text class="detail-card__label">领取时间</text>{{task.claimedAt}}</view>
+      <view wx:if="{{task.proofText}}" class="detail-card__proof">
+        <text class="detail-card__label">完成说明</text>
+        <text>{{task.proofText}}</text>
+        <text class="detail-card__time" wx:if="{{task.completedAt}}">{{task.completedAt}}</text>
+      </view>
+    </view>
+
+    <view class="detail-actions">
+      <block wx:if="{{task.status === 'pending_take' && !isPublisher}}">
+        <t-button theme="primary" size="large" block bindtap="onClaim">领取任务</t-button>
+      </block>
+      <block wx:elif="{{task.status === 'in_progress' && isTaker}}">
+        <view class="detail-proof">
+          <textarea placeholder="请填写完成说明（必填）" value="{{proofText}}" bindinput="onProofInput" class="detail-proof__input" />
+          <t-button theme="primary" size="large" block bindtap="onSubmitComplete">提交完成</t-button>
+        </view>
+      </block>
+      <block wx:elif="{{task.status === 'pending_confirm' && isPublisher}}">
+        <t-button theme="primary" size="large" block bindtap="onConfirmComplete">确认完成</t-button>
+      </block>
+      <block wx:elif="{{(task.status === 'pending_take' || task.status === 'in_progress') && isPublisher}}">
+        <t-button theme="default" size="large" block bindtap="onCancel">取消任务</t-button>
+      </block>
+    </view>
+  </block>
+  <view wx:else class="detail-loading">任务不存在</view>
+</view>

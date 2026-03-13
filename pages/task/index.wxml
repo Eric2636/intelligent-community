@@ -1,0 +1,17 @@
+<nav title-text="任务" />
+<view class="task-page">
+  <view wx:if="{{loading}}" class="task-loading"><t-loading theme="dots" size="48rpx" /></view>
+  <view wx:else class="task-list">
+    <view class="task-card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+      <view class="task-card__reward">¥{{item.reward}}</view>
+      <text class="task-card__title">{{item.title}}</text>
+      <text class="task-card__desc">{{item.desc}}</text>
+      <view class="task-card__meta">{{item.location}} · {{item.createdAt}}</view>
+    </view>
+    <view wx:if="{{list.length === 0}}" class="task-empty">暂无可领取任务</view>
+  </view>
+
+  <view class="task-fab" bindtap="goPublish">
+    <t-icon name="add" size="48rpx" color="#fff" />
+  </view>
+</view>

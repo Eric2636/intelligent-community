@@ -1,0 +1,39 @@
+{
+  "lazyCodeLoading": "requiredComponents",
+  "pages": [
+    "pages/task/index",
+    "pages/forum/index",
+    "pages/mall/index",
+    "pages/my/index"
+  ],
+  "usingComponents": {
+    "t-toast": "tdesign-miniprogram/toast/toast"
+  },
+  "subpackages": [
+    { "root": "pages/my/info-edit", "name": "edit", "pages": ["index"] },
+    { "root": "pages/login", "name": "login", "pages": ["login"] },
+    { "root": "pages/loginCode", "name": "loginCode", "pages": ["loginCode"] },
+    { "root": "pages/setting", "name": "setting", "pages": ["index"] },
+    { "root": "packageForum", "name": "forum", "pages": ["post/index", "publish/index", "my-posts/index"] },
+    { "root": "packageMall", "name": "mall", "pages": ["detail/index", "publish/index", "my-list/index"] },
+    { "root": "packageTask", "name": "task", "pages": ["detail/index", "publish/index", "my-tasks/index"] },
+    { "root": "packageCommon", "name": "common", "pages": ["notice/index", "feedback/index", "about/index"] }
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "智能社区",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "custom": true,
+    "list": [
+      { "pagePath": "pages/task/index", "text": "任务" },
+      { "pagePath": "pages/forum/index", "text": "论坛" },
+      { "pagePath": "pages/mall/index", "text": "商城" },
+      { "pagePath": "pages/my/index", "text": "我的" }
+    ]
+  },
+  "resolveAlias": { "~/*": "/*" },
+  "sitemapLocation": "sitemap.json"
+}

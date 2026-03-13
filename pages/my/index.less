@@ -1,0 +1,110 @@
+@import '/variable.less';
+
+.my {
+  min-height: calc(100vh - 56px);
+  padding-bottom: 48rpx;
+  background-color: @bg-color;
+
+  --td-navbar-bg-color: transparent;
+
+  &__bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 750rpx;
+    height: 200rpx;
+    z-index: 0;
+  }
+}
+
+.my-head {
+  position: relative;
+  z-index: 1;
+  margin: 24rpx 24rpx 0;
+  padding: 32rpx;
+  background: @bg-color-white;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+
+  &__user,
+  &__guest {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  &__avatar {
+    flex-shrink: 0;
+    margin-right: 24rpx;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: @gy1;
+    margin-bottom: 6rpx;
+  }
+
+  &__desc {
+    font-size: 24rpx;
+    color: @gy3;
+  }
+
+  &__tags {
+    display: flex;
+    gap: 12rpx;
+    margin-top: 8rpx;
+  }
+}
+
+.my-menu {
+  margin: 24rpx;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+}
+
+.my-menu__card {
+  background: @bg-color-white;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.my-menu__card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32rpx 24rpx;
+  min-height: 160rpx;
+}
+
+.my-menu__card-icon {
+  color: @brand7-normal;
+  margin-bottom: 16rpx;
+}
+
+.my-menu__card-title {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: @gy1;
+  margin-bottom: 8rpx;
+  text-align: center;
+}
+
+.my-menu__card-desc {
+  font-size: 22rpx;
+  color: @gy3;
+  text-align: center;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
