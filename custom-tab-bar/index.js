@@ -2,12 +2,24 @@ const app = getApp();
 
 Component({
   data: {
-    value: 'task', // 初始选中任务，避免第一次加载时闪烁
+    value: '', // 初始值设置为空，避免第一次加载时闪烁
+    unreadNum: 0, // 未读消息数量
     list: [
-      { icon: 'file-copy', value: 'task', label: '任务' },
-      { icon: 'chat', value: 'forum', label: '论坛' },
-      { icon: 'cart', value: 'mall', label: '商城' },
-      { icon: 'user', value: 'my', label: '我的' },
+      {
+        icon: 'home',
+        value: 'index',
+        label: '首页',
+      },
+      {
+        icon: 'chat',
+        value: 'notice',
+        label: '消息',
+      },
+      {
+        icon: 'user',
+        value: 'my',
+        label: '我的',
+      },
     ],
   },
   lifetimes: {
@@ -16,16 +28,30 @@ Component({
       const curPage = pages[pages.length - 1];
       if (curPage) {
         const nameRe = /pages\/(\w+)\/index/.exec(curPage.route);
-        if (nameRe && nameRe[1]) {
-          this.setData({ value: nameRe[1] });
+        if (nameRe === null) return;
+        if (nameRe[1] && nameRe) {
+          this.setData({
+            value: nameRe[1],
+          });
         }
       }
+
+      // 同步全局未读消息数量
+      this.setUnreadNum(app.globalData.unreadNum);
+      app.eventBus.on('unread-num-change', (unreadNum) => {
+        this.setUnreadNum(unreadNum);
+      });
     },
   },
   methods: {
     handleChange(e) {
       const { value } = e.detail;
       wx.switchTab({ url: `/pages/${value}/index` });
+    },
+
+    /** 设置未读消息数量 */
+    setUnreadNum(unreadNum) {
+      this.setData({ unreadNum });
     },
   },
 });

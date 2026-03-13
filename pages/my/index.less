@@ -1,110 +1,102 @@
-@import '/variable.less';
-
 .my {
-  min-height: calc(100vh - 56px);
-  padding-bottom: 48rpx;
-  background-color: @bg-color;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
 
   --td-navbar-bg-color: transparent;
-
-  &__bg {
-    position: fixed;
-    top: 0;
-    left: 0;
+  .nav-bg {
     width: 750rpx;
     height: 200rpx;
-    z-index: 0;
-  }
-}
-
-.my-head {
-  position: relative;
-  z-index: 1;
-  margin: 24rpx 24rpx 0;
-  padding: 32rpx;
-  background: @bg-color-white;
-  border-radius: 16rpx;
-  display: flex;
-  align-items: center;
-
-  &__user,
-  &__guest {
-    display: flex;
-    align-items: center;
-    width: 100%;
+    position: fixed;
+    top: 0;
   }
 
-  &__avatar {
-    flex-shrink: 0;
-    margin-right: 24rpx;
+  &-info,
+  &-service,
+  &-setting {
+    background-color: #fff;
   }
 
-  &__info {
-    flex: 1;
-    min-width: 0;
+  &-info {
+    border-radius: 24rpx;
+    margin: 8rpx 32rpx 0rpx 32rpx;
+    padding-bottom: 32rpx;
+    overflow: hidden;
+
+    .cell-class-title {
+      font-weight: 600 !important;
+    }
+
+    .cell-class-center {
+      display: flex;
+      align-items: center !important;
+    }
+
+    .divider-class {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+    }
+
+    .grid-class {
+      margin-top: 40rpx;
+    }
+
+    .grid-item .t-grid-item__content {
+      padding: 0px !important;
+    }
+
+    .split-line {
+      border-right: 1px solid #e7e7e7;
+    }
+
+    // 头像margin-right
+    --td-spacer-1: 32rpx;
+
+    &__person {
+      .name {
+        line-height: 48rpx;
+        font-size: 32rpx;
+        color: #000000e6;
+        font-weight: 600;
+      }
+
+      .tags {
+        display: flex;
+        margin-top: 16rpx;
+
+        --td-text-color-primary: #000000e6;
+        --td-tag-medium-font-size: 20rpx;
+        --td-tag-medium-icon-size: 24rpx;
+      }
+
+      .tag:not(:last-child) {
+        margin-right: 16rpx;
+      }
+    }
   }
 
-  &__name {
-    font-size: 32rpx;
-    font-weight: 600;
-    color: @gy1;
-    margin-bottom: 6rpx;
+  &-service {
+    border-radius: 24rpx;
+    margin: 32rpx;
+    padding-bottom: 8rpx;
+    overflow: hidden;
+
+    &__list-item {
+      .t-grid-item__content {
+        padding-bottom: 16rpx !important;
+      }
+      .t-grid-item__text {
+        height: 40rpx !important;
+      }
+    }
+
+    &--tips {
+      height: 44rpx;
+      line-height: 44rpx;
+      padding-left: 40rpx;
+      margin-top: 32rpx;
+      color: #000000e6;
+      font-size: 28rpx;
+      font-weight: 600;
+    }
   }
-
-  &__desc {
-    font-size: 24rpx;
-    color: @gy3;
-  }
-
-  &__tags {
-    display: flex;
-    gap: 12rpx;
-    margin-top: 8rpx;
-  }
-}
-
-.my-menu {
-  margin: 24rpx;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20rpx;
-}
-
-.my-menu__card {
-  background: @bg-color-white;
-  border-radius: 16rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-}
-
-.my-menu__card-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 32rpx 24rpx;
-  min-height: 160rpx;
-}
-
-.my-menu__card-icon {
-  color: @brand7-normal;
-  margin-bottom: 16rpx;
-}
-
-.my-menu__card-title {
-  font-size: 28rpx;
-  font-weight: 500;
-  color: @gy1;
-  margin-bottom: 8rpx;
-  text-align: center;
-}
-
-.my-menu__card-desc {
-  font-size: 22rpx;
-  color: @gy3;
-  text-align: center;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
