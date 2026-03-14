@@ -1,5 +1,5 @@
 <view class="home-navbar">
-  <t-navbar title="{{ titleText }}">
+  <t-navbar title="{{ titleText }}" placeholder="{{true}}">
     <view wx:if="{{showBack}}" slot="left" class="home-navbar__left">
       <t-icon class="home-navbar__icon" name="chevron-left" size="48rpx" bindtap="goBack" />
     </view>
