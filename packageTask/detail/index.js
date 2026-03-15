@@ -84,14 +84,28 @@ Page({
     });
   },
 
-  async onConfirmComplete() {
+  onConfirmComplete() {
     const { id, task } = this.data;
     const reward = (task && task.reward) ? String(task.reward) : '0';
+    const usePayment = config.enableTaskPayment;
     wx.showModal({
       title: '确认完成',
-      content: `需支付赏金 ¥${reward} 元给接单人。将调起微信支付，支付成功后任务自动完成。`,
+      content: usePayment
+        ? `需支付赏金 ¥${reward} 元给接单人。将调起微信支付，支付成功后任务自动完成。`
+        : `确认后任务完成，请线下支付赏金 ¥${reward} 元给接单人。`,
       success: async (res) => {
         if (!res.confirm) return;
+        if (!usePayment) {
+          taskAPI.confirmComplete(id).then((r) => {
+            if (r.code === 200) {
+              wx.showToast({ title: '已确认完成' });
+              this.loadDetail();
+            } else {
+              wx.showToast({ title: r.message || '操作失败', icon: 'none' });
+            }
+          });
+          return;
+        }
         wx.showLoading({ title: '请稍候...' });
         const payRes = await taskAPI.createTaskPayment(id, config.cloudEnvId);
         wx.hideLoading();

@@ -5,6 +5,8 @@ export const config = {
   subscribeTemplateIds: ['Krl4JhRZbIFrUccFLtgmRgiuK8VSb_hWRYLcEAKm1OM', 'vm5dcU8Dm9RHZnmINicEia_zhsfic-YG2omITNQR-Vo'],
   // 云开发环境 ID（与 app.js 中 wx.cloud.init 的 env 一致），用于任务赏金支付回调
   cloudEnvId: 'intelligence-communi-4bcfec6c3b1',
+  // 是否启用业主互助赏金在线支付（true=调起微信支付，false=仅线下支付后确认完成）
+  enableTaskPayment: false,
 };
 
 export default { config };
