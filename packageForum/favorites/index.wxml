@@ -1,0 +1,17 @@
+<nav title-text="我的收藏" show-back="{{true}}" />
+<view class="favorites-page">
+  <view wx:if="{{loading}}" class="favorites-loading">
+    <t-loading theme="dots" size="48rpx" />
+  </view>
+  <view wx:else class="favorites-list">
+    <view class="favorites-item" wx:for="{{list}}" wx:key="id" data-id="{{item.id || item._id}}" bindtap="goPost">
+      <text class="favorites-item__title">{{item.title}}</text>
+      <view class="favorites-item__meta">
+        <text>{{item.createTime}}</text>
+        <text>{{item.replyCount || 0}} 回复</text>
+        <text>{{item.likeCount || 0}} 赞</text>
+      </view>
+    </view>
+  </view>
+  <t-empty wx:if="{{!loading && list.length === 0}}" description="暂无收藏的帖子" />
+</view>

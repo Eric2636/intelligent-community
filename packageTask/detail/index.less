@@ -2,8 +2,9 @@
 
 .detail-page {
   min-height: calc(100vh - 56px);
-  padding-bottom: 120rpx;
-  background-color: @bg-color;
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+  background: @bg-color;
+  overflow-x: hidden;
 }
 
 .detail-loading {
@@ -13,15 +14,16 @@
 }
 
 .detail-card {
-  margin: 24rpx;
+  margin: @spacing-page;
   padding: 28rpx;
   background: @bg-color-white;
-  border-radius: 16rpx;
+  border-radius: @radius-card;
+  box-shadow: @shadow-card;
 
   &__reward {
     font-size: 40rpx;
     font-weight: 700;
-    color: #f5222d;
+    color: @color-price;
     margin-bottom: 16rpx;
   }
 
@@ -29,13 +31,13 @@
     display: inline-block;
     font-size: 24rpx;
     padding: 6rpx 16rpx;
-    border-radius: 8rpx;
+    border-radius: @radius-sm;
     margin-bottom: 16rpx;
 
-    &--pending_take { background: #e8f0fe; color: @brand7-normal; }
-    &--in_progress { background: #fff7e6; color: #ed7b2f; }
+    &--pending_take { background: #e8f0fe; color: @color-primary; }
+    &--in_progress { background: #fff7e6; color: @color-warning; }
     &--pending_confirm { background: #e6f7ff; color: #0d8ff2; }
-    &--completed { background: #e8f5e9; color: #52c41a; }
+    &--completed { background: #e8f5e9; color: @color-success; }
     &--cancelled { background: @gray3; color: @gy2; }
   }
 
@@ -85,18 +87,73 @@
 }
 
 .detail-actions {
-  margin: 24rpx;
+  margin: @spacing-page;
 }
 
 .detail-proof {
   &__input {
     width: 100%;
     min-height: 160rpx;
-    padding: 24rpx;
-    margin-bottom: 24rpx;
+    padding: @spacing-page;
+    margin-bottom: @spacing-page;
     font-size: 28rpx;
     background: @bg-color-white;
-    border-radius: 12rpx;
+    border-radius: @radius-sm;
     box-sizing: border-box;
   }
+}
+
+.detail-rating-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.detail-rating-panel {
+  width: 560rpx;
+  padding: 40rpx;
+  background: @bg-color-white;
+  border-radius: @radius-card;
+  box-shadow: @shadow-card;
+}
+
+.detail-rating__title {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 24rpx;
+  text-align: center;
+}
+
+.detail-rating__stars {
+  display: flex;
+  justify-content: center;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.detail-rating__star {
+  font-size: 48rpx;
+  color: @gy3;
+
+  &.on {
+    color: @color-warning;
+  }
+}
+
+.detail-rating__input {
+  width: 100%;
+  min-height: 120rpx;
+  padding: 20rpx;
+  margin-bottom: @spacing-page;
+  font-size: 26rpx;
+  border: 1rpx solid @gray3;
+  border-radius: @radius-sm;
+  box-sizing: border-box;
 }

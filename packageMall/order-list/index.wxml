@@ -1,0 +1,51 @@
+<nav title-text="我的订单" show-back="{{true}}" />
+<view class="order-list-page">
+  <view class="tabs">
+    <view
+      class="tabs__item {{tab === 'buy' ? 'tabs__item--active' : ''}}"
+      data-tab="buy"
+      bindtap="onTabChange"
+    >我买到的</view>
+    <view
+      class="tabs__item {{tab === 'sell' ? 'tabs__item--active' : ''}}"
+      data-tab="sell"
+      bindtap="onTabChange"
+    >我卖出的</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <t-loading theme="dots" size="48rpx" />
+  </view>
+
+  <view wx:elif="{{tab === 'buy'}}">
+    <view
+      wx:for="{{buyList}}"
+      wx:key="_id"
+      class="order-card"
+      data-id="{{item._id}}"
+      bindtap="goDetail"
+    >
+      <view class="order-card__title">{{item.itemTitle}}</view>
+      <view class="order-card__price">{{item.itemPrice}}{{item.itemUnit}}</view>
+      <view class="order-card__status order-card__status--{{item.status}}">{{item.status === 'pending' ? '待沟通' : item.status === 'completed' ? '已完成' : '已取消'}}</view>
+      <view class="order-card__time">{{item.createdAt}}</view>
+    </view>
+    <t-empty wx:if="{{buyList.length === 0}}" description="暂无买到的订单" />
+  </view>
+
+  <view wx:else>
+    <view
+      wx:for="{{sellList}}"
+      wx:key="_id"
+      class="order-card"
+      data-id="{{item._id}}"
+      bindtap="goDetail"
+    >
+      <view class="order-card__title">{{item.itemTitle}}</view>
+      <view class="order-card__price">{{item.itemPrice}}{{item.itemUnit}}</view>
+      <view class="order-card__status order-card__status--{{item.status}}">{{item.status === 'pending' ? '待沟通' : item.status === 'completed' ? '已完成' : '已取消'}}</view>
+      <view class="order-card__time">{{item.createdAt}}</view>
+    </view>
+    <t-empty wx:if="{{sellList.length === 0}}" description="暂无卖出的订单" />
+  </view>
+</view>

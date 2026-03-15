@@ -1,0 +1,62 @@
+@import '/variable.less';
+
+.fav-page {
+  min-height: 100vh;
+  background: @bg-color;
+  padding: @spacing-page;
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+}
+
+.fav-loading {
+  padding: 80rpx;
+  text-align: center;
+}
+
+.fav-item {
+  display: flex;
+  align-items: center;
+  background: @bg-color-white;
+  border-radius: @radius-card;
+  padding: @spacing-card;
+  margin-bottom: 16rpx;
+  box-shadow: @shadow-card;
+
+  &__thumb {
+    width: 120rpx;
+    height: 120rpx;
+    background: @bg-color-section;
+    border-radius: @radius-sm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 24rpx;
+  }
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: 28rpx;
+    font-weight: 500;
+    color: @gy1;
+    display: block;
+    margin-bottom: 8rpx;
+  }
+
+  &__meta {
+    font-size: 24rpx;
+    color: @gy3;
+  }
+
+  &__price {
+    color: @color-price;
+    margin-right: 16rpx;
+  }
+
+  &__arrow {
+    color: @gy3;
+  }
+}

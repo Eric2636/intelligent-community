@@ -1,23 +1,29 @@
-import { getMyItems } from '~/mock/mall/api';
+import { mallAPI } from '~/api/cloud';
 
 Page({
   data: {
-    list: [],
+    itemList: [],
     loading: true,
   },
 
-  onLoad() {},
-  onShow() {
-    this.loadList();
-  },
-  onPullDownRefresh() {
-    this.loadList().then(() => wx.stopPullDownRefresh());
+  onLoad() {
+    this.loadItems();
   },
 
-  async loadList() {
+  onShow() {
+    this.loadItems();
+  },
+
+  onPullDownRefresh() {
+    this.loadItems().then(() => wx.stopPullDownRefresh());
+  },
+
+  async loadItems() {
     this.setData({ loading: true });
-    const res = await getMyItems();
-    if (res.code === 200) this.setData({ list: res.data || [], loading: false });
+    const res = await mallAPI.getMyItems();
+    if (res.code === 200) {
+      this.setData({ itemList: res.data || [], loading: false });
+    }
   },
 
   goDetail(e) {

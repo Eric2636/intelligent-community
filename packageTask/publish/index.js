@@ -1,4 +1,4 @@
-import { publishTask } from '~/mock/task/api';
+import { taskAPI } from '~/api/cloud';
 
 Page({
   data: {
@@ -27,12 +27,11 @@ Page({
       return;
     }
     this.setData({ submitting: true });
-    const res = await publishTask({
+    const res = await taskAPI.publishTask({
       title: t,
       desc: (desc || '').trim(),
       reward: r,
       location: (location || '').trim() || '线下协商',
-      publisherName: '我',
     });
     this.setData({ submitting: false });
     if (res.code === 200 && res.data) {

@@ -1,4 +1,4 @@
-import { getCategories, publishItem } from '~/mock/mall/api';
+import { mallAPI } from '~/api/cloud';
 
 Page({
   data: {
@@ -14,7 +14,7 @@ Page({
   },
 
   onLoad() {
-    getCategories().then((res) => {
+    mallAPI.getCategories().then((res) => {
       if (res.code !== 200) return;
       const list = (res.data || []).filter((c) => c.id !== 'all');
       const categoryName = list[0] ? list[0].name : '日用品';
@@ -42,7 +42,7 @@ Page({
       return;
     }
     this.setData({ submitting: true });
-    const res = await publishItem({
+    const res = await mallAPI.publishItem({
       categoryId,
       title: t,
       price: (price || '').trim(),

@@ -5,7 +5,8 @@
   <nav title-text="我的" />
   <view class="my-head">
     <view wx:if="{{isLoad}}" class="my-head__user" bindtap="onNavigateTo">
-      <t-avatar image="{{personalInfo.image}}" size="large" class="my-head__avatar" />
+      <t-avatar wx:if="{{personalInfo.image || personalInfo.avatar}}" image="{{personalInfo.image || personalInfo.avatar}}" size="large" class="my-head__avatar" />
+      <t-avatar wx:else icon="user" size="large" class="my-head__avatar" />
       <view class="my-head__info">
         <view class="my-head__name">{{personalInfo.name || '业主'}}</view>
         <view class="my-head__tags" wx:if="{{personalInfo.star || personalInfo.city}}">

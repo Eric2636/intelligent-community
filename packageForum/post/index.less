@@ -2,8 +2,9 @@
 
 .post-page {
   min-height: calc(100vh - 56px);
-  padding-bottom: 120rpx;
-  background-color: @bg-color;
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+  background: @bg-color;
+  overflow-x: hidden;
 }
 
 .post-loading {
@@ -13,10 +14,11 @@
 }
 
 .post-card {
-  margin: 24rpx;
+  margin: @spacing-page;
   padding: 28rpx;
   background: @bg-color-white;
-  border-radius: 16rpx;
+  border-radius: @radius-card;
+  box-shadow: @shadow-card;
 
   &__head {
     margin-bottom: 16rpx;
@@ -57,13 +59,34 @@
       margin-left: 24rpx;
     }
   }
+
+  &__actions {
+    display: flex;
+    margin-top: 24rpx;
+    padding-top: 20rpx;
+    border-top: 1rpx solid @gray3;
+    gap: 32rpx;
+  }
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    font-size: 26rpx;
+    color: @gy3;
+
+    &--active {
+      color: @color-primary;
+    }
+  }
 }
 
 .post-replies {
-  margin: 24rpx;
-  padding: 24rpx;
+  margin: @spacing-page;
+  padding: @spacing-card;
   background: @bg-color-white;
-  border-radius: 16rpx;
+  border-radius: @radius-card;
+  box-shadow: @shadow-card;
 
   &__title {
     font-size: 28rpx;
@@ -119,17 +142,18 @@
   display: flex;
   align-items: center;
   gap: 16rpx;
-  padding: 16rpx 24rpx;
+  padding: 16rpx @spacing-page;
   padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
   background: @bg-color-white;
   border-top: 1rpx solid @gray3;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
 
   &__input {
     flex: 1;
     height: 72rpx;
-    padding: 0 24rpx;
+    padding: 0 @spacing-page;
     font-size: 28rpx;
-    background: @bg-color;
+    background: @bg-color-section;
     border-radius: 36rpx;
   }
 }

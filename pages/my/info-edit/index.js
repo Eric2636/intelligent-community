@@ -1,5 +1,5 @@
-import request from '~/api/request';
 import { areaList } from './areaData.js';
+import { userAPI } from '~/api/cloud';
 
 Page({
   data: {
@@ -47,20 +47,53 @@ Page({
     this.getPersonalInfo();
   },
 
-  getPersonalInfo() {
-    request('/api/genPersonalInfo').then((res) => {
-      this.setData(
-        {
-          personInfo: res.data.data,
-        },
-        () => {
-          const { personInfo } = this.data;
+  async getPersonalInfo() {
+    try {
+      const app = getApp();
+      if (app.globalData.useCloudBase) {
+        // 云开发环境：调用云函数获取用户信息
+        const res = await userAPI.getUserInfo();
+        if (res.code === 200 && res.data) {
+          this.setData(
+            {
+              personInfo: res.data,
+            },
+            () => {
+              const { personInfo } = this.data;
+              this.setData({
+                addressText: `${areaList.provinces[personInfo.address[0]]} ${areaList.cities[personInfo.address[1]]}`,
+              });
+            },
+          );
+        } else {
+          // 没有用户信息时，设置默认值
           this.setData({
-            addressText: `${areaList.provinces[personInfo.address[0]]} ${areaList.cities[personInfo.address[1]]}`,
+            personInfo: {
+              name: '',
+              gender: 0,
+              birth: '',
+              address: [],
+              introduction: '',
+              photos: [],
+            },
           });
-        },
-      );
-    });
+        }
+      } else {
+        // 非云开发环境，不加载用户信息
+        this.setData({
+          personInfo: {
+            name: '',
+            gender: 0,
+            birth: '',
+            address: [],
+            introduction: '',
+            photos: [],
+          },
+        });
+      }
+    } catch (err) {
+      console.error('获取用户信息失败', err);
+    }
   },
 
   getAreaOptions(data, filter) {
@@ -167,7 +200,43 @@ Page({
     });
   },
 
-  onSaveInfo() {
-    // console.log(this.data.personInfo);
+  async onSaveInfo() {
+    const { personInfo } = this.data;
+    const app = getApp();
+
+    if (app.globalData.useCloudBase) {
+      try {
+        wx.showLoading({ title: '保存中...' });
+        const res = await userAPI.updateUserInfo(personInfo);
+        wx.hideLoading();
+
+        if (res.code === 200) {
+          wx.showToast({
+            title: '保存成功',
+            icon: 'success',
+          });
+          setTimeout(() => {
+            wx.navigateBack();
+          }, 1000);
+        } else {
+          wx.showToast({
+            title: res.message || '保存失败',
+            icon: 'none',
+          });
+        }
+      } catch (err) {
+        wx.hideLoading();
+        wx.showToast({
+          title: '保存失败',
+          icon: 'none',
+        });
+        console.error('保存用户信息失败', err);
+      }
+    } else {
+      wx.showToast({
+        title: '请使用云开发模式',
+        icon: 'none',
+      });
+    }
   },
 });

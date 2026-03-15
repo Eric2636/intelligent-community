@@ -10,12 +10,20 @@
       </view>
       <view class="detail-card__price" wx:if="{{item.price}}">{{item.price}}{{item.unit}}</view>
       <view class="detail-card__title">{{item.title}}</view>
-      <view class="detail-card__meta">{{item.createTime}}</view>
+      <view class="detail-card__meta">{{item.createdAt}}</view>
       <view class="detail-card__desc">{{item.desc}}</view>
       <view class="detail-card__contact">联系：{{item.contact}}</view>
     </view>
     <view class="detail-bar">
-      <t-button theme="primary" size="large" block bindtap="onContact">联系 TA</t-button>
+      <view wx:if="{{!isMine}}" class="detail-bar__row">
+        <t-button theme="primary" size="large" block bindtap="onBuy">立即购买</t-button>
+        <view class="detail-bar__fav {{item.isFavorited ? 'detail-bar__fav--active' : ''}}" bindtap="onFavorite">
+          <t-icon name="{{item.isFavorited ? 'star-filled' : 'star'}}" size="44rpx" />
+          <text>{{item.isFavorited ? '已收藏' : '收藏'}}</text>
+        </view>
+      </view>
+      <t-button wx:if="{{!isMine}}" class="detail-bar__btn" variant="outline" size="large" block bindtap="onContact">联系 TA</t-button>
+      <t-button wx:if="{{isMine}}" theme="primary" size="large" block bindtap="onContact">联系 TA</t-button>
     </view>
   </block>
   <view wx:else class="detail-loading">信息不存在</view>

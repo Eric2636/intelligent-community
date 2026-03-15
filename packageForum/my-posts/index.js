@@ -1,27 +1,35 @@
-import { getMyPosts } from '~/mock/forum/api';
+import { forumAPI } from '~/api/cloud';
 
 Page({
   data: {
-    list: [],
+    postList: [],
     loading: true,
   },
 
-  onLoad() {},
+  onLoad() {
+    this.loadPosts();
+  },
+
   onShow() {
-    this.loadList();
+    this.loadPosts();
   },
+
   onPullDownRefresh() {
-    this.loadList().then(() => wx.stopPullDownRefresh());
+    this.loadPosts().then(() => wx.stopPullDownRefresh());
   },
 
-  async loadList() {
+  async loadPosts() {
     this.setData({ loading: true });
-    const res = await getMyPosts();
-    if (res.code === 200) this.setData({ list: res.data || [], loading: false });
+    const res = await forumAPI.getMyPosts();
+    if (res.code === 200) {
+      this.setData({ postList: res.data || [], loading: false });
+    }
   },
 
-  goDetail(e) {
+  goPost(e) {
     const { id } = e.currentTarget.dataset;
-    wx.navigateTo({ url: `/packageForum/post/index?postId=${id}` });
+    wx.navigateTo({
+      url: `/packageForum/post/index?postId=${id}`,
+    });
   },
 });

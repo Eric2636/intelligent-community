@@ -35,6 +35,24 @@
       <block wx:elif="{{(task.status === 'pending_take' || task.status === 'in_progress') && isPublisher}}">
         <t-button theme="default" size="large" block bindtap="onCancel">取消任务</t-button>
       </block>
+      <block wx:elif="{{task.status === 'completed' && (isPublisher || isTaker) && otherPartyId}}">
+        <t-button theme="primary" size="large" block bindtap="onOpenRating">评价 {{otherPartyName}}</t-button>
+      </block>
+    </view>
+
+    <view wx:if="{{showRating}}" class="detail-rating-mask" catchtap="onCloseRating">
+      <view class="detail-rating-panel" catchtap="">
+        <view class="detail-rating__title">评价 {{otherPartyName}}</view>
+        <view class="detail-rating__stars">
+          <text class="detail-rating__star {{ratingScore >= 1 ? 'on' : ''}}" data-score="1" bindtap="onRatingStar">★</text>
+          <text class="detail-rating__star {{ratingScore >= 2 ? 'on' : ''}}" data-score="2" bindtap="onRatingStar">★</text>
+          <text class="detail-rating__star {{ratingScore >= 3 ? 'on' : ''}}" data-score="3" bindtap="onRatingStar">★</text>
+          <text class="detail-rating__star {{ratingScore >= 4 ? 'on' : ''}}" data-score="4" bindtap="onRatingStar">★</text>
+          <text class="detail-rating__star {{ratingScore >= 5 ? 'on' : ''}}" data-score="5" bindtap="onRatingStar">★</text>
+        </view>
+        <textarea placeholder="选填评价内容" value="{{ratingComment}}" bindinput="onRatingComment" class="detail-rating__input" />
+        <t-button theme="primary" size="medium" block bindtap="onSubmitRating">提交评价</t-button>
+      </view>
     </view>
   </block>
   <view wx:else class="detail-loading">任务不存在</view>

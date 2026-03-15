@@ -1,24 +1,53 @@
-<nav title-text="我的任务" show-back="{{true}}" />
 <view class="my-tasks-page">
-  <view class="my-tasks-tabs">
-    <view class="my-tasks-tabs__item {{tab === 'published' ? 'my-tasks-tabs__item--active' : ''}}" data-tab="published" bindtap="onTabChange">我发布的</view>
-    <view class="my-tasks-tabs__item {{tab === 'taken' ? 'my-tasks-tabs__item--active' : ''}}" data-tab="taken" bindtap="onTabChange">我领取的</view>
-  </view>
+  <t-tabs value="{{activeTab}}" bind:change="onTabChange" space-evenly>
+    <t-tab-panel wx:for="{{tabs}}" wx:key="value" label="{{item.label}}" value="{{item.value}}" />
+  </t-tabs>
 
-  <view wx:if="{{loading}}" class="my-tasks-loading"><t-loading theme="dots" size="48rpx" /></view>
-  <view wx:else class="my-tasks-list">
-    <view wx:if="{{tab === 'published'}}" wx:for="{{publishedList}}" wx:key="id" class="my-tasks-card" data-id="{{item.id}}" bindtap="goDetail">
-      <view class="my-tasks-card__tag my-tasks-card__tag--{{item.status}}">{{STATUS_TEXT[item.status]}}</view>
-      <view class="my-tasks-card__reward">¥{{item.reward}}</view>
-      <text class="my-tasks-card__title">{{item.title}}</text>
-      <view class="my-tasks-card__meta">{{item.createdAt}}</view>
-    </view>
-    <view wx:if="{{tab === 'taken'}}" wx:for="{{takenList}}" wx:key="id" class="my-tasks-card" data-id="{{item.id}}" bindtap="goDetail">
-      <view class="my-tasks-card__tag my-tasks-card__tag--{{item.status}}">{{STATUS_TEXT[item.status]}}</view>
-      <view class="my-tasks-card__reward">¥{{item.reward}}</view>
-      <text class="my-tasks-card__title">{{item.title}}</text>
-      <view class="my-tasks-card__meta">{{item.createdAt}}</view>
-    </view>
-    <view wx:if="{{(tab === 'published' && publishedList.length === 0) || (tab === 'taken' && takenList.length === 0)}}" class="my-tasks-empty">暂无</view>
+  <view class="tab-content">
+    <t-pull-down-refresh
+      value="{{loading}}"
+      loadingProps="{{loadingProps}}"
+      bind:refresh="onPullDownRefresh"
+    >
+      <view wx:if="{{activeTab === 'published'}}">
+        <view class="task-list">
+          <t-cell
+            wx:for="{{publishedList}}"
+            wx:key="id"
+            title="{{item.title}}"
+            note="佣金：{{item.reward}}元"
+            hover
+            bind:click="goDetail"
+            data-id="{{item.id}}"
+          >
+            <view slot="note" class="task-info">
+              <t-tag theme="primary" size="small">{{STATUS_TEXT[item.status]}}</t-tag>
+              <text class="reward">佣金：{{item.reward}}元</text>
+            </view>
+          </t-cell>
+        </view>
+        <t-empty wx:if="{{!loading && publishedList.length === 0}}" description="暂无发布的任务" />
+      </view>
+
+      <view wx:if="{{activeTab === 'taken'}}">
+        <view class="task-list">
+          <t-cell
+            wx:for="{{takenList}}"
+            wx:key="id"
+            title="{{item.title}}"
+            note="佣金：{{item.reward}}元"
+            hover
+            bind:click="goDetail"
+            data-id="{{item.id}}"
+          >
+            <view slot="note" class="task-info">
+              <t-tag theme="primary" size="small">{{STATUS_TEXT[item.status]}}</t-tag>
+              <text class="reward">佣金：{{item.reward}}元</text>
+            </view>
+          </t-cell>
+        </view>
+        <t-empty wx:if="{{!loading && takenList.length === 0}}" description="暂无领取的任务" />
+      </view>
+    </t-pull-down-refresh>
   </view>
 </view>

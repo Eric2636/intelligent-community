@@ -1,17 +1,20 @@
-import { getMyPublished, getMyTaken } from '~/mock/task/api';
-import { STATUS } from '~/mock/task/api';
+import { taskAPI } from '~/api/cloud';
 
 const STATUS_TEXT = {
-  [STATUS.PENDING_TAKE]: '待领取',
-  [STATUS.IN_PROGRESS]: '进行中',
-  [STATUS.PENDING_CONFIRM]: '待确认',
-  [STATUS.COMPLETED]: '已完成',
-  [STATUS.CANCELLED]: '已取消',
+  0: '待领取',
+  1: '进行中',
+  2: '待确认',
+  3: '已完成',
+  4: '已取消',
 };
 
 Page({
   data: {
-    tab: 'published', // published | taken
+    tabs: [
+      { label: '我发布的', value: 'published' },
+      { label: '我领取的', value: 'taken' },
+    ],
+    activeTab: 'published',
     publishedList: [],
     takenList: [],
     loading: true,
@@ -19,29 +22,38 @@ Page({
   },
 
   onLoad() {
-    this.loadAll();
+    this.loadTasks();
   },
 
   onShow() {
-    this.loadAll();
+    this.loadTasks();
   },
 
   onPullDownRefresh() {
-    this.loadAll().then(() => wx.stopPullDownRefresh());
-  },
-
-  async loadAll() {
-    this.setData({ loading: true });
-    const [pub, taken] = await Promise.all([getMyPublished(), getMyTaken()]);
-    this.setData({
-      publishedList: (pub.code === 200 ? pub.data : []) || [],
-      takenList: (taken.code === 200 ? taken.data : []) || [],
-      loading: false,
-    });
+    this.loadTasks().then(() => wx.stopPullDownRefresh());
   },
 
   onTabChange(e) {
-    this.setData({ tab: e.currentTarget.dataset.tab });
+    const { value } = e.detail;
+    this.setData({ activeTab: value });
+    this.loadTasks();
+  },
+
+  async loadTasks() {
+    const { activeTab } = this.data;
+    this.setData({ loading: true });
+
+    if (activeTab === 'published') {
+      const res = await taskAPI.getMyPublished();
+      if (res.code === 200) {
+        this.setData({ publishedList: res.data || [], loading: false });
+      }
+    } else {
+      const res = await taskAPI.getMyTaken();
+      if (res.code === 200) {
+        this.setData({ takenList: res.data || [], loading: false });
+      }
+    }
   },
 
   goDetail(e) {

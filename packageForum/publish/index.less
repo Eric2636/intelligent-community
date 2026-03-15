@@ -5,12 +5,14 @@
   background-color: @bg-color;
   padding: 32rpx;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .publish-form {
   background: @bg-color-white;
-  border-radius: 16rpx;
+  border-radius: @radius-card;
   padding: 32rpx;
+  box-shadow: @shadow-card;
 }
 
 .publish-field {
@@ -25,8 +27,8 @@
     padding: 28rpx 32rpx;
     font-size: 30rpx;
     color: @gy1;
-    background: @bg-color;
-    border-radius: 16rpx;
+    background: @bg-color-section;
+    border-radius: @radius-sm;
     box-sizing: border-box;
     min-height: 96rpx;
     line-height: 1.5;

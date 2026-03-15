@@ -14,8 +14,19 @@
       <text class="post-card__title">{{post.title}}</text>
       <text class="post-card__content">{{post.content}}</text>
       <view class="post-card__meta">
-        <text>浏览 {{post.viewCount}}</text>
-        <text>回复 {{post.replyCount}}</text>
+        <text>浏览 {{post.viewCount || 0}}</text>
+        <text>回复 {{post.replyCount || 0}}</text>
+        <text>点赞 {{post.likeCount || 0}}</text>
+      </view>
+      <view class="post-card__actions">
+        <view class="post-card__btn {{post.isLiked ? 'post-card__btn--active' : ''}}" bindtap="onLike">
+          <t-icon name="{{post.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="40rpx" />
+          <text>{{post.isLiked ? '已赞' : '点赞'}}</text>
+        </view>
+        <view class="post-card__btn {{post.isFavorited ? 'post-card__btn--active' : ''}}" bindtap="onFavorite">
+          <t-icon name="{{post.isFavorited ? 'star-filled' : 'star'}}" size="40rpx" />
+          <text>{{post.isFavorited ? '已收藏' : '收藏'}}</text>
+        </view>
       </view>
     </view>
     <view class="post-replies">

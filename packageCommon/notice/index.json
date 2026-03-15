@@ -1,6 +1,3 @@
 {
-  "navigationStyle": "custom",
-  "usingComponents": {
-    "nav": "/components/nav"
-  }
+  "navigationBarTitleText": "消息通知"
 }

@@ -1,0 +1,29 @@
+<nav title-text="订单详情" show-back="{{true}}" />
+<view class="order-detail-page">
+  <view wx:if="{{loading}}" class="detail-loading">
+    <t-loading theme="dots" size="48rpx" />
+  </view>
+  <block wx:elif="{{order}}">
+    <view class="detail-card">
+      <view class="detail-card__title">{{order.itemTitle}}</view>
+      <view class="detail-card__price">{{order.itemPrice}}{{order.itemUnit}}</view>
+      <view class="detail-card__status detail-card__status--{{order.status}}">
+        {{order.status === 'pending' ? '待沟通' : order.status === 'completed' ? '已完成' : '已取消'}}
+      </view>
+      <view class="detail-card__row">
+        <text class="label">联系方式：</text>
+        <text>{{order.contact || '暂无'}}</text>
+      </view>
+      <view class="detail-card__row">
+        <text class="label">创建时间：</text>
+        <text>{{order.createdAt}}</text>
+      </view>
+    </view>
+    <view wx:if="{{order.status === 'pending'}}" class="detail-actions">
+      <t-button wx:if="{{isBuyer}}" theme="primary" size="medium" bindtap="onCancel">取消订单</t-button>
+      <t-button wx:if="{{isSeller}}" theme="primary" size="medium" bindtap="onConfirmComplete">确认完成</t-button>
+      <t-button wx:if="{{isBuyer}}" variant="outline" size="medium" bindtap="onConfirmComplete">确认完成</t-button>
+    </view>
+  </block>
+  <view wx:else class="detail-loading">订单不存在</view>
+</view>

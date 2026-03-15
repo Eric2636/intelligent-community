@@ -1,6 +1,44 @@
-<nav title-text="关于我们" show-back="{{true}}" />
 <view class="about-page">
-  <view class="about-logo">{{appName}}</view>
-  <view class="about-version">版本 {{version}}</view>
-  <view class="about-intro">{{intro}}</view>
+  <view class="header">
+    <image class="logo" src="/static/logo.png" mode="aspectFit" />
+    <view class="app-name">{{appName}}</view>
+    <view class="version" bind:tap="onVersionTap">v{{version}}</view>
+  </view>
+
+  <view class="content">
+    <view class="section">
+      <view class="section-title">产品介绍</view>
+      <view class="section-content">{{appDescription}}</view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">核心功能</view>
+      <view class="feature-list">
+        <view class="feature-item" wx:for="{{features}}" wx:key="index">
+          <t-icon name="check-circle" size="20" color="#00a870" />
+          <text>{{item}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">联系我们</view>
+      <view class="contact-list">
+        <view class="contact-item" bind:tap="onContactTap" data-type="phone" data-value="{{contact.phone}}">
+          <view class="contact-label">客服电话</view>
+          <view class="contact-value">{{contact.phone}}</view>
+          <t-icon name="chevron-right" size="16" color="#999" />
+        </view>
+        <view class="contact-item" bind:tap="onContactTap" data-type="email" data-value="{{contact.email}}">
+          <view class="contact-label">联系邮箱</view>
+          <view class="contact-value">{{contact.email}}</view>
+          <t-icon name="chevron-right" size="16" color="#999" />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <text>© 2026 智能社区 版权所有</text>
+  </view>
 </view>

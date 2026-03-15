@@ -1,0 +1,69 @@
+@import '/variable.less';
+
+.order-detail-page {
+  min-height: 100vh;
+  background: @bg-color;
+  padding: @spacing-page;
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+}
+
+.detail-loading {
+  padding: 80rpx;
+  text-align: center;
+  color: @gy2;
+}
+
+.detail-card {
+  background: @bg-color-white;
+  border-radius: @radius-card;
+  padding: 28rpx;
+  margin-bottom: @spacing-page;
+  box-shadow: @shadow-card;
+
+  &__title {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: @gy1;
+    margin-bottom: 16rpx;
+  }
+
+  &__price {
+    font-size: 36rpx;
+    font-weight: 600;
+    color: @color-price;
+    margin-bottom: 16rpx;
+  }
+
+  &__status {
+    font-size: 26rpx;
+    margin-bottom: 24rpx;
+
+    &--pending {
+      color: @color-warning;
+    }
+    &--completed {
+      color: @color-success;
+    }
+    &--cancelled {
+      color: @gy3;
+    }
+  }
+
+  &__row {
+    font-size: 26rpx;
+    color: @gy2;
+    margin-bottom: 12rpx;
+
+    .label {
+      color: @gy3;
+      margin-right: 8rpx;
+    }
+  }
+}
+
+.detail-actions {
+  display: flex;
+  gap: 24rpx;
+  flex-wrap: wrap;
+}

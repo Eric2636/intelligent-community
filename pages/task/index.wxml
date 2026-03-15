@@ -1,14 +1,30 @@
 <nav title-text="任务" />
 <view class="task-page">
-  <view wx:if="{{loading}}" class="task-loading"><t-loading theme="dots" size="48rpx" /></view>
-  <view wx:else class="task-list">
-    <view class="task-card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+  <view class="task-search">
+    <t-input
+      placeholder="搜索任务标题、描述"
+      value="{{keyword}}"
+      clearable
+      bindchange="onSearchInput"
+      bindconfirm="onSearchConfirm"
+    />
+  </view>
+  <view wx:if="{{loading}}" class="task-loading">
+    <view class="task-skeleton" wx:for="{{[1,2,3]}}" wx:key="*this">
+      <view class="task-skeleton__line task-skeleton__title"></view>
+      <view class="task-skeleton__line task-skeleton__desc"></view>
+      <view class="task-skeleton__line task-skeleton__meta"></view>
+    </view>
+  </view>
+  <view wx:else class="task-list list-fade-in">
+    <view class="task-card" wx:for="{{list}}" wx:key="id" data-id="{{item._id || item.id}}" bindtap="goDetail">
       <view class="task-card__reward">¥{{item.reward}}</view>
       <text class="task-card__title">{{item.title}}</text>
       <text class="task-card__desc">{{item.desc}}</text>
       <view class="task-card__meta">{{item.location}} · {{item.createdAt}}</view>
     </view>
     <view wx:if="{{list.length === 0}}" class="task-empty">暂无可领取任务</view>
+    <view wx:if="{{listTotal > maxRender}}" class="task-more-hint">已显示前 {{maxRender}} 条，共 {{listTotal}} 条，请用搜索缩小范围</view>
   </view>
 
   <view class="task-fab" bindtap="goPublish">

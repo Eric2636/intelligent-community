@@ -1,5 +1,2 @@
-import getSendMessage from './getSendMessage';
-import postCodeVerify from './postCodeVerify';
-import postPasswordLogin from './postPasswordLogin';
-
-export default [getSendMessage, postCodeVerify, postPasswordLogin];
+// 仅使用微信授权登录，无需 mock 登录接口
+export default [];

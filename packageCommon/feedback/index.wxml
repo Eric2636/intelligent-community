@@ -1,20 +1,51 @@
-<nav title-text="意见反馈" show-back="{{true}}" />
 <view class="feedback-page">
-  <view class="feedback-form">
-    <view class="feedback-field">
-      <text class="feedback-field__label">反馈类型</text>
-      <picker mode="selector" range="{{['功能建议','问题反馈','其他']}}" value="{{typeIndex}}" bindchange="onTypeChange">
-        <view class="feedback-field__picker">{{typeText}}</view>
-      </picker>
+  <view class="form-container">
+    <view class="form-item">
+      <view class="form-label">反馈类型</view>
+      <t-picker
+        value="{{feedbackType}}"
+        bind:change="onTypeChange"
+        title="选择反馈类型"
+        keys="{{ { label: 'label', value: 'value' } }}"
+      >
+        <t-cell
+          title="{{typeLabel || '请选择反馈类型'}}"
+          note="点击选择"
+          arrow
+        />
+      </t-picker>
     </view>
-    <view class="feedback-field">
-      <text class="feedback-field__label">反馈内容 <text class="required">*</text></text>
-      <textarea class="feedback-field__textarea" placeholder="请描述您的意见或问题" value="{{content}}" bindinput="onContentInput" maxlength="500" />
+
+    <view class="form-item">
+      <view class="form-label">反馈内容</view>
+      <t-textarea
+        value="{{content}}"
+        placeholder="请详细描述您的建议或问题..."
+        bind:input="onContentInput"
+        maxlength="500"
+        autosize
+      />
     </view>
-    <view class="feedback-field">
-      <text class="feedback-field__label">联系方式</text>
-      <input class="feedback-field__input" placeholder="选填，便于我们回复" value="{{contact}}" bindinput="onContactInput" />
+
+    <view class="form-item">
+      <view class="form-label">联系方式</view>
+      <t-input
+        value="{{contact}}"
+        placeholder="请输入手机号或邮箱"
+        bind:change="onContactInput"
+      />
     </view>
-    <button class="feedback-submit" bindtap="submit" disabled="{{submitting}}">提交</button>
+
+    <view class="form-actions">
+      <t-button
+        theme="primary"
+        size="large"
+        bind:tap="submit"
+        loading="{{submitting}}"
+        disabled="{{submitting}}"
+      >
+        提交反馈
+      </t-button>
+    </view>
   </view>
 </view>
