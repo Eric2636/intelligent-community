@@ -83,7 +83,16 @@ export const taskAPI = {
     });
   },
 
-  // 确认完成
+  // 创建任务赏金支付单（返回 payment 用于 wx.requestPayment）
+  createTaskPayment(taskId, envId) {
+    return callCloudFunction('task', {
+      action: 'createTaskPayment',
+      taskId,
+      envId,
+    });
+  },
+
+  // 确认完成（未开通支付时可继续使用，表示线下已付）
   confirmComplete(taskId) {
     return callCloudFunction('task', {
       action: 'confirmComplete',

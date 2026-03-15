@@ -158,7 +158,65 @@ exports.main = async (event, context) => {
     }
   }
 
-  // 确认完成
+  // 创建任务赏金支付单（发布者在「待确认」时调起支付，支付成功后由 taskPayCallback 将任务置为已完成）
+  if (action === 'createTaskPayment') {
+    const { taskId, envId: clientEnvId } = event
+    const openid = wxContext.OPENID
+    const subMchId = process.env.PAY_SUB_MCH_ID
+    const envId = clientEnvId || process.env.ENV_ID || ''
+    if (!subMchId) {
+      return { code: 500, message: '未配置支付商户号，请在云函数环境变量中设置 PAY_SUB_MCH_ID' }
+    }
+    if (!envId) {
+      return { code: 500, message: '未配置云环境 ID，请在云函数环境变量中设置 ENV_ID' }
+    }
+    try {
+      const taskRes = await db.collection('tasks').doc(taskId).get()
+      const task = taskRes.data
+      if (!task) return { code: 404, message: '任务不存在' }
+      if (task.status !== 'pending_confirm') return { code: 400, message: '当前状态不允许支付' }
+      if (task.publisherId !== openid) return { code: 403, message: '仅发布者可支付赏金' }
+      const rewardYuan = parseFloat(task.reward)
+      if (isNaN(rewardYuan) || rewardYuan <= 0) return { code: 400, message: '赏金金额无效' }
+      const totalFee = Math.round(rewardYuan * 100)
+      if (totalFee < 1) return { code: 400, message: '赏金金额至少 0.01 元' }
+      const outTradeNo = 'T' + taskId.replace(/[^a-zA-Z0-9_-]/g, '') + '_' + Date.now()
+      if (outTradeNo.length > 32) {
+        return { code: 400, message: '订单号过长' }
+      }
+      const body = ('任务赏金-' + (task.title || '')).slice(0, 128)
+      const res = await cloud.cloudPay.unifiedOrder({
+        body,
+        outTradeNo,
+        spbillCreateIp: '127.0.0.1',
+        subMchId,
+        totalFee,
+        envId,
+        functionName: 'taskPayCallback',
+        attach: taskId,
+        tradeType: 'JSAPI',
+        openid,
+      })
+      if (res.returnCode !== 'SUCCESS' || res.resultCode !== 'SUCCESS') {
+        return { code: 500, message: res.errCodeDes || res.returnMsg || '创建支付单失败' }
+      }
+      return {
+        code: 200,
+        data: {
+          payment: res.payment,
+          outTradeNo,
+        },
+      }
+    } catch (err) {
+      console.error('createTaskPayment error', err)
+      return {
+        code: 500,
+        message: err.message || '创建支付单失败'
+      }
+    }
+  }
+
+  // 确认完成（仅用于未开通支付时线下支付场景，或支付回调未生效时的补救）
   if (action === 'confirmComplete') {
     const { taskId } = event
     try {

@@ -1,4 +1,4 @@
-<nav title-text="任务" />
+<nav title-text="业主互助" />
 <view class="task-page">
   <view class="task-search">
     <t-input

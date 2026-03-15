@@ -1,4 +1,5 @@
 import { taskAPI } from '~/api/cloud';
+import { config } from '~/config';
 
 const STATUS_TEXT = {
   pending_take: '待领取',
@@ -83,19 +84,54 @@ Page({
     });
   },
 
-  onConfirmComplete() {
-    const { id } = this.data;
+  async onConfirmComplete() {
+    const { id, task } = this.data;
+    const reward = (task && task.reward) ? String(task.reward) : '0';
     wx.showModal({
       title: '确认完成',
-      content: '确认后任务完成，请线下支付佣金给接单人。',
-      success: (res) => {
+      content: `需支付赏金 ¥${reward} 元给接单人。将调起微信支付，支付成功后任务自动完成。`,
+      success: async (res) => {
         if (!res.confirm) return;
-        taskAPI.confirmComplete(id).then((r) => {
-          if (r.code === 200) {
-            wx.showToast({ title: '已确认完成' });
-            this.loadDetail();
-          }
-        });
+        wx.showLoading({ title: '请稍候...' });
+        const payRes = await taskAPI.createTaskPayment(id, config.cloudEnvId);
+        wx.hideLoading();
+        if (payRes.code === 200 && payRes.data && payRes.data.payment) {
+          wx.requestPayment({
+            ...payRes.data.payment,
+            success: () => {
+              wx.showToast({ title: '支付成功，任务已完成', icon: 'success' });
+              setTimeout(() => this.loadDetail(), 1500);
+            },
+            fail: (err) => {
+              if (err.errMsg && err.errMsg.indexOf('cancel') !== -1) {
+                wx.showToast({ title: '已取消支付', icon: 'none' });
+              } else {
+                wx.showToast({ title: err.errMsg || '支付失败', icon: 'none' });
+              }
+            },
+          });
+          return;
+        }
+        const msg = payRes.message || '无法创建支付单';
+        if (payRes.code === 500 && (msg.indexOf('未配置') !== -1 || msg.indexOf('商户') !== -1)) {
+          wx.showModal({
+            title: '未开通在线支付',
+            content: '当前未配置支付商户号，可先线下支付赏金给接单人，再点击确认完成。是否确认完成？',
+            success: (m) => {
+              if (!m.confirm) return;
+              taskAPI.confirmComplete(id).then((r) => {
+                if (r.code === 200) {
+                  wx.showToast({ title: '已确认完成' });
+                  this.loadDetail();
+                } else {
+                  wx.showToast({ title: r.message || '操作失败', icon: 'none' });
+                }
+              });
+            },
+          });
+        } else {
+          wx.showToast({ title: msg, icon: 'none' });
+        }
       },
     });
   },

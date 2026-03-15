@@ -4,9 +4,9 @@ Component({
   data: {
     value: 'task', // 初始选中任务，避免第一次加载时闪烁
     list: [
-      { icon: 'file-copy', value: 'task', label: '任务' },
-      { icon: 'chat', value: 'forum', label: '论坛' },
-      { icon: 'cart', value: 'mall', label: '商城' },
+      { icon: 'file-copy', value: 'task', label: '业主互助' },
+      { icon: 'chat', value: 'forum', label: '小区留言' },
+      { icon: 'cart', value: 'mall', label: '小区市场' },
       { icon: 'user', value: 'my', label: '我的' },
     ],
   },

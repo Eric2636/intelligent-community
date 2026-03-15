@@ -12,6 +12,11 @@ if (!USE_CLOUDBASE && config.isMock) {
 
 App({
   onLaunch() {
+    // 关闭 vConsole 调试器，避免真机/预览时出现调试面板
+    try {
+      wx.setEnableDebug({ enableDebug: false });
+    } catch (e) {}
+
     // 初始化云开发
     if (USE_CLOUDBASE) {
       try {

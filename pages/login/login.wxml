@@ -7,15 +7,20 @@
 
   <view class="login__content">
     <view class="login__agreement">
-      <t-radio-group allow-uncheck borderless value="{{agreed}}" bind:change="onAgreementChange">
-        <t-radio
-          label="同意《用户协议》和《隐私政策》"
-          value="agree"
-          t-class="radio-class"
-          t-class-icon="radio-class-icon"
-          t-class-label="radio-class-label"
-        />
-      </t-radio-group>
+      <view class="login__agreement-row">
+        <t-radio-group allow-uncheck borderless value="{{agreed}}" bind:change="onAgreementChange">
+          <t-radio
+            value="agree"
+            label="同意 "
+            t-class="radio-class"
+            t-class-icon="radio-class-icon"
+            t-class-label="radio-class-label"
+          />
+        </t-radio-group>
+        <text class="login__link" catchtap="openAgreement">《用户协议》</text>
+        <text>和</text>
+        <text class="login__link" catchtap="openPrivacy">《隐私政策》</text>
+      </view>
     </view>
 
     <view class="login__button">

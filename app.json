@@ -16,7 +16,7 @@
     { "root": "packageForum", "name": "forum", "pages": ["post/index", "publish/index", "my-posts/index", "favorites/index"] },
     { "root": "packageMall", "name": "mall", "pages": ["detail/index", "publish/index", "my-list/index", "order-list/index", "order-detail/index", "favorites/index"] },
     { "root": "packageTask", "name": "task", "pages": ["detail/index", "publish/index", "my-tasks/index"] },
-    { "root": "packageCommon", "name": "common", "pages": ["notice/index", "feedback/index", "about/index"] }
+    { "root": "packageCommon", "name": "common", "pages": ["notice/index", "feedback/index", "about/index", "agreement/index", "privacy/index"] }
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -27,9 +27,9 @@
   "tabBar": {
     "custom": true,
     "list": [
-      { "pagePath": "pages/task/index", "text": "任务" },
-      { "pagePath": "pages/forum/index", "text": "论坛" },
-      { "pagePath": "pages/mall/index", "text": "商城" },
+      { "pagePath": "pages/task/index", "text": "业主互助" },
+      { "pagePath": "pages/forum/index", "text": "小区留言" },
+      { "pagePath": "pages/mall/index", "text": "小区市场" },
       { "pagePath": "pages/my/index", "text": "我的" }
     ]
   },

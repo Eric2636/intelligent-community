@@ -8,6 +8,14 @@ Page({
     this.setData({ agreed });
   },
 
+  openAgreement() {
+    wx.navigateTo({ url: '/packageCommon/agreement/index' });
+  },
+
+  openPrivacy() {
+    wx.navigateTo({ url: '/packageCommon/privacy/index' });
+  },
+
   async login() {
     if (!this.data.agreed) {
       wx.showToast({ title: '请先同意用户协议', icon: 'none' });

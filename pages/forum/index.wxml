@@ -1,4 +1,4 @@
-<nav title-text="论坛" />
+<nav title-text="小区留言" />
 <view class="forum-search-bar">
   <view class="forum-search-bar__row">
     <t-icon name="search" size="40rpx" class="forum-search-bar__icon" />
