@@ -1,3 +1,4 @@
+<import src="../../templates/forum-list-media.wxml" />
 <view class="my-posts-page">
   <t-pull-down-refresh
     value="{{loading}}"
@@ -5,9 +6,10 @@
     bind:refresh="onPullDownRefresh"
   >
     <view class="post-list">
-      <view class="post-card" wx:for="{{postList}}" wx:key="id" bind:tap="goPost" data-id="{{item.id}}">
+      <view class="post-card" wx:for="{{postList}}" wx:key="id" bind:tap="goPost" data-id="{{item.id || item._id}}">
         <view class="post-title">{{item.title}}</view>
         <view class="post-content">{{item.content}}</view>
+        <template is="forumListMedia" data="{{item: item}}" />
         <view class="post-meta">
           <text class="time">{{item.createTime}}</text>
           <text class="reply-count">{{item.replyCount}} 回复</text>

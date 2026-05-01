@@ -1,0 +1,115 @@
+<nav title-text="小区跑腿" />
+<view class="errand-search-bar">
+  <view class="errand-search-bar__row">
+    <t-icon name="search" size="40rpx" class="errand-search-bar__icon" />
+    <t-input
+      class="errand-search-bar__input"
+      placeholder="搜索跑腿标题、内容"
+      value="{{keyword}}"
+      clearable
+      bindchange="onSearchInput"
+      bindconfirm="onSearchConfirm"
+    />
+    <view class="errand-search-bar__btn" bindtap="onSearchConfirm">搜索</view>
+  </view>
+  <view class="errand-order">
+    <view class="errand-order__item {{orderBy === 'time' ? 'errand-order__item--active' : ''}}" data-order="time" bindtap="onOrderChange">最新</view>
+    <view class="errand-order__item {{orderBy === 'hot' ? 'errand-order__item--active' : ''}}" data-order="hot" bindtap="onOrderChange">最热</view>
+  </view>
+</view>
+<scroll-view
+  class="errand-page"
+  scroll-y
+  enhanced="{{true}}"
+  show-scrollbar="{{false}}"
+  refresher-enabled="{{true}}"
+  refresher-triggered="{{refreshing}}"
+  bindrefresherrefresh="onRefresh"
+  bindscrolltolower="onLoadMore"
+  bindscroll="onListScroll"
+>
+  <view wx:if="{{loading && !refreshing}}" class="errand-loading">
+    <view class="errand-skeleton" wx:for="{{[1,2,3,4]}}" wx:key="*this">
+      <view class="errand-skeleton__line errand-skeleton__title"></view>
+      <view class="errand-skeleton__line errand-skeleton__meta"></view>
+    </view>
+  </view>
+  <block wx:else>
+    <view class="errand-section" wx:if="{{pinned.length > 0}}">
+      <view class="errand-section__title">
+        <t-icon name="pushpin" size="28rpx" /> 置顶
+      </view>
+      <view
+        class="errand-item errand-item--pinned"
+        wx:for="{{pinned}}"
+        wx:key="id"
+        data-id="{{item.id || item._id}}"
+        bindtap="goDetail"
+      >
+        <view class="errand-item__headline">
+          <text class="errand-item__title">{{item.title}}</text>
+          <text class="errand-item__reward" wx:if="{{item.reward && item.reward !== '0'}}">¥{{item.reward}}</text>
+        </view>
+        <view class="errand-item__meta">
+          <text class="errand-item__status">{{item.statusText}}</text>
+          <text>{{item.authorName}}</text>
+          <text>{{item.replyCount}} 回复</text>
+          <text>{{item.createTime}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="errand-section errand-section--list {{list.length && !loading ? 'list-fade-in' : ''}}">
+      <view class="errand-section__title" wx:if="{{pinned.length > 0}}">最新</view>
+      <block wx:if="{{useVirtual && list.length > 0}}">
+        <view class="errand-virtual" style="height: {{listTotalHeight}}rpx;">
+          <view class="errand-virtual__spacer errand-virtual__spacer--top" style="height: {{virtualStart * ITEM_HEIGHT_RPX}}rpx;"></view>
+          <view
+            class="errand-item"
+            wx:for="{{displayList}}"
+            wx:key="id"
+            data-id="{{item.id || item._id}}"
+            bindtap="goDetail"
+          >
+            <view class="errand-item__headline">
+              <text class="errand-item__title">{{item.title}}</text>
+              <text class="errand-item__reward" wx:if="{{item.reward && item.reward !== '0'}}">¥{{item.reward}}</text>
+            </view>
+            <view class="errand-item__meta">
+              <text class="errand-item__status">{{item.statusText}}</text>
+              <text>{{item.authorName}}</text>
+              <text>{{item.replyCount}} 回复</text>
+              <text>{{item.createTime}}</text>
+            </view>
+          </view>
+          <view class="errand-virtual__spacer errand-virtual__spacer--bottom" style="height: {{(list.length - virtualStart - displayList.length) * ITEM_HEIGHT_RPX}}rpx;"></view>
+        </view>
+      </block>
+      <block wx:elif="{{list.length > 0}}">
+        <view
+          class="errand-item"
+          wx:for="{{list}}"
+          wx:key="id"
+          data-id="{{item.id || item._id}}"
+          bindtap="goDetail"
+        >
+          <view class="errand-item__headline">
+            <text class="errand-item__title">{{item.title}}</text>
+            <text class="errand-item__reward" wx:if="{{item.reward && item.reward !== '0'}}">¥{{item.reward}}</text>
+          </view>
+          <view class="errand-item__meta">
+            <text class="errand-item__status">{{item.statusText}}</text>
+            <text>{{item.authorName}}</text>
+            <text>{{item.replyCount}} 回复</text>
+            <text>{{item.createTime}}</text>
+          </view>
+        </view>
+      </block>
+      <view wx:if="{{list.length === 0 && pinned.length === 0}}" class="errand-empty">暂无跑腿内容，快来发布吧</view>
+      <view wx:if="{{list.length > 0 && hasMore === false}}" class="errand-nomore">没有更多了</view>
+    </view>
+  </block>
+</scroll-view>
+<view class="errand-fab" catchtap="goPublish">
+  <!-- 自定义组件内点击默认不冒泡，需在图标上单独绑定 -->
+  <t-icon name="add" size="48rpx" color="#fff" catchtap="goPublish" />
+</view>

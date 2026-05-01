@@ -6,6 +6,17 @@ cloud.init({
 
 const db = cloud.database()
 
+function normalizeMediaIds(arr, max) {
+  if (!Array.isArray(arr)) return []
+  const out = []
+  for (const x of arr) {
+    if (typeof x !== 'string' || x.indexOf('cloud://') !== 0) continue
+    out.push(x)
+    if (out.length >= max) break
+  }
+  return out
+}
+
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const { action } = event
@@ -20,10 +31,7 @@ exports.main = async (event, context) => {
       const baseWhere = keyword && keyword.trim()
         ? _.and([
             { pinned: false },
-            _.or([
-              { title: db.RegExp({ regexp: keyword.trim(), options: 'i' }) },
-              { content: db.RegExp({ regexp: keyword.trim(), options: 'i' }) }
-            ])
+            { title: db.RegExp({ regexp: keyword.trim(), options: 'i' }) },
           ])
         : { pinned: false }
 
@@ -31,10 +39,7 @@ exports.main = async (event, context) => {
       const pinnedWhere = keyword && keyword.trim()
         ? _.and([
             { pinned: true },
-            _.or([
-              { title: db.RegExp({ regexp: keyword.trim(), options: 'i' }) },
-              { content: db.RegExp({ regexp: keyword.trim(), options: 'i' }) }
-            ])
+            { title: db.RegExp({ regexp: keyword.trim(), options: 'i' }) },
           ])
         : { pinned: true }
       const pinnedResult = await db.collection('posts')
@@ -207,11 +212,23 @@ exports.main = async (event, context) => {
   // 发布帖子
   if (action === 'publishPost') {
     const { title, content, authorName } = event
+    const images = normalizeMediaIds(event.images, 9)
+    const videos = normalizeMediaIds(event.videos, 2)
+    const titleTrim = (title || '').trim()
+    const contentTrim = (content || '').trim()
+    if (!titleTrim) {
+      return { code: 400, message: '请输入标题' }
+    }
+    if (!contentTrim && images.length === 0 && videos.length === 0) {
+      return { code: 400, message: '请输入内容或添加图片/视频' }
+    }
     try {
       const result = await db.collection('posts').add({
         data: {
-          title,
-          content,
+          title: titleTrim,
+          content: contentTrim,
+          images,
+          videos,
           authorId: wxContext.OPENID,
           authorName,
           authorAvatar: '',
@@ -226,8 +243,10 @@ exports.main = async (event, context) => {
         code: 200,
         data: {
           id: result._id,
-          title,
-          content,
+          title: titleTrim,
+          content: contentTrim,
+          images,
+          videos,
           authorName,
           createdAt: new Date().toISOString(),
           createTime: new Date().toISOString()
@@ -245,13 +264,21 @@ exports.main = async (event, context) => {
   // 发布回复
   if (action === 'publishReply') {
     const { postId, content, authorName } = event
+    const images = normalizeMediaIds(event.images, 6)
+    const videos = normalizeMediaIds(event.videos, 2)
+    const contentTrim = (content || '').trim()
+    if (!contentTrim && images.length === 0 && videos.length === 0) {
+      return { code: 400, message: '请输入回复或添加图片/视频' }
+    }
     try {
       // 添加回复
       const replyResult = await db.collection('replies').add({
         data: {
           postId,
           authorName,
-          content,
+          content: contentTrim,
+          images,
+          videos,
           createdAt: new Date().toISOString()
         }
       })
@@ -271,7 +298,9 @@ exports.main = async (event, context) => {
           id: replyResult._id,
           postId,
           authorName,
-          content,
+          content: contentTrim,
+          images,
+          videos,
           createdAt: new Date().toISOString(),
           createTime: new Date().toISOString()
         }

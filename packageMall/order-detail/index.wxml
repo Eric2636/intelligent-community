@@ -1,3 +1,4 @@
+<wxs src="../mallOrderStatus.wxs" module="ord" />
 <nav title-text="订单详情" show-back="{{true}}" />
 <view class="order-detail-page">
   <view wx:if="{{loading}}" class="detail-loading">
@@ -8,7 +9,7 @@
       <view class="detail-card__title">{{order.itemTitle}}</view>
       <view class="detail-card__price">{{order.itemPrice}}{{order.itemUnit}}</view>
       <view class="detail-card__status detail-card__status--{{order.status}}">
-        {{order.status === 'pending' ? '待沟通' : order.status === 'completed' ? '已完成' : '已取消'}}
+        {{ord.text(order.status)}}
       </view>
       <view class="detail-card__row">
         <text class="label">联系方式：</text>

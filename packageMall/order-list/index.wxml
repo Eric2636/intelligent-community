@@ -1,3 +1,4 @@
+<wxs src="../mallOrderStatus.wxs" module="ord" />
 <nav title-text="我的订单" show-back="{{true}}" />
 <view class="order-list-page">
   <view class="tabs">
@@ -27,7 +28,7 @@
     >
       <view class="order-card__title">{{item.itemTitle}}</view>
       <view class="order-card__price">{{item.itemPrice}}{{item.itemUnit}}</view>
-      <view class="order-card__status order-card__status--{{item.status}}">{{item.status === 'pending' ? '待沟通' : item.status === 'completed' ? '已完成' : '已取消'}}</view>
+      <view class="order-card__status order-card__status--{{item.status}}">{{ord.text(item.status)}}</view>
       <view class="order-card__time">{{item.createdAt}}</view>
     </view>
     <t-empty wx:if="{{buyList.length === 0}}" description="暂无买到的订单" />
@@ -43,7 +44,7 @@
     >
       <view class="order-card__title">{{item.itemTitle}}</view>
       <view class="order-card__price">{{item.itemPrice}}{{item.itemUnit}}</view>
-      <view class="order-card__status order-card__status--{{item.status}}">{{item.status === 'pending' ? '待沟通' : item.status === 'completed' ? '已完成' : '已取消'}}</view>
+      <view class="order-card__status order-card__status--{{item.status}}">{{ord.text(item.status)}}</view>
       <view class="order-card__time">{{item.createdAt}}</view>
     </view>
     <t-empty wx:if="{{sellList.length === 0}}" description="暂无卖出的订单" />

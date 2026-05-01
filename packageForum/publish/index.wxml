@@ -13,13 +13,46 @@
     <view class="publish-field">
       <textarea
         class="publish-field__input publish-field__textarea"
-        placeholder="请输入内容（必填）"
+        placeholder="请输入正文（可与图片/视频二选一）"
         value="{{content}}"
         maxlength="2000"
         auto-height
         bindinput="onContentInput"
       />
+      <view class="publish-field__hint">可使用系统键盘输入表情；最多 9 张图、2 段视频</view>
     </view>
+
+    <view class="media-picker" wx:if="{{mediaImages.length || mediaVideos.length}}">
+      <view class="media-picker__grid">
+        <block wx:for="{{mediaImages}}" wx:for-index="idx" wx:key="*this">
+          <view class="media-picker__cell">
+            <image
+              class="media-picker__img"
+              src="{{item}}"
+              mode="aspectFill"
+              data-urls="{{mediaImages}}"
+              data-current="{{item}}"
+              bindtap="onPreviewImage"
+            />
+            <view class="media-picker__del" data-kind="image" data-index="{{idx}}" catchtap="onRemoveMedia">×</view>
+          </view>
+        </block>
+        <block wx:for="{{mediaVideos}}" wx:for-index="vidx" wx:key="*this">
+          <view class="media-picker__cell media-picker__cell--video">
+            <video class="media-picker__video" src="{{item}}" object-fit="cover" show-center-play-btn="{{true}}" controls="{{false}}" />
+            <view class="media-picker__del" data-kind="video" data-index="{{vidx}}" catchtap="onRemoveMedia">×</view>
+          </view>
+        </block>
+      </view>
+    </view>
+    <view
+      class="media-picker__add"
+      bindtap="onAddMedia"
+      wx:if="{{mediaImages.length + mediaVideos.length < 11}}"
+    >
+      + 添加图片或视频
+    </view>
+
     <t-button
       class="publish-submit"
       theme="primary"

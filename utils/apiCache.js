@@ -40,4 +40,13 @@ export function clear() {
   Object.keys(store).forEach((k) => delete store[k]);
 }
 
-export default { get, set, remove, clear };
+/** 清除某个云函数名对应的全部缓存（用于发布/删除后列表立即刷新） */
+export function invalidateCloudFunction(functionName) {
+  if (!functionName) return;
+  const prefix = String(functionName) + '_';
+  Object.keys(store).forEach((k) => {
+    if (k.startsWith(prefix)) delete store[k];
+  });
+}
+
+export default { get, set, remove, clear, invalidateCloudFunction };

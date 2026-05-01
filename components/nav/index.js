@@ -11,12 +11,24 @@ Component({
     },
   },
   data: {
-    statusHeight: 0,
+    /** 与 TDesign t-navbar 占位一致：状态栏高度 + 导航内容区，避免首帧占位未就绪时与下方搜索区重叠 */
+    navHolderPx: 88,
   },
   lifetimes: {
     ready() {
-      const statusHeight = wx.getWindowInfo().statusBarHeight;
-      this.setData({ statusHeight });
+      let navHolderPx = 88;
+      try {
+        const sys = wx.getWindowInfo();
+        const top = sys && typeof sys.statusBarHeight === 'number' ? sys.statusBarHeight : 0;
+        const menu = wx.getMenuButtonBoundingClientRect && wx.getMenuButtonBoundingClientRect();
+        if (menu && typeof menu.top === 'number' && typeof menu.height === 'number') {
+          navHolderPx = top + (menu.top - top) * 2 + menu.height;
+        } else {
+          navHolderPx = top + 48;
+        }
+        navHolderPx = Math.ceil(navHolderPx);
+      } catch (e) {}
+      this.setData({ navHolderPx });
     },
   },
   methods: {

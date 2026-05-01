@@ -1,4 +1,6 @@
 import { taskAPI } from '~/api/cloud';
+import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
+import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 
 Page({
   data: {
@@ -10,10 +12,13 @@ Page({
   },
 
   onLoad() {
+    if (redirectIfEntryHidden('task')) return;
     this.loadList();
   },
 
   onShow() {
+    syncCustomTabBar(this);
+    if (redirectIfEntryHidden('task')) return;
     this.loadList();
   },
 
@@ -35,7 +40,13 @@ Page({
       const res = await taskAPI.getTaskList({ keyword: this.data.keyword?.trim() || undefined });
       if (res.code === 200) {
         const raw = res.data || [];
-        const list = raw.length > this.data.maxRender ? raw.slice(0, this.data.maxRender) : raw;
+        const normalized = raw.map((t) => ({
+          ...t,
+          id: t._id || t.id,
+          images: Array.isArray(t.images) ? t.images : [],
+          videos: Array.isArray(t.videos) ? t.videos : [],
+        }));
+        const list = normalized.length > this.data.maxRender ? normalized.slice(0, this.data.maxRender) : normalized;
         this.setData({ list, listTotal: raw.length, loading: false });
       } else {
         this.setData({ loading: false });
@@ -44,6 +55,17 @@ Page({
       console.error('加载任务列表失败', err);
       this.setData({ loading: false });
     }
+  },
+
+  onPreviewListImages(e) {
+    const { cardIndex, current } = e.currentTarget.dataset;
+    const list = this.data.list;
+    const item = list[Number(cardIndex)];
+    if (!item || !item.images || !item.images.length) return;
+    wx.previewImage({
+      current: current || item.images[0],
+      urls: item.images,
+    });
   },
 
   goDetail(e) {

@@ -1,7 +1,9 @@
 import { taskAPI } from '~/api/cloud';
 import { config } from '~/config';
+import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 
 const STATUS_TEXT = {
+  draft: '草稿',
   pending_take: '待领取',
   in_progress: '进行中',
   pending_confirm: '待确认',
@@ -26,8 +28,22 @@ Page({
   },
 
   onLoad(options) {
+    if (redirectIfEntryHidden('task')) return;
     this.setData({ id: options.id });
     this.loadDetail();
+  },
+
+  onShow() {
+    if (redirectIfEntryHidden('task')) return;
+    // 返回该页面时可能登录态/任务状态变化，刷新一次
+    this.loadDetail();
+  },
+
+  onPreviewTaskImages(e) {
+    const { current } = e.currentTarget.dataset;
+    const urls = (this.data.task && this.data.task.images) || [];
+    if (!urls.length) return;
+    wx.previewImage({ current, urls });
   },
 
   async loadDetail() {
@@ -38,11 +54,23 @@ Page({
       this.setData({ loading: false });
       return;
     }
-    const task = res.data;
+    const raw = res.data;
+    const task = {
+      ...raw,
+      images: Array.isArray(raw.images) ? raw.images : [],
+      videos: Array.isArray(raw.videos) ? raw.videos : [],
+    };
     const app = getApp();
-    const openid = (app.globalData && app.globalData.openid) || '';
-    const isPublisher = (task.publisherId || task.publisherOpenid) === openid;
-    const isTaker = (task.takerId || task.takerOpenid) === openid;
+    const me = (app.globalData && app.globalData.userInfo) || null;
+    const myUserId = me && me.id ? String(me.id) : '';
+    const myOpenid = me && me.openid ? String(me.openid) : '';
+    // 自建后端优先用 userId（JWT sub），兼容历史云开发 openid 字段
+    const isPublisher =
+      (myUserId && String(task.publisherId || '') === myUserId) ||
+      (myOpenid && String(task.publisherOpenid || '') === myOpenid);
+    const isTaker =
+      (myUserId && String(task.takerId || '') === myUserId) ||
+      (myOpenid && String(task.takerOpenid || '') === myOpenid);
     const otherPartyId = isPublisher ? task.takerId : task.publisherId;
     const otherPartyName = isPublisher ? task.takerName : task.publisherName;
     this.setData({ task, loading: false, isPublisher, isTaker, otherPartyId, otherPartyName });
@@ -59,6 +87,8 @@ Page({
           if (r.code === 200) {
             wx.showToast({ title: '领取成功' });
             this.loadDetail();
+          } else {
+            wx.showToast({ title: r.message || '领取失败', icon: 'none' });
           }
         });
       },
@@ -153,15 +183,83 @@ Page({
   onCancel() {
     const { id } = this.data;
     wx.showModal({
-      title: '取消任务',
-      content: '确定要取消该任务吗？',
+      title: '撤销发布',
+      content: '确定要撤销发布该任务吗？撤销后该任务将不再可领取。',
       success: (res) => {
         if (!res.confirm) return;
         taskAPI.cancelTask(id).then((r) => {
           if (r.code === 200) {
-            wx.showToast({ title: '已取消' });
-            wx.navigateBack();
+            wx.showToast({ title: '已撤销' });
+            this.loadDetail();
           }
+        });
+      },
+    });
+  },
+
+  onRepublish() {
+    const { id } = this.data;
+    wx.showModal({
+      title: '重新发布',
+      content: '确定要重新发布该任务吗？重新发布后其他人将可以领取。',
+      success: (res) => {
+        if (!res.confirm) return;
+        taskAPI.republishTask(id).then((r) => {
+          if (r.code === 200) {
+            wx.showToast({ title: '已重新发布' });
+            this.loadDetail();
+          } else wx.showToast({ title: r.message || '操作失败', icon: 'none' });
+        });
+      },
+    });
+  },
+
+  onDeleteTask() {
+    const { id } = this.data;
+    wx.showModal({
+      title: '删除任务',
+      content: '确定要删除该任务吗？删除后不可恢复。',
+      success: (res) => {
+        if (!res.confirm) return;
+        taskAPI.deleteTask(id).then((r) => {
+          if (r.code === 200) {
+            wx.showToast({ title: '已删除' });
+            wx.navigateBack();
+          } else wx.showToast({ title: r.message || '删除失败', icon: 'none' });
+        });
+      },
+    });
+  },
+
+  onAbandon() {
+    const { id } = this.data;
+    wx.showModal({
+      title: '放弃任务',
+      content: '确定要放弃该任务吗？放弃后任务将重新回到待领取。',
+      success: (res) => {
+        if (!res.confirm) return;
+        taskAPI.abandonTask(id).then((r) => {
+          if (r.code === 200) {
+            wx.showToast({ title: '已放弃' });
+            this.loadDetail();
+          } else wx.showToast({ title: r.message || '操作失败', icon: 'none' });
+        });
+      },
+    });
+  },
+
+  onPublishDraft() {
+    const { id } = this.data;
+    wx.showModal({
+      title: '发布任务',
+      content: '确定要发布该草稿吗？发布后其他人将可以领取。',
+      success: (res) => {
+        if (!res.confirm) return;
+        taskAPI.publishDraft(id).then((r) => {
+          if (r.code === 200) {
+            wx.showToast({ title: '已发布' });
+            this.loadDetail();
+          } else wx.showToast({ title: r.message || '发布失败', icon: 'none' });
         });
       },
     });

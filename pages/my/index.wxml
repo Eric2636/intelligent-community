@@ -26,19 +26,24 @@
     </view>
   </view>
 
-  <view class="my-menu">
-    <view
-      class="my-menu__card"
-      wx:for="{{menuList}}"
-      wx:key="name"
-      data-url="{{item.url}}"
-      data-name="{{item.name}}"
-      bindtap="onMenuTap"
-    >
-      <view class="my-menu__card-inner">
-        <t-icon name="{{item.icon}}" size="48rpx" class="my-menu__card-icon" />
-        <text class="my-menu__card-title">{{item.name}}</text>
-        <text class="my-menu__card-desc">{{item.desc}}</text>
+  <view class="my-sections">
+    <view class="my-section" wx:for="{{menuSections}}" wx:key="id">
+      <view class="my-section__panel">
+        <view class="my-section__title">{{item.title}}</view>
+        <view class="my-section__grid">
+          <view
+            class="my-section__item"
+            wx:for="{{item.items}}"
+            wx:for-item="card"
+            wx:key="name"
+            data-url="{{card.url}}"
+            data-name="{{card.name}}"
+            bindtap="onMenuTap"
+          >
+            <t-icon name="{{card.icon}}" size="32rpx" class="my-section__item-icon" />
+            <text class="my-section__item-title">{{card.name}}</text>
+          </view>
+        </view>
       </view>
     </view>
   </view>

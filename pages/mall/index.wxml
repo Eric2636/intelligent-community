@@ -56,7 +56,13 @@
       bindtap="goDetail"
     >
       <view class="mall-card__thumb">
-        <t-icon name="image" size="64rpx" color="#999" />
+        <image
+          wx:if="{{item.coverImage}}"
+          class="mall-card__img"
+          src="{{item.coverImage}}"
+          mode="aspectFill"
+        />
+        <t-icon wx:else name="image" size="64rpx" color="#999" />
       </view>
       <view class="mall-card__main">
         <text class="mall-card__title">{{item.title}}</text>
@@ -71,6 +77,6 @@
     <view wx:if="{{listTotal > maxRender}}" class="mall-more-hint">已显示前 {{maxRender}} 条，共 {{listTotal}} 条，请用搜索或分类缩小范围</view>
   </view>
   <view class="mall-fab" bindtap="goPublish">
-    <t-icon name="add" size="48rpx" color="#fff" />
+    <t-icon name="add" size="48rpx" color="#fff" bindtap="goPublish" />
   </view>
 </view>

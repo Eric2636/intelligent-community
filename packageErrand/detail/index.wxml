@@ -1,0 +1,70 @@
+<nav title-text="{{errand ? errand.title : '跑腿'}}" show-back="{{true}}" />
+<view class="errand-detail-page">
+  <view wx:if="{{loading}}" class="errand-detail-loading">
+    <t-loading theme="dots" size="48rpx" />
+  </view>
+  <block wx:elif="{{errand}}">
+    <view class="errand-detail-card">
+      <view class="errand-detail-card__head">
+        <view class="errand-detail-card__author">
+          <text>{{errand.authorName}}</text>
+          <text class="errand-detail-card__time">{{errand.createTime}}</text>
+        </view>
+      </view>
+      <text class="errand-detail-card__title">{{errand.title}}</text>
+      <text class="errand-detail-card__content" wx:if="{{errand.content}}">{{errand.content}}</text>
+      <view class="errand-detail-card__reward-row">
+        <text class="errand-detail-card__reward">¥{{errand.reward || '0'}}</text>
+        <text class="errand-detail-card__status-tag">{{errand.statusText}}</text>
+      </view>
+      <text class="errand-detail-card__offline">佣金由双方线下自行结算，平台不参与支付</text>
+      <view class="errand-detail-card__claimer" wx:if="{{errand.claimerName && errand.status !== 'pending_take'}}">
+        接单人：{{errand.claimerName}}
+      </view>
+      <view class="errand-detail-card__meta">
+        <text>浏览 {{errand.viewCount || 0}}</text>
+        <text>回复 {{errand.replyCount || 0}}</text>
+        <text>点赞 {{errand.likeCount || 0}}</text>
+      </view>
+      <view class="errand-detail-card__claim-actions" wx:if="{{errand.canClaim || errand.canComplete}}">
+        <t-button wx:if="{{errand.canClaim}}" theme="primary" block size="medium" bindtap="onClaim" loading="{{claimLoading}}">领取任务</t-button>
+        <t-button wx:if="{{errand.canComplete}}" theme="primary" block size="medium" bindtap="onComplete" loading="{{completeLoading}}">确认已完成</t-button>
+      </view>
+      <view class="errand-detail-card__actions">
+        <view class="errand-detail-card__btn {{errand.isLiked ? 'errand-detail-card__btn--active' : ''}}" bindtap="onLike">
+          <t-icon name="{{errand.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="40rpx" />
+          <text>{{errand.isLiked ? '已赞' : '点赞'}}</text>
+        </view>
+        <view class="errand-detail-card__btn {{errand.isFavorited ? 'errand-detail-card__btn--active' : ''}}" bindtap="onFavorite">
+          <t-icon name="{{errand.isFavorited ? 'star-filled' : 'star'}}" size="40rpx" />
+          <text>{{errand.isFavorited ? '已收藏' : '收藏'}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="errand-replies">
+      <view class="errand-replies__title">全部回复 ({{errand.replies.length}})</view>
+      <view class="errand-reply-item" wx:for="{{errand.replies}}" wx:key="id">
+        <view class="errand-reply-item__head">
+          <text class="errand-reply-item__author">{{item.authorName}}</text>
+          <text class="errand-reply-item__time">{{item.createTime}}</text>
+        </view>
+        <text class="errand-reply-item__content">{{item.content}}</text>
+      </view>
+      <view wx:if="{{errand.replies.length === 0}}" class="errand-replies__empty">暂无回复</view>
+    </view>
+    <view class="errand-reply-bar">
+      <view class="errand-reply-bar__row">
+        <textarea
+          class="errand-reply-bar__input"
+          placeholder="请输入评论"
+          value="{{replyContent}}"
+          maxlength="800"
+          auto-height
+          bindinput="onReplyInput"
+        />
+        <t-button theme="primary" size="small" bindtap="submitReply" loading="{{submitting}}">发送</t-button>
+      </view>
+    </view>
+  </block>
+  <view wx:else class="errand-detail-loading">跑腿不存在</view>
+</view>

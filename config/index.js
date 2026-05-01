@@ -3,8 +3,8 @@ export const config = {
   useMock: false,
   // 订阅消息模板 ID 列表，在微信公众平台「订阅消息」中申请后填入，用于消息推送
   subscribeTemplateIds: ['Krl4JhRZbIFrUccFLtgmRgiuK8VSb_hWRYLcEAKm1OM', 'vm5dcU8Dm9RHZnmINicEia_zhsfic-YG2omITNQR-Vo'],
-  // 云开发环境 ID（与 app.js 中 wx.cloud.init 的 env 一致），用于任务赏金支付回调
-  cloudEnvId: 'intelligence-communi-4bcfec6c3b1',
+  // 已切换自建后端：云开发环境 ID 不再使用
+  cloudEnvId: '',
   // 是否启用业主互助赏金在线支付（true=调起微信支付，false=仅线下支付后确认完成）
   enableTaskPayment: false,
 };

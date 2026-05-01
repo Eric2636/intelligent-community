@@ -6,6 +6,17 @@ cloud.init({
 
 const db = cloud.database()
 
+function normalizeMediaIds(arr, max) {
+  if (!Array.isArray(arr)) return []
+  const out = []
+  for (const x of arr) {
+    if (typeof x !== 'string' || x.indexOf('cloud://') !== 0) continue
+    out.push(x)
+    if (out.length >= max) break
+  }
+  return out
+}
+
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const { action } = event
@@ -20,7 +31,7 @@ exports.main = async (event, context) => {
         const reg = db.RegExp({ regexp: keyword.trim(), options: 'i' })
         query = db.collection('tasks').where(_.and([
           { status: 'pending_take' },
-          _.or([{ title: reg }, { desc: reg }])
+          { title: reg },
         ]))
       }
       const result = await query.orderBy('createdAt', 'desc').get()
@@ -68,11 +79,23 @@ exports.main = async (event, context) => {
   // 发布任务
   if (action === 'publishTask') {
     const { title, desc, reward, location, publisherName } = event
+    const images = normalizeMediaIds(event.images, 9)
+    const videos = normalizeMediaIds(event.videos, 2)
+    const titleTrim = (title || '').trim()
+    const descTrim = (desc || '').trim()
+    if (!titleTrim) {
+      return { code: 400, message: '请输入任务标题' }
+    }
+    if (!descTrim && images.length === 0 && videos.length === 0) {
+      return { code: 400, message: '请填写任务说明或添加图片/视频' }
+    }
     try {
       const result = await db.collection('tasks').add({
         data: {
-          title,
-          desc,
+          title: titleTrim,
+          desc: descTrim,
+          images,
+          videos,
           reward,
           location,
           status: 'pending_take',
@@ -104,24 +127,39 @@ exports.main = async (event, context) => {
     }
   }
 
-  // 领取任务
+  // 领取任务（不可领取自己发布的；仅待领取状态可抢，条件更新防并发）
   if (action === 'claimTask') {
     const { taskId, takerName } = event
+    const openid = wxContext.OPENID
+    if (!taskId) return { code: 400, message: '缺少任务 ID' }
     try {
-      const result = await db.collection('tasks')
-        .doc(taskId)
-        .update({
-          data: {
-            status: 'in_progress',
-            takerId: wxContext.OPENID,
-            takerName,
-            claimedAt: new Date().toISOString()
-          }
-        })
-      return {
-        code: 200,
-        data: result.data
+      const doc = await db.collection('tasks').doc(taskId).get()
+      if (!doc.data) return { code: 404, message: '任务不存在' }
+      if (doc.data.publisherId === openid) {
+        return { code: 400, message: '不能领取自己发布的任务' }
       }
+      if ((doc.data.status || '') !== 'pending_take') {
+        return { code: 400, message: '该任务不可领取' }
+      }
+      const _ = db.command
+      const now = new Date().toISOString()
+      const name = (takerName && String(takerName).trim()) || '邻居'
+      const upd = await db.collection('tasks').where({
+        _id: taskId,
+        status: 'pending_take',
+        publisherId: _.neq(openid),
+      }).update({
+        data: {
+          status: 'in_progress',
+          takerId: openid,
+          takerName: name,
+          claimedAt: now,
+        },
+      })
+      if (!upd.stats || upd.stats.updated === 0) {
+        return { code: 400, message: '领取失败，请稍后重试' }
+      }
+      return { code: 200, data: { claimedAt: now } }
     } catch (err) {
       console.error(err)
       return {
@@ -315,7 +353,7 @@ exports.main = async (event, context) => {
     }
   }
 
-  // 获取我的任务
+  // 获取我的任务（type: published | taken）
   if (action === 'getMyTasks') {
     const { type } = event
     const openid = wxContext.OPENID
@@ -337,11 +375,13 @@ exports.main = async (event, context) => {
           })
           .orderBy('claimedAt', 'desc')
           .get()
+      } else {
+        return { code: 400, message: '缺少类型 published 或 taken' }
       }
 
       return {
         code: 200,
-        data: result.data
+        data: (result && result.data) ? result.data : []
       }
     } catch (err) {
       console.error(err)

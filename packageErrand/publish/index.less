@@ -1,0 +1,74 @@
+@import '/variable.less';
+
+.publish-page {
+  min-height: calc(100vh - 56px);
+  background-color: @bg-color;
+  padding: 32rpx;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.publish-form {
+  background: @bg-color-white;
+  border-radius: @radius-card;
+  padding: 32rpx;
+  box-shadow: @shadow-card;
+}
+
+.publish-field {
+  margin-bottom: 32rpx;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
+  &__label {
+    font-size: 28rpx;
+    color: @gy1;
+    margin-bottom: 12rpx;
+  }
+
+  &__required {
+    color: @color-price;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 28rpx 32rpx;
+    font-size: 30rpx;
+    color: @gy1;
+    background: @bg-color-section;
+    border-radius: @radius-sm;
+    box-sizing: border-box;
+    min-height: 96rpx;
+    line-height: 1.5;
+
+    &--title {
+      font-weight: 500;
+    }
+  }
+
+  &__textarea {
+    min-height: 320rpx;
+    padding: 28rpx 32rpx;
+    font-size: 30rpx;
+    line-height: 1.6;
+  }
+
+  &__reward {
+    font-size: 36rpx;
+    font-weight: 600;
+    color: @color-price;
+  }
+
+  &__hint {
+    margin-top: 12rpx;
+    font-size: 22rpx;
+    color: @gy3;
+    line-height: 1.4;
+  }
+}
+
+.publish-submit {
+  margin-top: 48rpx;
+}

@@ -7,16 +7,58 @@
     </view>
     <view class="publish-field">
       <view class="publish-field__label">任务说明</view>
-      <textarea class="publish-field__input publish-field__textarea" placeholder="描述任务内容、要求" value="{{desc}}" maxlength="200" bindinput="onDescInput" />
+      <textarea
+        class="publish-field__input publish-field__textarea"
+        placeholder="请描述任务"
+        value="{{desc}}"
+        maxlength="500"
+        bindinput="onDescInput"
+      />
+      <view class="publish-field__hint">可使用系统键盘输入表情；最多 9 张图、2 段视频</view>
     </view>
+
+    <view class="media-picker" wx:if="{{mediaImages.length || mediaVideos.length}}">
+      <view class="media-picker__grid">
+        <block wx:for="{{mediaImages}}" wx:for-index="idx" wx:key="*this">
+          <view class="media-picker__cell">
+            <image
+              class="media-picker__img"
+              src="{{item}}"
+              mode="aspectFill"
+              data-urls="{{mediaImages}}"
+              data-current="{{item}}"
+              bindtap="onPreviewImage"
+            />
+            <view class="media-picker__del" data-kind="image" data-index="{{idx}}" catchtap="onRemoveMedia">×</view>
+          </view>
+        </block>
+        <block wx:for="{{mediaVideos}}" wx:for-index="vidx" wx:key="*this">
+          <view class="media-picker__cell media-picker__cell--video">
+            <video class="media-picker__video" src="{{item}}" object-fit="cover" show-center-play-btn="{{true}}" controls="{{false}}" />
+            <view class="media-picker__del" data-kind="video" data-index="{{vidx}}" catchtap="onRemoveMedia">×</view>
+          </view>
+        </block>
+      </view>
+    </view>
+    <view
+      class="media-picker__add"
+      bindtap="onAddMedia"
+      wx:if="{{mediaImages.length + mediaVideos.length < 11}}"
+    >
+      + 添加图片或视频
+    </view>
+
     <view class="publish-field">
       <view class="publish-field__label">佣金（元）<text class="publish-field__required">*</text></view>
-      <input class="publish-field__input publish-field__reward" type="digit" placeholder="线下支付，请输入金额" value="{{reward}}" bindinput="onRewardInput" />
+      <input class="publish-field__input" type="digit" placeholder="线下支付，请输入金额" value="{{reward}}" bindinput="onRewardInput" />
     </view>
     <view class="publish-field">
       <view class="publish-field__label">地点</view>
       <input class="publish-field__input" placeholder="例如：小区南门" value="{{location}}" bindinput="onLocationInput" />
     </view>
-    <t-button class="publish-submit" theme="primary" size="large" block bindtap="submit" loading="{{submitting}}">发布</t-button>
+    <view class="publish-actions">
+      <t-button class="publish-actions__btn" theme="default" size="large" block bindtap="saveDraft" loading="{{savingDraft}}">保存草稿</t-button>
+      <t-button class="publish-actions__btn" theme="primary" size="large" block bindtap="submit" loading="{{submitting}}">发布</t-button>
+    </view>
   </view>
 </view>

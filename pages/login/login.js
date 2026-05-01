@@ -23,30 +23,20 @@ Page({
     }
 
     const app = getApp();
-    if (!app.globalData.useCloudBase) {
-      wx.showToast({ title: '请使用云开发模式', icon: 'none' });
-      return;
-    }
-
     try {
       wx.showLoading({ title: '登录中...' });
-      const result = await wx.cloud.callFunction({
-        name: 'user',
-        data: { action: 'login' },
-      });
+      await app.login();
       wx.hideLoading();
 
-      if (result.result && result.result.code === 200) {
-        app.globalData.openid = result.result.data.openid;
-        app.globalData.userInfo = result.result.data.userInfo || null;
-        wx.setStorageSync('access_token', result.result.data.openid);
-        wx.showToast({ title: '登录成功', icon: 'success' });
-        setTimeout(() => {
-          wx.switchTab({ url: '/pages/my/index' });
-        }, 800);
-      } else {
-        wx.showToast({ title: result.result?.message || '登录失败', icon: 'none' });
+      if (app.globalData.offlineMode) {
+        wx.showToast({ title: '网络不可用，已进入离线浏览', icon: 'none' });
+        return;
       }
+
+      wx.showToast({ title: '登录成功', icon: 'success' });
+      setTimeout(() => {
+        wx.switchTab({ url: '/pages/my/index' });
+      }, 800);
     } catch (err) {
       wx.hideLoading();
       wx.showToast({ title: '登录失败', icon: 'none' });

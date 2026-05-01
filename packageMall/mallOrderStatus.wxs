@@ -1,0 +1,15 @@
+/** 订单状态文案（供订单列表/详情 wxml 引用，避免重复三元表达式） */
+var LABELS = {
+  pending: '待沟通',
+  completed: '已完成',
+  cancelled: '已取消'
+}
+
+function text(status) {
+  var s = status || ''
+  return LABELS[s] || s
+}
+
+module.exports = {
+  text: text
+}

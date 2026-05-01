@@ -1,4 +1,7 @@
 import { forumAPI } from '~/api/cloud';
+import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
+import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
+import { normalizeForumListPost, forumListPostHasMedia } from '~/utils/forumPostList';
 
 Page({
   data: {
@@ -21,10 +24,13 @@ Page({
   },
 
   onLoad() {
+    if (redirectIfEntryHidden('forum')) return;
     this.loadPosts();
   },
 
   onShow() {
+    syncCustomTabBar(this);
+    if (redirectIfEntryHidden('forum')) return;
     this.loadPosts();
   },
 
@@ -72,35 +78,32 @@ Page({
   async loadPosts(refresh = true) {
     this.setData({ loading: true });
 
-    const app = getApp();
-    if (!app.globalData.useCloudBase) {
-      console.error('云开发未启用');
-      wx.showToast({
-        title: '云开发未启用',
-        icon: 'none'
-      });
-      this.setData({ loading: false });
-      return;
-    }
-
     try {
       const res = await forumAPI.getPostList({
         page: this.data.page,
         pageSize: this.data.pageSize,
-        keyword: this.data.keyword?.trim() || undefined,
+        keyword: (this.data.keyword && String(this.data.keyword).trim()) || undefined,
         orderBy: this.data.orderBy
       });
 
       if (res.code === 200 && res.data) {
         const { pinned, list } = res.data;
-        const fullList = refresh ? (list || []) : [...this.data.list, ...(list || [])];
-        const useVirtual = fullList.length > this.data.VIRTUAL_WINDOW;
+        const pinnedNorm = (pinned || []).map(normalizeForumListPost);
+        const chunk = (list || []).map(normalizeForumListPost);
+        const fullList = refresh ? chunk : [...this.data.list, ...chunk];
+        const nextPinned = refresh
+          ? pinnedNorm
+          : (pinnedNorm && pinnedNorm.length > 0 ? pinnedNorm : this.data.pinned);
+        const useVirtual =
+          fullList.length > this.data.VIRTUAL_WINDOW &&
+          !fullList.some(forumListPostHasMedia) &&
+          !(nextPinned || []).some(forumListPostHasMedia);
         const displayList = useVirtual ? fullList.slice(0, this.data.VIRTUAL_WINDOW) : fullList;
         const listTotalHeight = fullList.length * this.data.ITEM_HEIGHT_RPX;
 
         if (refresh) {
           this.setData({
-            pinned: pinned || [],
+            pinned: pinnedNorm,
             list: fullList,
             hasMore: (list || []).length >= this.data.pageSize,
             useVirtual,
@@ -110,7 +113,7 @@ Page({
           });
         } else {
           this.setData({
-            pinned: pinned && pinned.length > 0 ? pinned : this.data.pinned,
+            pinned: pinnedNorm && pinnedNorm.length > 0 ? pinnedNorm : this.data.pinned,
             list: fullList,
             hasMore: (list || []).length >= this.data.pageSize,
             useVirtual,
@@ -145,8 +148,20 @@ Page({
     }
   },
 
+  onForumListPreviewImage(e) {
+    const postId = String(e.currentTarget.dataset.postId || '');
+    const current = e.currentTarget.dataset.src;
+    const merged = [...this.data.pinned, ...this.data.list];
+    const post = merged.find((p) => String(p.id || p._id) === postId);
+    if (!post || !post.images || !post.images.length) return;
+    wx.previewImage({
+      current: current || post.images[0],
+      urls: post.images,
+    });
+  },
+
   goPost(e) {
-    const id = e.currentTarget.dataset.id;
+    const { id } = e.currentTarget.dataset;
     const postId = id != null ? String(id) : '';
 
     if (!postId) {

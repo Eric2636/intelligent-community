@@ -57,6 +57,30 @@
     margin-bottom: 20rpx;
   }
 
+  &__media {
+    margin-bottom: 20rpx;
+  }
+
+  &__media-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12rpx;
+  }
+
+  &__media-img {
+    width: 220rpx;
+    height: 220rpx;
+    border-radius: @radius-sm;
+    background: @gray3;
+  }
+
+  &__media-video {
+    width: 100%;
+    max-height: 400rpx;
+    border-radius: @radius-sm;
+    background: #000;
+  }
+
   &__row {
     font-size: 26rpx;
     color: @gy2;
@@ -88,6 +112,13 @@
 
 .detail-actions {
   margin: @spacing-page;
+
+  &__hint {
+    margin-top: 16rpx;
+    font-size: 24rpx;
+    line-height: 1.4;
+    color: @gy3;
+  }
 }
 
 .detail-proof {

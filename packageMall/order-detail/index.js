@@ -1,4 +1,5 @@
 import { mallAPI } from '~/api/cloud';
+import { getCurrentUserId } from '~/utils/getOpenid';
 
 Page({
   data: {
@@ -20,11 +21,10 @@ Page({
     this.setData({ loading: true });
     const res = await mallAPI.getOrderDetail(id);
     if (res.code === 200 && res.data) {
-      const app = getApp();
-      const openid = (app.globalData && app.globalData.openid) || '';
+      const uid = getCurrentUserId();
       const order = res.data;
-      const isBuyer = order.buyerId === openid;
-      const isSeller = order.sellerId === openid;
+      const isBuyer = order.buyerId === uid;
+      const isSeller = order.sellerId === uid;
       this.setData({
         order,
         loading: false,
@@ -34,11 +34,6 @@ Page({
     } else {
       this.setData({ loading: false });
     }
-  },
-
-  getStatusText(status) {
-    const map = { pending: '待沟通', completed: '已完成', cancelled: '已取消' };
-    return map[status] || status;
   },
 
   async onConfirmComplete() {

@@ -7,24 +7,189 @@
   overflow-x: hidden;
 }
 
+.my-tasks-tabs {
+  display: flex;
+  gap: 24rpx;
+  padding: @spacing-page @spacing-page 0;
+
+  &__item {
+    flex: 1;
+    text-align: center;
+    padding: 20rpx;
+    font-size: 28rpx;
+    color: @gy2;
+    background: @bg-color-white;
+    border-radius: @radius-card;
+    box-shadow: @shadow-card;
+
+    &--active {
+      color: @color-primary;
+      font-weight: 600;
+      box-shadow: @shadow-card-hover;
+    }
+  }
+}
+
 .tab-content {
   padding: @spacing-page;
 }
 
-.task-list {
+/* 与 pages/task 业主互助列表一致的卡片样式 */
+.task-loading {
+  padding: 8rpx 0;
+}
+
+.task-skeleton {
   background: @bg-color-white;
   border-radius: @radius-card;
-  overflow: hidden;
+  padding: @spacing-card;
+  margin-bottom: 20rpx;
   box-shadow: @shadow-card;
+
+  &__line {
+    height: 28rpx;
+    background: linear-gradient(90deg, @gray3 25%, #f0f0f0 50%, @gray3 75%);
+    background-size: 200% 100%;
+    animation: skeleton 1.2s ease-in-out infinite;
+    border-radius: 8rpx;
+
+    &.task-skeleton__title {
+      width: 60%;
+      margin-bottom: 16rpx;
+    }
+    &.task-skeleton__desc {
+      width: 100%;
+      margin-bottom: 12rpx;
+    }
+    &.task-skeleton__meta {
+      width: 40%;
+    }
+  }
 }
 
-.task-info {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
+@keyframes skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-.reward {
+.list-fade-in {
+  animation: listFadeIn 0.35s ease-out;
+}
+
+@keyframes listFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.task-list {
+  padding: 0;
+}
+
+.task-card {
+  position: relative;
+  padding: @spacing-card;
+  margin-bottom: 20rpx;
+  background: @bg-color-white;
+  border-radius: @radius-card;
+  box-shadow: @shadow-card;
+
+  &--with-tag {
+    padding-top: 48rpx;
+  }
+
+  &__tag {
+    position: absolute;
+    top: 16rpx;
+    right: 16rpx;
+    font-size: 22rpx;
+    padding: 4rpx 12rpx;
+    border-radius: 8rpx;
+
+    &--pending_take { background: #e8f0fe; color: @brand7-normal; }
+    &--in_progress { background: #fff7e6; color: #ed7b2f; }
+    &--pending_confirm { background: #e6f7ff; color: #0d8ff2; }
+    &--completed { background: #e8f5e9; color: #52c41a; }
+    &--cancelled { background: @gray3; color: @gy2; }
+  }
+
+  &__reward {
+    font-size: 36rpx;
+    font-weight: 700;
+    color: @color-price;
+    margin-bottom: 8rpx;
+  }
+
+  &__title {
+    display: block;
+    font-size: 30rpx;
+    font-weight: 600;
+    color: @gy1;
+    margin-bottom: 8rpx;
+  }
+
+  &__thumbs {
+    display: flex;
+    flex-direction: row;
+    gap: 12rpx;
+    margin-bottom: 8rpx;
+  }
+
+  &__thumb-wrap {
+    position: relative;
+    width: 160rpx;
+    height: 120rpx;
+    flex-shrink: 0;
+    border-radius: 12rpx;
+    overflow: hidden;
+    background: @gray3;
+  }
+
+  &__thumb {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  &__thumb-more {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28rpx;
+    font-weight: 600;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  &__media-hint {
+    font-size: 22rpx;
+    color: @color-primary;
+    margin-bottom: 8rpx;
+  }
+
+  &__desc {
+    display: block;
+    font-size: 26rpx;
+    color: @gy2;
+    margin-bottom: 8rpx;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    font-size: 22rpx;
+    color: @gy3;
+  }
+}
+
+.task-empty {
+  padding: 80rpx 24rpx;
+  text-align: center;
+  color: @gy3;
   font-size: 28rpx;
-  color: @color-price;
 }

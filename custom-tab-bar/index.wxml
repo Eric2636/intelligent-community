@@ -1,6 +1,3 @@
 <t-tab-bar value="{{ value }}" theme="tag" split="{{ false }}" bind:change="handleChange">
-  <t-tab-bar-item icon="file-copy" value="task">业主互助</t-tab-bar-item>
-  <t-tab-bar-item icon="chat" value="forum">小区留言</t-tab-bar-item>
-  <t-tab-bar-item icon="cart" value="mall">小区市场</t-tab-bar-item>
-  <t-tab-bar-item icon="user" value="my">我的</t-tab-bar-item>
+  <t-tab-bar-item wx:for="{{ visibleList }}" wx:key="value" icon="{{ item.icon }}" value="{{ item.value }}">{{ item.label }}</t-tab-bar-item>
 </t-tab-bar>

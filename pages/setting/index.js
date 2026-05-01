@@ -164,52 +164,10 @@ Page({
   },
 
   async initDatabase() {
-    wx.showLoading({ title: '初始化中...' });
-
-    try {
-      const result = await wx.cloud.callFunction({
-        name: 'init-db',
-        data: {}
-      });
-
-      wx.hideLoading();
-
-      const { code, message, data, guide } = result.result;
-
-      if (code === 200) {
-        wx.showModal({
-          title: '初始化成功',
-          content: `所有数据库集合已创建成功！\n成功: ${data.success}/${data.total}`,
-          showCancel: false
-        });
-      } else if (code === 206) {
-        // 部分集合需要手动创建
-        const missingList = guide.missingCollections.join(', ');
-        wx.showModal({
-          title: '部分集合需要手动创建',
-          content: `以下集合需要手动创建:\n${missingList}\n\n请在云开发控制台 > 数据库中创建这些集合`,
-          confirmText: '查看详情',
-          success(res) {
-            if (res.confirm) {
-              console.log('需要创建的集合:', guide.missingCollections);
-            }
-          }
-        });
-      } else {
-        wx.showModal({
-          title: '初始化失败',
-          content: message || '未知错误',
-          showCancel: false
-        });
-      }
-    } catch (err) {
-      wx.hideLoading();
-      console.error('数据库初始化失败:', err);
-      wx.showModal({
-        title: '初始化失败',
-        content: '请检查云开发环境是否正确配置',
-        showCancel: false
-      });
-    }
+    wx.showModal({
+      title: '已切换自建后端',
+      content: '云开发数据库初始化已禁用。请在自建后端侧通过 Prisma migrate/seed 初始化数据库。',
+      showCancel: false,
+    });
   },
 });

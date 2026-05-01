@@ -1,4 +1,7 @@
 import { mallAPI } from '~/api/cloud';
+import { mallDetailUrl, mallPublishUrl } from '~/utils/mallPaths';
+import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
+import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 
 Page({
   data: {
@@ -13,8 +16,14 @@ Page({
   },
 
   onLoad() {
+    if (redirectIfEntryHidden('mall')) return;
     this.loadCategories();
     this.loadList();
+  },
+
+  onShow() {
+    syncCustomTabBar(this);
+    if (redirectIfEntryHidden('mall')) return;
   },
 
   onPullDownRefresh() {
@@ -59,10 +68,10 @@ Page({
 
   goDetail(e) {
     const { id } = e.currentTarget.dataset;
-    wx.navigateTo({ url: `/packageMall/detail/index?id=${id}` });
+    wx.navigateTo({ url: mallDetailUrl(id) });
   },
 
   goPublish() {
-    wx.navigateTo({ url: '/packageMall/publish/index' });
+    wx.navigateTo({ url: mallPublishUrl() });
   },
 });

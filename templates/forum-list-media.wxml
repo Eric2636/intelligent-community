@@ -1,0 +1,35 @@
+<!--
+  论坛类列表中的图/视频条（需在页面实现 onForumListPreviewImage）
+  使用：<import src="相对路径" /> 后 <template is="forumListMedia" data="{{item: item}}" />
+-->
+<template name="forumListMedia">
+  <view class="forum-list-media" wx:if="{{item.listMediaSlots.length}}">
+    <view class="forum-list-media__row">
+      <block wx:for="{{item.listMediaSlots}}" wx:for-item="slot" wx:for-index="slotIdx" wx:key="slotIdx">
+        <view class="forum-list-media__thumb-wrap">
+          <image
+            wx:if="{{slot.type === 'image'}}"
+            class="forum-list-media__thumb"
+            src="{{slot.url}}"
+            mode="aspectFill"
+            lazy-load="{{true}}"
+            catchtap="onForumListPreviewImage"
+            data-post-id="{{item.id || item._id}}"
+            data-src="{{slot.url}}"
+          />
+          <video
+            wx:else
+            class="forum-list-media__thumb forum-list-media__video"
+            src="{{slot.url}}"
+            object-fit="cover"
+            show-center-play-btn="{{true}}"
+          />
+          <view
+            class="forum-list-media__more"
+            wx:if="{{index === item.listMediaSlots.length - 1 && item.listMediaMoreLabel}}"
+          >{{item.listMediaMoreLabel}}</view>
+        </view>
+      </block>
+    </view>
+  </view>
+</template>

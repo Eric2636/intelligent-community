@@ -1,0 +1,212 @@
+@import '/variable.less';
+
+.errand-detail-page {
+  min-height: calc(100vh - 56px);
+  padding-bottom: calc(180rpx + env(safe-area-inset-bottom));
+  background: @bg-color;
+  overflow-x: hidden;
+}
+
+.errand-detail-loading {
+  padding: 80rpx;
+  text-align: center;
+  color: @gy2;
+}
+
+.errand-detail-card {
+  margin: @spacing-page;
+  padding: 28rpx;
+  background: @bg-color-white;
+  border-radius: @radius-card;
+  box-shadow: @shadow-card;
+
+  &__head {
+    margin-bottom: 16rpx;
+  }
+
+  &__author {
+    font-size: 24rpx;
+    color: @gy3;
+  }
+
+  &__time {
+    margin-left: 12rpx;
+  }
+
+  &__title {
+    display: block;
+    font-size: 32rpx;
+    font-weight: 600;
+    color: @gy1;
+    margin-bottom: 16rpx;
+  }
+
+  &__reward-row {
+    display: flex;
+    align-items: center;
+    gap: 20rpx;
+    margin-bottom: 12rpx;
+  }
+
+  &__reward {
+    font-size: 40rpx;
+    font-weight: 700;
+    color: @color-price;
+  }
+
+  &__status-tag {
+    font-size: 24rpx;
+    color: @color-primary;
+    font-weight: 500;
+    padding: 4rpx 16rpx;
+    background: #e8f0fe;
+    border-radius: 8rpx;
+  }
+
+  &__offline {
+    display: block;
+    font-size: 22rpx;
+    color: @gy3;
+    line-height: 1.5;
+    margin-bottom: 12rpx;
+  }
+
+  &__claimer {
+    font-size: 26rpx;
+    color: @gy2;
+    margin-bottom: 12rpx;
+  }
+
+  &__claim-actions {
+    margin: 24rpx 0 8rpx;
+
+    .t-button {
+      margin-bottom: 16rpx;
+    }
+
+    .t-button:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__content {
+    display: block;
+    font-size: 28rpx;
+    color: @gy2;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  &__meta {
+    margin-top: 20rpx;
+    font-size: 24rpx;
+    color: @gy3;
+
+    text + text {
+      margin-left: 24rpx;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    margin-top: 24rpx;
+    padding-top: 20rpx;
+    border-top: 1rpx solid @gray3;
+    gap: 32rpx;
+  }
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    font-size: 26rpx;
+    color: @gy3;
+
+    &--active {
+      color: @color-primary;
+    }
+  }
+}
+
+.errand-replies {
+  margin: @spacing-page;
+  padding: @spacing-card;
+  background: @bg-color-white;
+  border-radius: @radius-card;
+  box-shadow: @shadow-card;
+
+  &__title {
+    font-size: 28rpx;
+    font-weight: 600;
+    color: @gy1;
+    margin-bottom: 20rpx;
+  }
+
+  &__empty {
+    padding: 40rpx;
+    text-align: center;
+    color: @gy3;
+    font-size: 26rpx;
+  }
+}
+
+.errand-reply-item {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid @gray3;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__head {
+    margin-bottom: 8rpx;
+  }
+
+  &__author {
+    font-size: 26rpx;
+    color: @gy1;
+    font-weight: 500;
+  }
+
+  &__time {
+    font-size: 22rpx;
+    color: @gy3;
+    margin-left: 16rpx;
+  }
+
+  &__content {
+    font-size: 26rpx;
+    color: @gy2;
+    line-height: 1.5;
+  }
+}
+
+.errand-reply-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12rpx @spacing-page;
+  padding-bottom: calc(12rpx + env(safe-area-inset-bottom));
+  background: @bg-color-white;
+  border-top: 1rpx solid @gray3;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+
+  &__row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12rpx;
+  }
+
+  &__input {
+    flex: 1;
+    min-height: 72rpx;
+    max-height: 200rpx;
+    padding: 16rpx 24rpx;
+    font-size: 28rpx;
+    background: @bg-color-section;
+    border-radius: 24rpx;
+    box-sizing: border-box;
+  }
+}

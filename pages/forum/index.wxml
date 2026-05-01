@@ -1,10 +1,11 @@
+<import src="../../templates/forum-list-media.wxml" />
 <nav title-text="小区留言" />
 <view class="forum-search-bar">
   <view class="forum-search-bar__row">
     <t-icon name="search" size="40rpx" class="forum-search-bar__icon" />
     <t-input
       class="forum-search-bar__input"
-      placeholder="搜索帖子标题、内容"
+      placeholder="搜索帖子标题"
       value="{{keyword}}"
       clearable
       bindchange="onSearchInput"
@@ -46,7 +47,10 @@
         data-id="{{item.id || item._id}}"
         bindtap="goPost"
       >
-        <text class="post-item__title">{{item.title}}</text>
+        <view class="post-item__headline">
+          <text class="post-item__title">{{item.title}}</text>
+        </view>
+        <template is="forumListMedia" data="{{item: item}}" />
         <view class="post-item__meta">
           <text>{{item.authorName}}</text>
           <text>{{item.replyCount}} 回复</text>
@@ -66,7 +70,10 @@
             data-id="{{item.id || item._id}}"
             bindtap="goPost"
           >
-            <text class="post-item__title">{{item.title}}</text>
+            <view class="post-item__headline">
+              <text class="post-item__title">{{item.title}}</text>
+            </view>
+            <template is="forumListMedia" data="{{item: item}}" />
             <view class="post-item__meta">
               <text>{{item.authorName}}</text>
               <text>{{item.replyCount}} 回复</text>
@@ -84,7 +91,10 @@
           data-id="{{item.id || item._id}}"
           bindtap="goPost"
         >
-          <text class="post-item__title">{{item.title}}</text>
+          <view class="post-item__headline">
+            <text class="post-item__title">{{item.title}}</text>
+          </view>
+          <template is="forumListMedia" data="{{item: item}}" />
           <view class="post-item__meta">
             <text>{{item.authorName}}</text>
             <text>{{item.replyCount}} 回复</text>
@@ -98,5 +108,5 @@
   </block>
 </scroll-view>
 <view class="forum-fab" bindtap="goPublish">
-  <t-icon name="add" size="48rpx" color="#fff" />
+  <t-icon name="add" size="48rpx" color="#fff" bindtap="goPublish" />
 </view>

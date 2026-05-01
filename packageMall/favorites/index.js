@@ -1,4 +1,6 @@
 import { mallAPI } from '~/api/cloud';
+import { mallDetailUrl } from '~/utils/mallPaths';
+import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 
 Page({
   data: {
@@ -7,10 +9,12 @@ Page({
   },
 
   onLoad() {
+    if (redirectIfEntryHidden('mall')) return;
     this.loadList();
   },
 
   onShow() {
+    if (redirectIfEntryHidden('mall')) return;
     this.loadList();
   },
 
@@ -19,6 +23,7 @@ Page({
   },
 
   async loadList() {
+    if (redirectIfEntryHidden('mall')) return;
     this.setData({ loading: true });
     const res = await mallAPI.getMyFavoriteItems();
     if (res.code === 200) this.setData({ list: res.data || [], loading: false });
@@ -27,6 +32,6 @@ Page({
 
   goDetail(e) {
     const id = e.currentTarget.dataset.id;
-    wx.navigateTo({ url: `/packageMall/detail/index?id=${id}` });
+    wx.navigateTo({ url: mallDetailUrl(id) });
   },
 });

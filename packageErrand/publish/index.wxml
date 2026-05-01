@@ -1,0 +1,38 @@
+<nav title-text="发布跑腿" show-back="{{true}}" />
+<view class="publish-page">
+  <view class="publish-form">
+    <view class="publish-field">
+      <input
+        class="publish-field__input publish-field__input--title"
+        placeholder="请输入标题（必填）"
+        value="{{title}}"
+        maxlength="60"
+        bindinput="onTitleInput"
+      />
+    </view>
+
+    <view class="publish-field">
+      <textarea
+        class="publish-field__input publish-field__textarea"
+        placeholder="请输入正文（必填）"
+        value="{{content}}"
+        maxlength="2000"
+        auto-height
+        bindinput="onContentInput"
+      />
+    </view>
+
+    <view class="publish-field">
+      <view class="publish-field__label">佣金（元）<text class="publish-field__required">*</text></view>
+      <input
+        class="publish-field__input publish-field__reward"
+        type="digit"
+        placeholder="线下自行支付，请输入金额"
+        value="{{reward}}"
+        bindinput="onRewardInput"
+      />
+    </view>
+
+    <t-button class="publish-submit" theme="primary" block size="large" bindtap="submit" loading="{{submitting}}">发布</t-button>
+  </view>
+</view>
