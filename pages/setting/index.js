@@ -1,4 +1,5 @@
 import useToastBehavior from '~/behaviors/useToast';
+import config from '~/config';
 
 Page({
   behaviors: [useToastBehavior],
@@ -35,6 +36,12 @@ Page({
       ],
       [
         {
+          title: '数据库初始化',
+          url: '',
+          icon: 'cloud',
+          action: 'initDB',
+        },
+        {
           title: '账号安全',
           url: '',
           icon: 'secured',
@@ -45,12 +52,122 @@ Page({
           icon: 'info-circle',
         },
       ],
+      [
+        {
+          title: '订阅消息',
+          url: '',
+          icon: 'notification',
+          action: 'subscribeMessage',
+        },
+        {
+          title: '清除缓存',
+          url: '',
+          icon: 'delete',
+          action: 'clearCache',
+        },
+        {
+          title: '退出登录',
+          url: '',
+          icon: 'logout',
+          action: 'logout',
+        },
+      ],
     ],
   },
 
-  onEleClick(e) {
-    const { title, url } = e.currentTarget.dataset.data;
+  async onEleClick(e) {
+    const { title, url, action } = e.currentTarget.dataset.data;
+
+    if (action === 'initDB') {
+      await this.initDatabase();
+      return;
+    }
+
+    if (action === 'subscribeMessage') {
+      this.requestSubscribeMessage();
+      return;
+    }
+
+    if (action === 'clearCache') {
+      this.clearCache();
+      return;
+    }
+
+    if (action === 'logout') {
+      this.logout();
+      return;
+    }
+
     if (url) return;
     this.onShowToast('#t-toast', title);
+  },
+
+  requestSubscribeMessage() {
+    const tmplIds = config.subscribeTemplateIds || [];
+    if (!tmplIds.length) {
+      wx.showToast({
+        title: '请先在公众平台申请订阅模板并配置 config.subscribeTemplateIds',
+        icon: 'none',
+        duration: 3000,
+      });
+      return;
+    }
+    wx.requestSubscribeMessage({
+      tmplIds,
+      success: (res) => {
+        if (Object.values(res).some((v) => v === 'accept')) {
+          wx.showToast({ title: '订阅成功', icon: 'success' });
+        } else {
+          wx.showToast({ title: '已取消', icon: 'none' });
+        }
+      },
+      fail: (err) => {
+        wx.showToast({ title: err.errMsg || '订阅失败', icon: 'none' });
+      },
+    });
+  },
+
+  clearCache() {
+    wx.showModal({
+      title: '清除缓存',
+      content: '将清除本地缓存数据，不会退出登录。确定继续？',
+      success: (res) => {
+        if (!res.confirm) return;
+        try {
+          const token = wx.getStorageSync('access_token');
+          wx.clearStorageSync();
+          if (token) wx.setStorageSync('access_token', token);
+          wx.showToast({ title: '缓存已清除', icon: 'success' });
+        } catch (e) {
+          wx.showToast({ title: '清除失败', icon: 'none' });
+        }
+      },
+    });
+  },
+
+  logout() {
+    wx.showModal({
+      title: '退出登录',
+      content: '确定要退出当前账号吗？',
+      success: (res) => {
+        if (!res.confirm) return;
+        const app = getApp();
+        wx.removeStorageSync('access_token');
+        app.globalData.openid = '';
+        app.globalData.userInfo = null;
+        wx.showToast({ title: '已退出', icon: 'none' });
+        setTimeout(() => {
+          wx.switchTab({ url: '/pages/my/index' });
+        }, 300);
+      },
+    });
+  },
+
+  async initDatabase() {
+    wx.showModal({
+      title: '已切换自建后端',
+      content: '云开发数据库初始化已禁用。请在自建后端侧通过 Prisma migrate/seed 初始化数据库。',
+      showCancel: false,
+    });
   },
 });

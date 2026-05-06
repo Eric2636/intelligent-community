@@ -1,12 +1,19 @@
-<nav title-text="我发布的" show-back="{{true}}" />
 <view class="my-list-page">
-  <view wx:if="{{loading}}" class="my-list-loading"><t-loading theme="dots" size="48rpx" /></view>
-  <view wx:else class="my-list-list">
-    <view class="my-list-card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
-      <view class="my-list-card__reward" wx:if="{{item.price}}">¥{{item.price}}{{item.unit}}</view>
-      <text class="my-list-card__title">{{item.title}}</text>
-      <view class="my-list-card__meta">{{item.createTime}}</view>
+  <t-pull-down-refresh
+    value="{{loading}}"
+    loadingProps="{{loadingProps}}"
+    bind:refresh="onPullDownRefresh"
+  >
+    <view class="item-grid">
+      <view class="item-card" wx:for="{{itemList}}" wx:key="id" bind:tap="goDetail" data-id="{{item.id}}">
+        <image class="item-image" src="{{item.image || '/static/default-item.png'}}" mode="aspectFill" lazy-load />
+        <view class="item-info">
+          <view class="item-title">{{item.title}}</view>
+          <view class="item-price">¥{{item.price}}</view>
+          <view class="item-category">{{item.categoryName}}</view>
+        </view>
+      </view>
     </view>
-    <view wx:if="{{list.length === 0}}" class="my-list-empty">暂无发布</view>
-  </view>
+    <t-empty wx:if="{{!loading && itemList.length === 0}}" description="暂无发布的商品" />
+  </t-pull-down-refresh>
 </view>

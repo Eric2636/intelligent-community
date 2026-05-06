@@ -1,0 +1,36 @@
+<nav title-text="我的跑腿" show-back="{{true}}" />
+<view class="my-errands-page">
+  <view class="my-errands-tabs">
+    <view
+      class="my-errands-tabs__item {{activeRole === 'published' ? 'my-errands-tabs__item--active' : ''}}"
+      data-role="published"
+      bindtap="onRoleTab"
+    >我发布的</view>
+    <view
+      class="my-errands-tabs__item {{activeRole === 'claimed' ? 'my-errands-tabs__item--active' : ''}}"
+      data-role="claimed"
+      bindtap="onRoleTab"
+    >我接的</view>
+  </view>
+  <t-pull-down-refresh
+    value="{{loading}}"
+    loadingProps="{{loadingProps}}"
+    bind:refresh="onPullDownRefresh"
+  >
+    <view class="post-list">
+      <view class="post-card" wx:for="{{postList}}" wx:key="id" bind:tap="goPost" data-id="{{item.id || item._id}}">
+        <view class="post-card__head">
+          <text class="post-title">{{item.title}}</text>
+          <text class="post-reward" wx:if="{{item.reward && item.reward !== '0'}}">¥{{item.reward}}</text>
+        </view>
+        <view class="post-content">{{item.content}}</view>
+        <view class="post-meta">
+          <text class="post-status">{{item.statusText}}</text>
+          <text class="time">{{item.createTime}}</text>
+          <text class="reply-count">{{item.replyCount}} 回复</text>
+        </view>
+      </view>
+    </view>
+    <t-empty wx:if="{{!loading && postList.length === 0}}" description="{{emptyText}}" />
+  </t-pull-down-refresh>
+</view>

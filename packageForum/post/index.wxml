@@ -6,37 +6,190 @@
   <block wx:elif="{{post}}">
     <view class="post-card">
       <view class="post-card__head">
-        <view class="post-card__author">
-          <text>{{post.authorName}}</text>
-          <text class="post-card__time">{{post.createTime}}</text>
+        <view class="post-card__head-main">
+          <view class="post-card__author">
+            <text>{{post.authorName}}</text>
+            <text class="post-card__time">{{post.createTime}}</text>
+          </view>
         </view>
       </view>
       <text class="post-card__title">{{post.title}}</text>
-      <text class="post-card__content">{{post.content}}</text>
+      <text class="post-card__content" wx:if="{{post.content}}">{{post.content}}</text>
+      <view class="post-card__media" wx:if="{{post.images.length || post.videos.length}}">
+        <view class="post-card__media-grid">
+          <block wx:for="{{post.images}}" wx:for-index="imgIdx" wx:key="*this">
+            <image
+              class="post-card__media-img"
+              src="{{item}}"
+              mode="aspectFill"
+              data-current="{{item}}"
+              bindtap="onPreviewPostImages"
+            />
+          </block>
+          <block wx:for="{{post.videos}}" wx:key="*this">
+            <video
+              class="post-card__media-video"
+              src="{{item}}"
+              controls
+              show-center-play-btn
+              object-fit="contain"
+            />
+          </block>
+        </view>
+      </view>
       <view class="post-card__meta">
-        <text>浏览 {{post.viewCount}}</text>
-        <text>回复 {{post.replyCount}}</text>
+        <text>浏览 {{post.viewCount || 0}}</text>
+        <text>回复 {{post.replyCount || 0}}</text>
+        <text>点赞 {{post.likeCount || 0}}</text>
+      </view>
+      <view class="post-card__actions">
+        <view class="post-card__actions-main">
+          <view class="post-card__btn {{post.isLiked ? 'post-card__btn--active' : ''}}" bindtap="onLike">
+            <t-icon name="{{post.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="40rpx" />
+            <text>{{post.isLiked ? '已赞' : '点赞'}}</text>
+          </view>
+          <view class="post-card__btn {{post.isFavorited ? 'post-card__btn--active' : ''}}" bindtap="onFavorite">
+            <t-icon name="{{post.isFavorited ? 'star-filled' : 'star'}}" size="40rpx" />
+            <text>{{post.isFavorited ? '已收藏' : '收藏'}}</text>
+          </view>
+        </view>
+        <view wx:if="{{post.isAuthor}}" class="post-card__delete" catchtap="onDeletePost">
+          <t-icon name="delete-1" size="36rpx" color="#b0b0b0" />
+        </view>
       </view>
     </view>
     <view class="post-replies">
       <view class="post-replies__title">全部回复 ({{post.replies.length}})</view>
-      <view class="reply-item" wx:for="{{post.replies}}" wx:key="id">
-        <view class="reply-item__head">
-          <text class="reply-item__author">{{item.authorName}}</text>
-          <text class="reply-item__time">{{item.createTime}}</text>
+      <view
+        class="reply-item"
+        style="padding-left: {{item.padLeftRpx}}rpx"
+        wx:for="{{post.replies}}"
+        wx:for-index="rIndex"
+        wx:key="id"
+      >
+        <view class="reply-item__main">
+          <view class="reply-item__head">
+            <view class="reply-item__head-main">
+              <text class="reply-item__author">{{item.authorName}}</text>
+              <text class="reply-item__time">{{item.createTime}}</text>
+            </view>
+          </view>
+          <text wx:if="{{item.replyToAuthorName}}" class="reply-item__to">回复 <text class="reply-item__to-name">@{{item.replyToAuthorName}}</text></text>
+          <text class="reply-item__content" wx:if="{{item.content}}">{{item.content}}</text>
+          <view class="reply-item__media" wx:if="{{item.images.length || item.videos.length}}">
+            <view class="reply-item__media-grid">
+              <block wx:for="{{item.images}}" wx:for-item="img" wx:key="*this">
+                <image
+                  class="reply-item__media-img"
+                  src="{{img}}"
+                  mode="aspectFill"
+                  data-rid="{{item.id}}"
+                  data-src="{{img}}"
+                  catchtap="onPreviewReplyImage"
+                />
+              </block>
+              <block wx:for="{{item.videos}}" wx:for-item="vid" wx:key="*this">
+                <video class="reply-item__media-video" src="{{vid}}" controls show-center-play-btn object-fit="contain" />
+              </block>
+            </view>
+          </view>
+          <view class="reply-item__reactions" wx:if="{{item.reactionList.length || item.myReaction}}">
+            <block wx:for="{{item.reactionList}}" wx:for-item="rx" wx:key="emoji">
+              <text class="reply-item__rx-pill {{item.myReaction === rx.emoji ? 'reply-item__rx-pill--mine' : ''}}">{{rx.emoji}} {{rx.count}}</text>
+            </block>
+            <text wx:if="{{item.myReaction && !item.reactionList.length}}" class="reply-item__rx-pill reply-item__rx-pill--mine">{{item.myReaction}}</text>
+          </view>
+          <view class="reply-item__actions-row">
+            <view class="reply-toolbar">
+              <view class="reply-toolbar__btn" catchtap="onReplyLike" data-rid="{{item.id}}">
+                <t-icon name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="36rpx" color="{{item.isLiked ? '#ff2442' : '#666'}}" />
+                <text class="reply-toolbar__txt {{item.isLiked ? 'reply-toolbar__txt--on' : ''}}">{{item.likeCount || 0}}</text>
+              </view>
+              <view class="reply-toolbar__btn" catchtap="onReplyToTap" data-rid="{{item.id}}" data-name="{{item.authorName}}">
+                <t-icon name="chat" size="36rpx" color="#666" />
+                <text class="reply-toolbar__txt">评论</text>
+              </view>
+              <view class="reply-toolbar__btn" catchtap="onReplyFavorite" data-rid="{{item.id}}">
+                <t-icon name="{{item.isFavorited ? 'star-filled' : 'star'}}" size="36rpx" color="{{item.isFavorited ? '#ffb800' : '#666'}}" />
+                <text class="reply-toolbar__txt {{item.isFavorited ? 'reply-toolbar__txt--gold' : ''}}">{{item.favoriteCount || 0}}</text>
+              </view>
+              <view class="reply-toolbar__btn" catchtap="onReplyEmojiOpen" data-rid="{{item.id}}">
+                <t-icon name="{{item.myReaction ? 'smile-filled' : 'smile'}}" size="36rpx" color="{{item.myReaction ? '#0052d9' : '#666'}}" />
+                <text class="reply-toolbar__txt {{item.myReaction ? 'reply-toolbar__txt--rx' : ''}}">表情</text>
+              </view>
+            </view>
+            <view
+              wx:if="{{item.isAuthor}}"
+              class="reply-item__delete"
+              catchtap="onDeleteReply"
+              data-rid="{{item.id}}"
+            >
+              <t-icon name="delete-1" size="36rpx" color="#b0b0b0" />
+            </view>
+          </view>
         </view>
-        <text class="reply-item__content">{{item.content}}</text>
       </view>
       <view wx:if="{{post.replies.length === 0}}" class="post-replies__empty">暂无回复</view>
     </view>
+    <!-- 评论底栏：输入区 + 右侧工具与主操作 -->
     <view class="post-reply-bar">
-      <input
-        class="post-reply-bar__input"
-        placeholder="说点什么..."
-        value="{{replyContent}}"
-        bindinput="onReplyInput"
-      />
-      <t-button theme="primary" size="small" bindtap="submitReply" loading="{{submitting}}">发送</t-button>
+      <view class="post-reply-bar__target" wx:if="{{replyTarget}}" catchtap="onCancelReplyTarget">
+        <text class="post-reply-bar__target-txt">回复 <text class="post-reply-bar__target-at">@{{replyTarget.authorName}}</text></text>
+        <text class="post-reply-bar__target-x">×</text>
+      </view>
+      <view class="post-reply-bar__preview" wx:if="{{replyImages.length || replyVideos.length}}">
+        <scroll-view scroll-x class="post-reply-bar__preview-scroll" show-scrollbar="{{false}}" enhanced="{{true}}">
+          <view class="post-reply-bar__preview-inner">
+            <block wx:for="{{replyImages}}" wx:for-index="idx" wx:key="*this">
+              <view class="post-reply-bar__pv-cell">
+                <image class="post-reply-bar__pv-thumb" src="{{item}}" mode="aspectFill" />
+                <view class="post-reply-bar__pv-del" data-kind="image" data-index="{{idx}}" catchtap="onRemoveReplyMedia">×</view>
+              </view>
+            </block>
+            <block wx:for="{{replyVideos}}" wx:for-index="vidx" wx:key="*this">
+              <view class="post-reply-bar__pv-cell post-reply-bar__pv-cell--video">
+                <video class="post-reply-bar__pv-video" src="{{item}}" object-fit="cover" />
+                <view class="post-reply-bar__pv-del" data-kind="video" data-index="{{vidx}}" catchtap="onRemoveReplyMedia">×</view>
+              </view>
+            </block>
+          </view>
+        </scroll-view>
+      </view>
+      <view class="post-reply-bar__dock">
+        <view class="post-reply-bar__input-box">
+          <textarea
+            class="post-reply-bar__textarea"
+            placeholder="{{replyPlaceholderText}}"
+            placeholder-class="post-reply-bar__ph"
+            value="{{replyContent}}"
+            maxlength="800"
+            auto-height
+            show-confirm-bar="{{false}}"
+            cursor-spacing="20"
+            adjust-position="{{true}}"
+            bindinput="onReplyInput"
+          />
+        </view>
+        <view class="post-reply-bar__dock-right">
+          <view class="post-reply-bar__tools">
+            <view class="post-reply-bar__tool" bindtap="onReplyAddMedia">
+              <t-icon name="image-add" size="48rpx" color="#5c5c5c" />
+            </view>
+            <view class="post-reply-bar__tool" bindtap="onReplyEmojiHint">
+              <t-icon name="smile" size="48rpx" color="#5c5c5c" />
+            </view>
+          </view>
+          <view
+            class="post-reply-bar__publish-slot {{canPublish && !submitting ? 'post-reply-bar__publish-slot--ready' : ''}} {{submitting ? 'post-reply-bar__publish-slot--busy' : ''}}"
+            bindtap="submitReply"
+          >
+            <view wx:if="{{submitting}}" class="post-reply-bar__publish-loading">
+              <t-loading theme="dots" size="32rpx" />
+            </view>
+            <text wx:else class="post-reply-bar__publish">发表</text>
+          </view>
+        </view>
+      </view>
     </view>
   </block>
   <view wx:else class="post-loading">帖子不存在</view>

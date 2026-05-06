@@ -1,11 +1,21 @@
-<nav title-text="我的帖子" show-back="{{true}}" />
+<import src="../../templates/forum-list-media.wxml" />
 <view class="my-posts-page">
-  <view wx:if="{{loading}}" class="my-posts-loading"><t-loading theme="dots" size="48rpx" /></view>
-  <view wx:else class="my-posts-list">
-    <view class="my-posts-card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
-      <text class="my-posts-card__title">{{item.title}}</text>
-      <view class="my-posts-card__meta">{{item.createTime}} · {{item.replyCount}} 回复</view>
+  <t-pull-down-refresh
+    value="{{loading}}"
+    loadingProps="{{loadingProps}}"
+    bind:refresh="onPullDownRefresh"
+  >
+    <view class="post-list">
+      <view class="post-card" wx:for="{{postList}}" wx:key="id" bind:tap="goPost" data-id="{{item.id || item._id}}">
+        <view class="post-title">{{item.title}}</view>
+        <view class="post-content">{{item.content}}</view>
+        <template is="forumListMedia" data="{{item: item}}" />
+        <view class="post-meta">
+          <text class="time">{{item.createTime}}</text>
+          <text class="reply-count">{{item.replyCount}} 回复</text>
+        </view>
+      </view>
     </view>
-    <view wx:if="{{list.length === 0}}" class="my-posts-empty">暂无发帖</view>
-  </view>
+    <t-empty wx:if="{{!loading && postList.length === 0}}" description="暂无发布的帖子" />
+  </t-pull-down-refresh>
 </view>

@@ -18,6 +18,7 @@
   "license": "MIT",
   "description": "a start-kit for wechat miniprogram powerby TDesign miniprogram",
   "dependencies": {
+    "cos-wx-sdk-v5": "^1.8.0",
     "tdesign-miniprogram": "^1.11.2"
   },
   "devDependencies": {

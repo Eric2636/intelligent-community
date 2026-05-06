@@ -21,7 +21,7 @@
     "uglifyFileName": false,
     "uploadWithSourceMap": true,
     "useIsolateContext": true,
-    "nodeModules": false,
+    "nodeModules": true,
     "enhance": true,
     "useMultiFrameRuntime": true,
     "useApiHook": true,
@@ -51,9 +51,12 @@
     "swc": false,
     "disableSWC": true
   },
+  "cloudfunctionRoot": "cloudfunctions/",
+  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/",
+  "miniprogramRoot": "",
   "compileType": "miniprogram",
   "libVersion": "3.7.8",
-  "appid": "wx2ea3a9ed028f05bb",
+  "appid": "wx08174a59578eb710",
   "projectname": "miniprogram-starter",
   "condition": {
     "miniprogram": {
@@ -61,12 +64,6 @@
         {
           "name": "login",
           "pathName": "pages/login/login",
-          "query": "",
-          "scene": null
-        },
-        {
-          "name": "loginCode",
-          "pathName": "pages/loginCode/loginCode",
           "query": "",
           "scene": null
         },

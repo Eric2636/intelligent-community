@@ -1,3 +1,16 @@
+@import '/variable.less';
+
+.setting {
+  min-height: 100vh;
+  padding: @spacing-page;
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
+  background: @bg-color;
+  overflow-x: hidden;
+}
+
 .cell-group-class {
-  margin: 32rpx !important;
+  margin: 0 0 24rpx !important;
+  border-radius: @radius-card !important;
+  overflow: hidden;
+  box-shadow: @shadow-card !important;
 }

@@ -1,0 +1,40 @@
+@import '/variable.less';
+@import '/styles/forum-list-media.less';
+
+.favorites-page {
+  min-height: 100vh;
+  background: @bg-color;
+  padding: @spacing-page;
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+}
+
+.favorites-loading {
+  padding: 80rpx;
+  text-align: center;
+}
+
+.favorites-item {
+  background: @bg-color-white;
+  border-radius: @radius-card;
+  padding: @spacing-card;
+  margin-bottom: 16rpx;
+  box-shadow: @shadow-card;
+
+  &__title {
+    font-size: 28rpx;
+    font-weight: 500;
+    color: @gy1;
+    display: block;
+    margin-bottom: 12rpx;
+  }
+
+  &__meta {
+    font-size: 24rpx;
+    color: @gy3;
+
+    text + text {
+      margin-left: 24rpx;
+    }
+  }
+}

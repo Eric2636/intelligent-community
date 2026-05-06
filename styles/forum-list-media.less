@@ -1,0 +1,48 @@
+@import '/variable.less';
+
+.forum-list-media {
+  margin-bottom: 14rpx;
+
+  &__row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 12rpx;
+  }
+
+  &__thumb-wrap {
+    position: relative;
+    width: 200rpx;
+    height: 200rpx;
+    border-radius: 12rpx;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: @gray3;
+  }
+
+  &__thumb {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  &__video {
+    vertical-align: top;
+  }
+
+  &__more {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30rpx;
+    font-weight: 600;
+    pointer-events: none;
+  }
+}

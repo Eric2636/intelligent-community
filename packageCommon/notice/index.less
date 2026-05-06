@@ -1,26 +1,67 @@
 @import '/variable.less';
 
 .notice-page {
-  min-height: calc(100vh - 56px);
-  padding: 48rpx;
-  background-color: @bg-color;
+  min-height: 100vh;
+  background: @bg-color;
+  padding: @spacing-page;
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
+  overflow-x: hidden;
 }
 
-.notice-placeholder {
-  padding: 80rpx 32rpx;
-  text-align: center;
+.notice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.notice-card {
   background: @bg-color-white;
-  border-radius: 16rpx;
+  border-radius: @radius-card;
+  padding: 32rpx;
+  box-shadow: @shadow-card;
+}
 
-  &__text {
-    display: block;
-    font-size: 30rpx;
-    color: @gy2;
-    margin-bottom: 16rpx;
+.notice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.notice-type {
+  display: inline-block;
+  padding: 8rpx 16rpx;
+  border-radius: @radius-sm;
+  font-size: 24rpx;
+  color: #fff;
+
+  &.system {
+    background: @color-primary;
   }
 
-  &__hint {
-    font-size: 26rpx;
-    color: @gy3;
+  &.task {
+    background: @color-success;
   }
+
+  &.mall {
+    background: @color-price;
+  }
+}
+
+.notice-time {
+  font-size: 24rpx;
+  color: @gy3;
+}
+
+.notice-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+
+.notice-content {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
 }

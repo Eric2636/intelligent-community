@@ -1,7 +1,22 @@
-<nav title-text="消息通知" show-back="{{true}}" />
 <view class="notice-page">
-  <view class="notice-placeholder">
-    <text class="notice-placeholder__text">暂无消息</text>
-    <text class="notice-placeholder__hint">任务状态、系统通知将在此展示</text>
+  <view class="notice-list">
+    <view
+      class="notice-card"
+      wx:for="{{noticeList}}"
+      wx:key="id"
+      bind:tap="onNoticeTap"
+      data-id="{{item.id}}"
+    >
+      <view class="notice-header">
+        <view class="notice-type {{item.type}}">
+          <text wx:if="{{item.type === 'system'}}">系统</text>
+          <text wx:if="{{item.type === 'task'}}">任务</text>
+          <text wx:if="{{item.type === 'mall'}}">商城</text>
+        </view>
+        <text class="notice-time">{{item.time}}</text>
+      </view>
+      <view class="notice-title">{{item.title}}</view>
+      <view class="notice-content">{{item.content}}</view>
+    </view>
   </view>
 </view>

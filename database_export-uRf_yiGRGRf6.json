@@ -1,0 +1,44 @@
+{
+  "docs": [
+    {
+      "_id": "tab_task",
+      "kind": "tab",
+      "order": 1,
+      "key": "task",
+      "icon": "file-copy",
+      "enabled": false,
+      "labelEnc": "jdu3idffkdb3yO/H",
+      "updatedAt": "2026-04-13T07:24:23.698Z"
+    },
+    {
+      "_id": "tab_forum",
+      "kind": "tab",
+      "order": 2,
+      "key": "forum",
+      "icon": "chat",
+      "enabled": true,
+      "labelEnc": "jNOiiOPekvn8xc3u",
+      "updatedAt": "2026-04-13T07:24:23.698Z"
+    },
+    {
+      "_id": "tab_mall",
+      "kind": "tab",
+      "order": 3,
+      "key": "mall",
+      "icon": "cart",
+      "enabled": true,
+      "labelEnc": "jNOiiOPekNTnyPnU",
+      "updatedAt": "2026-04-13T07:24:23.698Z"
+    },
+    {
+      "_id": "tab_my",
+      "kind": "tab",
+      "order": 4,
+      "key": "my",
+      "icon": "user",
+      "enabled": true,
+      "labelEnc": "j+u8ivXg",
+      "updatedAt": "2026-04-13T07:24:23.698Z"
+    }
+  ]
+}

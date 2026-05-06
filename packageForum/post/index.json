@@ -3,6 +3,6 @@
   "usingComponents": {
     "nav": "/components/nav",
     "t-loading": "tdesign-miniprogram/loading/loading",
-    "t-button": "tdesign-miniprogram/button/button"
+    "t-icon": "tdesign-miniprogram/icon/icon"
   }
 }

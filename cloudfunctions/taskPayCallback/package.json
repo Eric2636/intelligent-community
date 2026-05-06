@@ -1,0 +1,9 @@
+{
+  "name": "taskPayCallback",
+  "version": "1.0.0",
+  "description": "任务赏金支付结果回调",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,0 +1,20 @@
+<nav title-text="收藏的商品" show-back="{{true}}" />
+<view class="fav-page">
+  <view wx:if="{{loading}}" class="fav-loading">
+    <t-loading theme="dots" size="48rpx" />
+  </view>
+  <view wx:else class="fav-list">
+    <view class="fav-item" wx:for="{{list}}" wx:key="_id" data-id="{{item._id}}" bindtap="goDetail">
+      <view class="fav-item__thumb"><t-icon name="image" size="64rpx" color="#999" /></view>
+      <view class="fav-item__main">
+        <text class="fav-item__title">{{item.title}}</text>
+        <view class="fav-item__meta">
+          <text wx:if="{{item.price}}" class="fav-item__price">{{item.price}}{{item.unit}}</text>
+          <text class="fav-item__time">{{item.createdAt}}</text>
+        </view>
+      </view>
+      <t-icon name="chevron-right" size="32rpx" class="fav-item__arrow" />
+    </view>
+  </view>
+  <t-empty wx:if="{{!loading && list.length === 0}}" description="暂无收藏的商品" />
+</view>

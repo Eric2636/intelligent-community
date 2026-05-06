@@ -1,7 +1,39 @@
-<nav title-text="论坛" />
-<view class="forum-page">
-  <view wx:if="{{loading}}" class="forum-loading">
-    <t-loading theme="dots" size="48rpx" />
+<import src="../../templates/forum-list-media.wxml" />
+<nav title-text="小区留言" />
+<view class="forum-search-bar">
+  <view class="forum-search-bar__row">
+    <t-icon name="search" size="40rpx" class="forum-search-bar__icon" />
+    <t-input
+      class="forum-search-bar__input"
+      placeholder="搜索帖子标题"
+      value="{{keyword}}"
+      clearable
+      bindchange="onSearchInput"
+      bindconfirm="onSearchConfirm"
+    />
+    <view class="forum-search-bar__btn" bindtap="onSearchConfirm">搜索</view>
+  </view>
+  <view class="forum-order">
+    <view class="forum-order__item {{orderBy === 'time' ? 'forum-order__item--active' : ''}}" data-order="time" bindtap="onOrderChange">最新</view>
+    <view class="forum-order__item {{orderBy === 'hot' ? 'forum-order__item--active' : ''}}" data-order="hot" bindtap="onOrderChange">最热</view>
+  </view>
+</view>
+<scroll-view
+  class="forum-page"
+  scroll-y
+  enhanced="{{true}}"
+  show-scrollbar="{{false}}"
+  refresher-enabled="{{true}}"
+  refresher-triggered="{{refreshing}}"
+  bindrefresherrefresh="onRefresh"
+  bindscrolltolower="onLoadMore"
+  bindscroll="onListScroll"
+>
+  <view wx:if="{{loading && !refreshing}}" class="forum-loading">
+    <view class="forum-skeleton" wx:for="{{[1,2,3,4]}}" wx:key="*this">
+      <view class="forum-skeleton__line forum-skeleton__title"></view>
+      <view class="forum-skeleton__line forum-skeleton__meta"></view>
+    </view>
   </view>
   <block wx:else>
     <view class="forum-section" wx:if="{{pinned.length > 0}}">
@@ -12,10 +44,13 @@
         class="post-item post-item--pinned"
         wx:for="{{pinned}}"
         wx:key="id"
-        data-id="{{item.id}}"
+        data-id="{{item.id || item._id}}"
         bindtap="goPost"
       >
-        <text class="post-item__title">{{item.title}}</text>
+        <view class="post-item__headline">
+          <text class="post-item__title">{{item.title}}</text>
+        </view>
+        <template is="forumListMedia" data="{{item: item}}" />
         <view class="post-item__meta">
           <text>{{item.authorName}}</text>
           <text>{{item.replyCount}} 回复</text>
@@ -23,26 +58,55 @@
         </view>
       </view>
     </view>
-    <view class="forum-section">
+    <view class="forum-section forum-section--list {{list.length && !loading ? 'list-fade-in' : ''}}">
       <view class="forum-section__title" wx:if="{{pinned.length > 0}}">最新</view>
-      <view
-        class="post-item"
-        wx:for="{{list}}"
-        wx:key="id"
-        data-id="{{item.id}}"
-        bindtap="goPost"
-      >
-        <text class="post-item__title">{{item.title}}</text>
-        <view class="post-item__meta">
-          <text>{{item.authorName}}</text>
-          <text>{{item.replyCount}} 回复</text>
-          <text>{{item.createTime}}</text>
+      <block wx:if="{{useVirtual && list.length > 0}}">
+        <view class="forum-virtual" style="height: {{listTotalHeight}}rpx;">
+          <view class="forum-virtual__spacer forum-virtual__spacer--top" style="height: {{virtualStart * ITEM_HEIGHT_RPX}}rpx;"></view>
+          <view
+            class="post-item"
+            wx:for="{{displayList}}"
+            wx:key="id"
+            data-id="{{item.id || item._id}}"
+            bindtap="goPost"
+          >
+            <view class="post-item__headline">
+              <text class="post-item__title">{{item.title}}</text>
+            </view>
+            <template is="forumListMedia" data="{{item: item}}" />
+            <view class="post-item__meta">
+              <text>{{item.authorName}}</text>
+              <text>{{item.replyCount}} 回复</text>
+              <text>{{item.createTime}}</text>
+            </view>
+          </view>
+          <view class="forum-virtual__spacer forum-virtual__spacer--bottom" style="height: {{(list.length - virtualStart - displayList.length) * ITEM_HEIGHT_RPX}}rpx;"></view>
         </view>
-      </view>
+      </block>
+      <block wx:elif="{{list.length > 0}}">
+        <view
+          class="post-item"
+          wx:for="{{list}}"
+          wx:key="id"
+          data-id="{{item.id || item._id}}"
+          bindtap="goPost"
+        >
+          <view class="post-item__headline">
+            <text class="post-item__title">{{item.title}}</text>
+          </view>
+          <template is="forumListMedia" data="{{item: item}}" />
+          <view class="post-item__meta">
+            <text>{{item.authorName}}</text>
+            <text>{{item.replyCount}} 回复</text>
+            <text>{{item.createTime}}</text>
+          </view>
+        </view>
+      </block>
       <view wx:if="{{list.length === 0 && pinned.length === 0}}" class="forum-empty">暂无帖子，快来发帖吧</view>
+      <view wx:if="{{list.length > 0 && hasMore === false}}" class="forum-nomore">没有更多了</view>
     </view>
   </block>
-  <view class="forum-fab" bindtap="goPublish">
-    <t-icon name="add" size="48rpx" color="#fff" />
-  </view>
+</scroll-view>
+<view class="forum-fab" bindtap="goPublish">
+  <t-icon name="add" size="48rpx" color="#fff" bindtap="goPublish" />
 </view>

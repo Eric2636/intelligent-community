@@ -1,27 +1,40 @@
-import { getMyItems } from '~/mock/mall/api';
+import { mallAPI } from '~/api/cloud';
+import { mallDetailUrl } from '~/utils/mallPaths';
+import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 
 Page({
   data: {
-    list: [],
+    itemList: [],
     loading: true,
   },
 
-  onLoad() {},
-  onShow() {
-    this.loadList();
-  },
-  onPullDownRefresh() {
-    this.loadList().then(() => wx.stopPullDownRefresh());
+  onLoad() {
+    if (redirectIfEntryHidden('mall')) return;
+    this.loadItems();
   },
 
-  async loadList() {
+  onShow() {
+    if (redirectIfEntryHidden('mall')) return;
+    this.loadItems();
+  },
+
+  onPullDownRefresh() {
+    this.loadItems().then(() => wx.stopPullDownRefresh());
+  },
+
+  async loadItems() {
+    if (redirectIfEntryHidden('mall')) return;
     this.setData({ loading: true });
-    const res = await getMyItems();
-    if (res.code === 200) this.setData({ list: res.data || [], loading: false });
+    const res = await mallAPI.getMyItems();
+    if (res.code === 200) {
+      this.setData({ itemList: res.data || [], loading: false });
+    } else {
+      this.setData({ loading: false });
+    }
   },
 
   goDetail(e) {
     const { id } = e.currentTarget.dataset;
-    wx.navigateTo({ url: `/packageMall/detail/index?id=${id}` });
+    wx.navigateTo({ url: mallDetailUrl(id) });
   },
 });

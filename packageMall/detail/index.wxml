@@ -6,16 +6,151 @@
   <block wx:elif="{{item}}">
     <view class="detail-card">
       <view class="detail-card__thumb">
-        <t-icon name="image" size="120rpx" color="#999" />
+        <swiper
+          wx:if="{{(previewImages && previewImages.length) || (item.videos && item.videos.length)}}"
+          class="detail-card__swiper"
+          circular
+          indicator-dots
+          autoplay
+          interval="3500"
+        >
+          <block wx:for="{{previewImages}}" wx:key="*this">
+            <swiper-item>
+              <image class="detail-card__media" src="{{item}}" mode="aspectFill" data-current="{{item}}" bindtap="onPreviewSwiperMedia" />
+            </swiper-item>
+          </block>
+          <block wx:for="{{item.videos}}" wx:key="*this">
+            <swiper-item>
+              <video class="detail-card__media" src="{{item}}" object-fit="cover" controls="{{true}}" />
+            </swiper-item>
+          </block>
+        </swiper>
+        <view wx:else class="detail-card__thumb-empty">
+          <t-icon name="image" size="120rpx" color="#999" />
+        </view>
       </view>
       <view class="detail-card__price" wx:if="{{item.price}}">{{item.price}}{{item.unit}}</view>
       <view class="detail-card__title">{{item.title}}</view>
-      <view class="detail-card__meta">{{item.createTime}}</view>
+      <view class="detail-card__meta">{{item.createdAt}}</view>
       <view class="detail-card__desc">{{item.desc}}</view>
       <view class="detail-card__contact">联系：{{item.contact}}</view>
     </view>
+
+    <view class="comment-card">
+      <view class="comment-card__header">
+        <text class="comment-card__title">评论</text>
+        <text class="comment-card__count">{{commentTotal}}</text>
+      </view>
+
+      <view wx:if="{{comments.length === 0}}" class="comment-card__empty">暂无评论</view>
+
+      <view wx:else class="comment-list">
+        <block wx:for="{{comments}}" wx:key="id">
+          <view class="comment-thread">
+            <view class="comment-item">
+              <image wx:if="{{item.userAvatar}}" class="comment-item__avatar" src="{{item.userAvatar}}" mode="aspectFill" />
+              <view wx:else class="comment-item__avatar comment-item__avatar--placeholder"></view>
+              <view class="comment-item__main">
+                <view class="comment-item__top">
+                  <text class="comment-item__name">{{item.userName || '用户'}}</text>
+                  <text class="comment-item__time">{{item.createdAt}}</text>
+                </view>
+                <view wx:if="{{item.content}}" class="comment-item__content">{{item.content}}</view>
+                <view wx:if="{{item.images && item.images.length}}" class="comment-item__images">
+                  <block wx:for="{{item.images}}" wx:for-item="img" wx:key="*this">
+                    <image
+                      class="comment-item__img"
+                      src="{{img}}"
+                      mode="aspectFill"
+                      data-urls="{{item.images}}"
+                      data-current="{{img}}"
+                      bindtap="onPreviewCommentImage"
+                    />
+                  </block>
+                </view>
+                <view class="comment-item__actions">
+                  <text class="comment-item__action" data-id="{{item.id}}" catchtap="onReplyTap">回复</text>
+                  <view class="comment-item__like" data-id="{{item.id}}" data-liked="{{item.liked ? 1 : 0}}" catchtap="onToggleLike">
+                    <t-icon name="{{item.liked ? 'thumb-up-filled' : 'thumb-up'}}" size="32rpx" color="{{item.liked ? '#ff2442' : '#999'}}" />
+                    <text class="comment-item__like-num">{{item.likeCount}}</text>
+                  </view>
+                  <text wx:if="{{item.userId === currentUserId}}" class="comment-item__action comment-item__action--danger" data-id="{{item.id}}" catchtap="onDeleteComment">删除</text>
+                </view>
+              </view>
+            </view>
+
+            <block wx:for="{{item.replies}}" wx:for-item="sub" wx:key="id">
+              <view class="comment-item comment-item--sub">
+                <image wx:if="{{sub.userAvatar}}" class="comment-item__avatar" src="{{sub.userAvatar}}" mode="aspectFill" />
+                <view wx:else class="comment-item__avatar comment-item__avatar--placeholder"></view>
+                <view class="comment-item__main">
+                  <view class="comment-item__replyto" wx:if="{{sub.replyToAuthorName}}">回复 @{{sub.replyToAuthorName}}</view>
+                  <view class="comment-item__top">
+                    <text class="comment-item__name">{{sub.userName || '用户'}}</text>
+                    <text class="comment-item__time">{{sub.createdAt}}</text>
+                  </view>
+                  <view wx:if="{{sub.content}}" class="comment-item__content">{{sub.content}}</view>
+                  <view wx:if="{{sub.images && sub.images.length}}" class="comment-item__images">
+                    <block wx:for="{{sub.images}}" wx:for-item="img" wx:key="*this">
+                      <image
+                        class="comment-item__img"
+                        src="{{img}}"
+                        mode="aspectFill"
+                        data-urls="{{sub.images}}"
+                        data-current="{{img}}"
+                        bindtap="onPreviewCommentImage"
+                      />
+                    </block>
+                  </view>
+                  <view class="comment-item__actions">
+                    <view class="comment-item__like" data-id="{{sub.id}}" data-liked="{{sub.liked ? 1 : 0}}" catchtap="onToggleLike">
+                      <t-icon name="{{sub.liked ? 'thumb-up-filled' : 'thumb-up'}}" size="32rpx" color="{{sub.liked ? '#ff2442' : '#999'}}" />
+                      <text class="comment-item__like-num">{{sub.likeCount}}</text>
+                    </view>
+                    <text wx:if="{{sub.userId === currentUserId}}" class="comment-item__action comment-item__action--danger" data-id="{{sub.id}}" catchtap="onDeleteComment">删除</text>
+                  </view>
+                </view>
+              </view>
+            </block>
+          </view>
+        </block>
+      </view>
+
+      <view wx:if="{{replyParentId}}" class="comment-reply-hint">
+        <text>正在回复评论</text>
+        <text class="comment-reply-hint__cancel" bindtap="onCancelReply">取消</text>
+      </view>
+
+      <view wx:if="{{commentImages.length}}" class="comment-editor__picked">
+        <view class="comment-editor__grid">
+          <block wx:for="{{commentImages}}" wx:for-index="cidx" wx:key="*this">
+            <view class="comment-editor__cell">
+              <image class="comment-editor__thumb" src="{{item}}" mode="aspectFill" />
+              <view class="comment-editor__del" data-index="{{cidx}}" catchtap="onRemoveCommentImage">×</view>
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <view class="comment-editor">
+        <input class="comment-editor__input" placeholder="文字或图片（支持系统表情）…" value="{{commentInput}}" maxlength="1000" bindinput="onCommentInput" />
+        <view class="comment-editor__side">
+          <view class="comment-editor__addimg" bindtap="onAddCommentImages" wx:if="{{commentImages.length < 3}}">图</view>
+          <t-button size="small" theme="primary" bindtap="submitComment" loading="{{commentSubmitting}}">发送</t-button>
+        </view>
+      </view>
+    </view>
+
     <view class="detail-bar">
-      <t-button theme="primary" size="large" block bindtap="onContact">联系 TA</t-button>
+      <view wx:if="{{!isMine}}" class="detail-bar__row">
+        <t-button theme="primary" size="large" block bindtap="onBuy">立即购买</t-button>
+        <view class="detail-bar__fav {{item.isFavorited ? 'detail-bar__fav--active' : ''}}" bindtap="onFavorite">
+          <t-icon name="{{item.isFavorited ? 'star-filled' : 'star'}}" size="44rpx" />
+          <text>{{item.isFavorited ? '已收藏' : '收藏'}}</text>
+        </view>
+      </view>
+      <t-button wx:if="{{!isMine}}" class="detail-bar__btn" variant="outline" size="large" block bindtap="onContact">联系 TA</t-button>
+      <t-button wx:if="{{isMine}}" theme="primary" size="large" block bindtap="onContact">联系 TA</t-button>
     </view>
   </block>
   <view wx:else class="detail-loading">信息不存在</view>

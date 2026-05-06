@@ -1,75 +1,41 @@
 {
-  "pages": ["pages/home/index", "pages/message/index", "pages/my/index"],
+  "lazyCodeLoading": "requiredComponents",
+  "pages": [
+    "pages/task/index",
+    "pages/errand/index",
+    "pages/forum/index",
+    "pages/mall/index",
+    "pages/my/index"
+  ],
   "usingComponents": {
     "t-toast": "tdesign-miniprogram/toast/toast"
   },
   "subpackages": [
-    {
-      "root": "pages/search",
-      "name": "search",
-      "pages": ["index"]
-    },
-    {
-      "root": "pages/my/info-edit",
-      "name": "edit",
-      "pages": ["index"]
-    },
-    {
-      "root": "pages/chat",
-      "name": "chat",
-      "pages": ["index"]
-    },
-    {
-      "root": "pages/login",
-      "name": "login",
-      "pages": ["login"]
-    },
-    {
-      "root": "pages/loginCode",
-      "name": "loginCode",
-      "pages": ["loginCode"]
-    },
-    {
-      "root": "pages/dataCenter",
-      "name": "dataCenter",
-      "pages": ["index"]
-    },
-    {
-      "root": "pages/setting",
-      "name": "setting",
-      "pages": ["index"]
-    },
-    {
-      "root": "pages/release",
-      "name": "release",
-      "pages": ["index"]
-    }
+    { "root": "pages/my/info-edit", "name": "edit", "pages": ["index"] },
+    { "root": "pages/login", "name": "login", "pages": ["login"] },
+    { "root": "pages/setting", "name": "setting", "pages": ["index"] },
+    { "root": "packageForum", "name": "forum", "pages": ["post/index", "publish/index", "my-posts/index", "favorites/index"] },
+    { "root": "packageMall", "name": "mall", "pages": ["detail/index", "publish/index", "my-list/index", "order-list/index", "order-detail/index", "favorites/index"] },
+    { "root": "packageTask", "name": "task", "pages": ["detail/index", "publish/index", "my-tasks/index"] },
+    { "root": "packageErrand", "name": "errand", "pages": ["publish/index", "detail/index", "my-errands/index"] },
+    { "root": "packageCommon", "name": "common", "pages": ["notice/index", "feedback/index", "about/index", "agreement/index", "privacy/index"] }
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "Weixin",
+    "navigationBarTitleText": "智能社区",
     "navigationBarTextStyle": "black"
   },
   "tabBar": {
     "custom": true,
     "list": [
-      {
-        "pagePath": "pages/home/index",
-        "text": "首页"
-      },
-      {
-        "pagePath": "pages/message/index",
-        "text": "消息"
-      },
-      {
-        "pagePath": "pages/my/index",
-        "text": "我的"
-      }
+      { "pagePath": "pages/task/index", "text": "业主互助" },
+      { "pagePath": "pages/errand/index", "text": "小区跑腿" },
+      { "pagePath": "pages/forum/index", "text": "小区留言" },
+      { "pagePath": "pages/mall/index", "text": "小区市场" },
+      { "pagePath": "pages/my/index", "text": "我的" }
     ]
   },
-  "resolveAlias": {
-    "~/*": "/*"
-  },
+  "resolveAlias": { "~/*": "/*" },
   "sitemapLocation": "sitemap.json"
 }

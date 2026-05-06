@@ -1,0 +1,102 @@
+@import '/variable.less';
+
+.my-errands-page {
+  min-height: 100vh;
+  background: @bg-color;
+  padding: @spacing-page;
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+}
+
+.my-errands-tabs {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 24rpx;
+
+  &__item {
+    flex: 1;
+    text-align: center;
+    padding: 20rpx;
+    font-size: 28rpx;
+    color: @gy2;
+    background: @bg-color-white;
+    border-radius: @radius-card;
+    box-shadow: @shadow-card;
+
+    &--active {
+      color: @color-primary;
+      font-weight: 600;
+      box-shadow: @shadow-card-hover;
+    }
+  }
+}
+
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-page;
+}
+
+.post-card {
+  background: @bg-color-white;
+  border-radius: @radius-card;
+  padding: 32rpx;
+  box-shadow: @shadow-card;
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16rpx;
+    margin-bottom: 16rpx;
+  }
+}
+
+.post-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: @gy1;
+}
+
+.post-reward {
+  flex-shrink: 0;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: @color-price;
+}
+
+.post-content {
+  font-size: 28rpx;
+  color: @gy2;
+  line-height: 1.6;
+  margin-bottom: 24rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16rpx;
+  font-size: 24rpx;
+  color: @gy3;
+}
+
+.post-status {
+  color: @color-primary;
+  font-weight: 500;
+}
+
+.time {
+  color: @gy3;
+}
+
+.reply-count {
+  color: @gy2;
+}

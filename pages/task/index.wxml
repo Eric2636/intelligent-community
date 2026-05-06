@@ -1,17 +1,64 @@
-<nav title-text="任务" />
+<nav title-text="业主互助" />
 <view class="task-page">
-  <view wx:if="{{loading}}" class="task-loading"><t-loading theme="dots" size="48rpx" /></view>
-  <view wx:else class="task-list">
-    <view class="task-card" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
-      <view class="task-card__reward">¥{{item.reward}}</view>
-      <text class="task-card__title">{{item.title}}</text>
-      <text class="task-card__desc">{{item.desc}}</text>
-      <view class="task-card__meta">{{item.location}} · {{item.createdAt}}</view>
+  <view class="task-search-bar">
+    <view class="task-search-bar__row">
+      <t-icon name="search" size="40rpx" class="task-search-bar__icon" />
+      <t-input
+        class="task-search-bar__input"
+        placeholder="搜索任务标题"
+        value="{{keyword}}"
+        clearable
+        bindchange="onSearchInput"
+        bindconfirm="onSearchConfirm"
+      />
+      <view class="task-search-bar__btn" bindtap="onSearchConfirm">搜索</view>
+    </view>
+  </view>
+  <view wx:if="{{loading}}" class="task-loading">
+    <view class="task-skeleton" wx:for="{{[1,2,3]}}" wx:key="*this">
+      <view class="task-skeleton__line task-skeleton__title"></view>
+      <view class="task-skeleton__line task-skeleton__desc"></view>
+      <view class="task-skeleton__line task-skeleton__meta"></view>
+    </view>
+  </view>
+  <view wx:else class="task-list list-fade-in">
+    <view
+      class="task-card"
+      wx:for="{{list}}"
+      wx:for-item="card"
+      wx:for-index="cardIdx"
+      wx:key="id"
+      data-id="{{card._id || card.id}}"
+      bindtap="goDetail"
+    >
+      <view class="task-card__reward">¥{{card.reward}}</view>
+      <text class="task-card__title">{{card.title}}</text>
+      <view class="task-card__thumbs" wx:if="{{card.images.length}}">
+        <block wx:for="{{card.images}}" wx:for-item="img" wx:for-index="imgIdx" wx:key="*this">
+          <view wx:if="{{imgIdx < 3}}" class="task-card__thumb-wrap">
+            <image
+              class="task-card__thumb"
+              src="{{img}}"
+              mode="aspectFill"
+              lazy-load="{{true}}"
+              data-card-index="{{cardIdx}}"
+              data-current="{{img}}"
+              catchtap="onPreviewListImages"
+            />
+            <view wx:if="{{imgIdx === 2 && card.images.length > 3}}" class="task-card__thumb-more">+{{card.images.length - 3}}</view>
+          </view>
+        </block>
+      </view>
+      <view class="task-card__media-hint" wx:if="{{card.videos.length}}">含视频</view>
+      <text class="task-card__desc">{{card.desc}}</text>
+      <view class="task-card__meta" wx:if="{{card.location}}">{{card.location}} · {{card.createdAt}}</view>
+      <view class="task-card__meta" wx:else>{{card.createdAt}}</view>
     </view>
     <view wx:if="{{list.length === 0}}" class="task-empty">暂无可领取任务</view>
+    <view wx:if="{{listTotal > maxRender}}" class="task-more-hint">已显示前 {{maxRender}} 条，共 {{listTotal}} 条，请用搜索缩小范围</view>
   </view>
 
   <view class="task-fab" bindtap="goPublish">
-    <t-icon name="add" size="48rpx" color="#fff" />
+    <t-icon name="add" size="48rpx" color="#fff" bindtap="goPublish" />
   </view>
 </view>

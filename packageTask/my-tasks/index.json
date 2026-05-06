@@ -1,8 +1,6 @@
 {
-  "navigationStyle": "custom",
-  "enablePullDownRefresh": true,
+  "navigationBarTitleText": "我的任务",
   "usingComponents": {
-    "nav": "/components/nav",
-    "t-loading": "tdesign-miniprogram/loading/loading"
+    "t-pull-down-refresh": "tdesign-miniprogram/pull-down-refresh/pull-down-refresh"
   }
 }
