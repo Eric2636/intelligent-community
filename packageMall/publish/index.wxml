@@ -44,7 +44,7 @@
     </view>
 
     <view class="publish-field">
-      <view class="publish-field__label">主图（用于列表展示，至少 1 张，最多 6 张）</view>
+      <view class="publish-field__label">主图（用于列表展示，必填 1 张）</view>
       <view class="media-picker" wx:if="{{mainImages.length}}">
         <view class="media-picker__grid">
           <block wx:for="{{mainImages}}" wx:for-index="idx" wx:key="*this">
@@ -62,7 +62,7 @@
           </block>
         </view>
       </view>
-      <view class="media-picker__add" bindtap="onAddMainImages" wx:if="{{mainImages.length + subImages.length < 6}}">
+      <view class="media-picker__add" bindtap="onAddMainImages" wx:if="{{mainImages.length < 1 && mainImages.length + subImages.length < 6}}">
         + 添加主图
       </view>
     </view>

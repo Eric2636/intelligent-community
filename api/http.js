@@ -1,9 +1,15 @@
+import config from '../config';
+
 const DEFAULT_TIMEOUT = 15000;
 
 function getBaseUrl() {
-  // 开发阶段：写死一个默认值；你可以在 app.js 启动时覆盖 app.globalData.apiBaseUrl
   const app = getApp();
-  return (app && app.globalData && app.globalData.apiBaseUrl) || 'http://127.0.0.1:3000';
+  const fromGlobal = app && app.globalData && app.globalData.apiBaseUrl;
+  if (fromGlobal) return fromGlobal;
+  if (!config.useLocalDevApi && config.productionApiBase) {
+    return String(config.productionApiBase).replace(/\/+$/, '');
+  }
+  return `http://127.0.0.1:${config.devPort}`;
 }
 
 function buildUrl(path, query) {

@@ -10,10 +10,6 @@ if (config.isMock) {
   Mock();
 }
 
-/** 本地联调：模拟器走 127.0.0.1；真机预览须填宿主机局域网 IP */
-const DEV_API_PORT = 3000;
-const DEV_API_HOST_LAN = '192.168.82.169';
-
 App({
   async onLaunch() {
     console.log('>>> onLaunch 开始执行');
@@ -27,13 +23,18 @@ App({
       /* ignore */
     }
 
-    let apiBase = `http://${DEV_API_HOST_LAN}:${DEV_API_PORT}`;
-    try {
-      if (wx.getSystemInfoSync().platform === 'devtools') {
-        apiBase = `http://127.0.0.1:${DEV_API_PORT}`;
+    let apiBase;
+    if (config.useLocalDevApi) {
+      apiBase = `http://${config.devLanHost}:${config.devPort}`;
+      try {
+        if (wx.getSystemInfoSync().platform === 'devtools') {
+          apiBase = `http://127.0.0.1:${config.devPort}`;
+        }
+      } catch (e) {
+        /* ignore */
       }
-    } catch (e) {
-      /* ignore */
+    } else {
+      apiBase = String(config.productionApiBase || '').replace(/\/+$/, '');
     }
     this.globalData.apiBaseUrl = apiBase;
     this.globalData.offlineMode = false;

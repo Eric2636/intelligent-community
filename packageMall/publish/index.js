@@ -40,20 +40,24 @@ Page({
 
   async onAddMainImages() {
     const { mainImages, subImages } = this.data;
-    const remain = Math.max(0, 6 - (mainImages.length + subImages.length));
-    if (remain <= 0) {
+    if (mainImages.length >= 1) {
+      wx.showToast({ title: '主图只能 1 张', icon: 'none' });
+      return;
+    }
+    const remainTotal = Math.max(0, 6 - subImages.length);
+    if (remainTotal <= 0) {
       wx.showToast({ title: '图片最多 6 张', icon: 'none' });
       return;
     }
     const { images } = await chooseAndUploadMedia({
       folder: 'mall/items',
-      maxImages: remain,
+      maxImages: 1,
       maxVideos: 0,
       existingImageCount: 0,
       existingVideoCount: 0,
     });
     if (!images.length) return;
-    this.setData({ mainImages: mainImages.concat(images) });
+    this.setData({ mainImages: images.slice(0, 1) });
   },
 
   async onAddSubImages() {
