@@ -5,6 +5,8 @@
       <t-icon name="search" size="40rpx" class="mall-search__icon" />
       <t-input
         class="mall-search__input"
+        style="--td-input-bg-color: transparent; --td-input-vertical-padding: 0; --td-input-border-left-space: 0; height: 72rpx; padding: 0;"
+        borderless
         placeholder="搜索商品标题、描述"
         value="{{keyword}}"
         clearable

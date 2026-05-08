@@ -5,6 +5,8 @@
       <t-icon name="search" size="40rpx" class="task-search-bar__icon" />
       <t-input
         class="task-search-bar__input"
+        style="--td-input-bg-color: transparent; --td-input-vertical-padding: 0; --td-input-border-left-space: 0; height: 72rpx; padding: 0;"
+        borderless
         placeholder="搜索任务标题"
         value="{{keyword}}"
         clearable
