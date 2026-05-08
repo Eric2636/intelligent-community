@@ -32,19 +32,32 @@
 .mall-search__input {
   flex: 1;
   min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 /* 搜索栏内输入框无边框、透明背景 */
 .mall-search__input .t-input,
 .mall-search__input .t-input__wrap {
+  min-height: 0 !important;
+  height: 100% !important;
   background: transparent !important;
   border: none !important;
+}
+
+.mall-search__input .t-input__content,
+.mall-search__input .t-input__control {
+  height: 100% !important;
+  min-height: 0 !important;
 }
 
 .mall-search__btn {
   flex-shrink: 0;
   margin-left: 16rpx;
-  padding: 12rpx 24rpx;
+  height: 52rpx;
+  line-height: 52rpx;
+  padding: 0 24rpx;
   font-size: 26rpx;
   color: @color-primary;
   font-weight: 500;
