@@ -1,6 +1,7 @@
 // 自建后端 HTTP API 调用工具
 import { request as httpRequest } from '~/api/http';
 import { cacheGet, cacheSet } from '~/utils/persistCache';
+import { formatDateTimeFields } from '~/utils/date';
 
 /** 401 不应回退到离线缓存，否则界面仍像「已登录可用」，只有上传等接口会暴露失败 */
 function shouldUseOfflineCache(err) {
@@ -18,7 +19,7 @@ function cachedRequest(path, query, ttlSeconds = 60, options = {}) {
     .catch((err) => {
       if (!shouldUseOfflineCache(err)) throw err;
       const cached = cacheGet(cacheKey);
-      if (cached) return cached;
+      if (cached) return formatDateTimeFields(cached);
       throw err;
     });
 }
@@ -45,7 +46,7 @@ export const taskAPI = {
       .catch((err) => {
         if (!shouldUseOfflineCache(err)) throw err;
         const cached = cacheGet(cacheKey);
-        if (cached) return cached;
+        if (cached) return formatDateTimeFields(cached);
         throw err;
       });
   },

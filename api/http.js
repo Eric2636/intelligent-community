@@ -1,4 +1,5 @@
 import config from '../config';
+import { formatDateTimeFields } from '../utils/date';
 
 const DEFAULT_TIMEOUT = 15000;
 
@@ -95,7 +96,7 @@ export function request({ method = 'GET', path, query, data, auth = true, timeou
           reject(err);
           return;
         }
-        resolve(res.data);
+        resolve(formatDateTimeFields(res.data));
       },
       fail: (err) => {
         try {
