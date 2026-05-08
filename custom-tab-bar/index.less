@@ -3,11 +3,12 @@
 .custom-tab-bar {
   --td-tab-bar-height: @tab-bar-height;
   padding-bottom: env(safe-area-inset-bottom);
-  background: @bg-color-white;
-  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.92);
+  border-top: 1rpx solid rgba(60, 60, 67, 0.1);
+  box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, 0.04);
 
   &-item {
     margin: 0;
-    padding: 16rpx @spacing-page;
+    padding: 14rpx @spacing-page 16rpx;
   }
 }

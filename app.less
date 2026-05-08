@@ -1,9 +1,12 @@
 /**app.wxss**/
 /* 禁止整页横向滚动，避免出现横向滚动条 */
 page {
-  background-color: #f3f3f3;
+  background-color: #f5f5f7;
   overflow-x: hidden;
   box-sizing: border-box;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* 全局隐藏滚动条（仍可滚动） */
@@ -16,18 +19,18 @@ scroll-view::-webkit-scrollbar {
 
 .page {
   height: 100vh;
-  background-color: #fff;
+  background-color: #f5f5f7;
   overflow-x: hidden;
 }
 
 /* 后台发布内容的标签（所属单位 / 网站管理员） */
 .admin-tag {
   display: inline-block;
-  padding: 2rpx 10rpx;
+  padding: 4rpx 12rpx;
   font-size: 20rpx;
   line-height: 1.6;
-  color: #0052d9;
-  background: #e8f0fe;
+  color: #007aff;
+  background: rgba(0, 122, 255, 0.1);
   border-radius: 999rpx;
   max-width: 320rpx;
   overflow: hidden;

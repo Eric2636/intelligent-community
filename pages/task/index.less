@@ -3,14 +3,14 @@
 .task-page {
   min-height: 100vh;
   padding-bottom: 140rpx;
-  background-color: @bg-color;
+  background: @bg-color;
   overflow-x: hidden;
 }
 
 .task-search-bar {
-  padding: 24rpx @spacing-page;
-  background: @bg-color-white;
-  border-bottom: 1rpx solid @gray3;
+  padding: 20rpx @spacing-page 18rpx;
+  background: rgba(245, 245, 247, 0.94);
+  border-bottom: 1rpx solid rgba(60, 60, 67, 0.08);
 }
 
 .task-search-bar__row {
@@ -20,6 +20,7 @@
   padding: 0 24rpx 0 20rpx;
   background: @bg-color-section;
   border-radius: 36rpx;
+  border: 1rpx solid rgba(60, 60, 67, 0.06);
 }
 
 .task-search-bar__icon {
@@ -95,15 +96,16 @@
 }
 
 .task-list {
-  padding: @spacing-page;
+  padding: 24rpx @spacing-page @spacing-page;
 }
 
 .task-card {
   position: relative;
-  padding: @spacing-card;
-  margin-bottom: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 22rpx;
   background: @bg-color-white;
   border-radius: @radius-card;
+  border: 1rpx solid rgba(60, 60, 67, 0.08);
   box-shadow: @shadow-card;
 
   &--with-tag {
@@ -116,13 +118,13 @@
     right: 16rpx;
     font-size: 22rpx;
     padding: 4rpx 12rpx;
-    border-radius: 8rpx;
+    border-radius: 999rpx;
 
-    &--pending_take { background: #e8f0fe; color: @brand7-normal; }
-    &--in_progress { background: #fff7e6; color: #ed7b2f; }
-    &--pending_confirm { background: #e6f7ff; color: #0d8ff2; }
-    &--completed { background: #e8f5e9; color: #52c41a; }
-    &--cancelled { background: @gray3; color: @gy2; }
+    &--pending_take { background: rgba(0, 122, 255, 0.1); color: @brand7-normal; }
+    &--in_progress { background: rgba(255, 149, 0, 0.12); color: @color-price; }
+    &--pending_confirm { background: rgba(90, 200, 250, 0.14); color: #007aff; }
+    &--completed { background: rgba(52, 199, 89, 0.12); color: @color-success; }
+    &--cancelled { background: @bg-color-section; color: @gy2; }
   }
 
   &__reward {
@@ -152,7 +154,7 @@
     width: 160rpx;
     height: 120rpx;
     flex-shrink: 0;
-    border-radius: 12rpx;
+    border-radius: 18rpx;
     overflow: hidden;
     background: @gray3;
   }
@@ -226,4 +228,5 @@
   align-items: center;
   justify-content: center;
   box-shadow: @shadow-card-hover;
+  border: 1rpx solid rgba(255, 255, 255, 0.42);
 }

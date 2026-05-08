@@ -7,9 +7,9 @@
 }
 
 .errand-search-bar {
-  padding: 24rpx @spacing-page;
-  background: @bg-color-white;
-  border-bottom: 1rpx solid @gray3;
+  padding: 20rpx @spacing-page 18rpx;
+  background: rgba(245, 245, 247, 0.94);
+  border-bottom: 1rpx solid rgba(60, 60, 67, 0.08);
 }
 
 .errand-search-bar__row {
@@ -19,6 +19,7 @@
   padding: 0 24rpx 0 20rpx;
   background: @bg-color-section;
   border-radius: 36rpx;
+  border: 1rpx solid rgba(60, 60, 67, 0.06);
 }
 
 .errand-search-bar__icon {
@@ -49,15 +50,19 @@
 
 .errand-order {
   display: flex;
-  margin-top: 40rpx;
-  gap: 24rpx;
+  margin-top: 28rpx;
+  gap: 12rpx;
 
   &__item {
+    padding: 10rpx 22rpx;
     font-size: 26rpx;
     color: @gy2;
+    background: transparent;
+    border-radius: 999rpx;
 
     &--active {
       color: @color-primary;
+      background: rgba(0, 122, 255, 0.1);
       font-weight: 500;
     }
   }
@@ -144,10 +149,11 @@
 
 .errand-item {
   position: relative;
-  padding: 28rpx @spacing-card;
-  margin-bottom: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 22rpx;
   background: @bg-color-white;
   border-radius: @radius-card;
+  border: 1rpx solid rgba(60, 60, 67, 0.08);
   box-shadow: @shadow-card;
   min-height: 120rpx;
   box-sizing: border-box;
@@ -157,7 +163,8 @@
   }
 
   &--pinned {
-    border-left: 6rpx solid @color-primary;
+    border-color: rgba(0, 122, 255, 0.2);
+    box-shadow: 0 10rpx 30rpx rgba(0, 122, 255, 0.08);
   }
 
   &--pinned .errand-item__title {
@@ -235,4 +242,5 @@
   align-items: center;
   justify-content: center;
   box-shadow: @shadow-card-hover;
+  border: 1rpx solid rgba(255, 255, 255, 0.42);
 }

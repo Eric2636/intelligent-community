@@ -15,9 +15,10 @@
 
 .detail-card {
   margin: @spacing-page;
-  padding: 28rpx;
+  padding: 32rpx;
   background: @bg-color-white;
   border-radius: @radius-card;
+  border: 1rpx solid rgba(60, 60, 67, 0.08);
   box-shadow: @shadow-card;
 
   &__reward {
@@ -34,10 +35,10 @@
     border-radius: @radius-sm;
     margin-bottom: 16rpx;
 
-    &--pending_take { background: #e8f0fe; color: @color-primary; }
-    &--in_progress { background: #fff7e6; color: @color-warning; }
-    &--pending_confirm { background: #e6f7ff; color: #0d8ff2; }
-    &--completed { background: #e8f5e9; color: @color-success; }
+    &--pending_take { background: rgba(0, 122, 255, 0.1); color: @color-primary; }
+    &--in_progress { background: rgba(255, 159, 10, 0.12); color: @color-warning; }
+    &--pending_confirm { background: rgba(90, 200, 250, 0.14); color: #007aff; }
+    &--completed { background: rgba(52, 199, 89, 0.12); color: @color-success; }
     &--cancelled { background: @gray3; color: @gy2; }
   }
 
@@ -95,7 +96,7 @@
   &__proof {
     margin-top: 20rpx;
     padding-top: 20rpx;
-    border-top: 1rpx solid @gray3;
+    border-top: 1rpx solid rgba(60, 60, 67, 0.1);
     font-size: 26rpx;
     color: @gy2;
 
@@ -130,6 +131,7 @@
     font-size: 28rpx;
     background: @bg-color-white;
     border-radius: @radius-sm;
+    border: 1rpx solid rgba(60, 60, 67, 0.08);
     box-sizing: border-box;
   }
 }
@@ -152,6 +154,7 @@
   padding: 40rpx;
   background: @bg-color-white;
   border-radius: @radius-card;
+  border: 1rpx solid rgba(60, 60, 67, 0.08);
   box-shadow: @shadow-card;
 }
 
@@ -184,7 +187,7 @@
   padding: 20rpx;
   margin-bottom: @spacing-page;
   font-size: 26rpx;
-  border: 1rpx solid @gray3;
+  border: 1rpx solid rgba(60, 60, 67, 0.12);
   border-radius: @radius-sm;
   box-sizing: border-box;
 }
