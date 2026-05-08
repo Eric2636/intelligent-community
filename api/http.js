@@ -2,6 +2,7 @@ import config from '../config';
 import { formatDateTimeFields } from '../utils/date';
 
 const DEFAULT_TIMEOUT = 15000;
+const MINI_API_ERROR_LOG_PATH = 'api/logs/mini-api-errors';
 
 function getBaseUrl() {
   const app = getApp();
@@ -48,6 +49,64 @@ export function getToken() {
   }
 }
 
+function getClientInfo() {
+  try {
+    const account = wx.getAccountInfoSync ? wx.getAccountInfoSync() : {};
+    const sys = wx.getSystemInfoSync ? wx.getSystemInfoSync() : {};
+    return {
+      platform: sys.platform || '',
+      appVersion: account && account.miniProgram ? account.miniProgram.version || '' : '',
+      sdkVersion: sys.SDKVersion || '',
+      system: sys.system || '',
+    };
+  } catch (e) {
+    return {};
+  }
+}
+
+function reportMiniApiErrorLog({ method, path, url, query, data, statusCode, responseData, error }) {
+  if (String(path || '').replace(/^\/+/, '') === MINI_API_ERROR_LOG_PATH) return;
+
+  const header = { 'content-type': 'application/json' };
+  const token = getToken();
+  if (token) header.Authorization = `Bearer ${token}`;
+
+  const payload = {
+    ...getClientInfo(),
+    method,
+    path,
+    url,
+    statusCode,
+    errorMessage:
+      (error && (error.message || error.errMsg)) ||
+      (responseData && (responseData.message || responseData.hint)) ||
+      `HTTP ${statusCode || 'FAIL'}`,
+    requestData: { query: query || null, data: data || null },
+    responseData: responseData || null,
+    stack: error && error.stack ? String(error.stack) : '',
+  };
+
+  const send = (networkType) => {
+    wx.request({
+      url: buildUrl(MINI_API_ERROR_LOG_PATH),
+      method: 'POST',
+      data: { ...payload, networkType: networkType || '' },
+      timeout: 5000,
+      header,
+      fail: () => {},
+    });
+  };
+
+  try {
+    wx.getNetworkType({
+      success: (res) => send(res.networkType),
+      fail: () => send(''),
+    });
+  } catch (e) {
+    send('');
+  }
+}
+
 export function request({ method = 'GET', path, query, data, auth = true, timeout = DEFAULT_TIMEOUT } = {}) {
   const header = { 'content-type': 'application/json' };
   if (auth) {
@@ -59,19 +118,6 @@ export function request({ method = 'GET', path, query, data, auth = true, timeou
   }
   const url = buildUrl(path, query);
 
-  // 让“是否真正发出请求”在控制台可见（开发调试用）
-  try {
-    console.log('[http.request]', {
-      method,
-      url,
-      auth,
-      hasToken: Boolean(header.Authorization),
-      timeout,
-    });
-  } catch (e) {
-    /* ignore */
-  }
-
   return new Promise((resolve, reject) => {
     wx.request({
       url,
@@ -80,11 +126,6 @@ export function request({ method = 'GET', path, query, data, auth = true, timeou
       timeout,
       header,
       success: (res) => {
-        try {
-          console.log('[http.response]', { url, statusCode: res.statusCode, data: res.data });
-        } catch (e) {
-          /* ignore */
-        }
         const code = res.statusCode;
         if (code != null && code >= 400) {
           const data = res.data && typeof res.data === 'object' ? res.data : {};
@@ -93,6 +134,16 @@ export function request({ method = 'GET', path, query, data, auth = true, timeou
           const err = new Error(msg);
           err.statusCode = code;
           err.body = data;
+          reportMiniApiErrorLog({
+            method,
+            path,
+            url,
+            query,
+            data,
+            statusCode: code,
+            responseData: data,
+            error: err,
+          });
           reject(err);
           return;
         }
@@ -104,6 +155,16 @@ export function request({ method = 'GET', path, query, data, auth = true, timeou
         } catch (e) {
           /* ignore */
         }
+        reportMiniApiErrorLog({
+          method,
+          path,
+          url,
+          query,
+          data,
+          statusCode: null,
+          responseData: err,
+          error: err,
+        });
         reject(err);
       },
     });
