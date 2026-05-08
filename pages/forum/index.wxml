@@ -53,6 +53,7 @@
         <template is="forumListMedia" data="{{item: item}}" />
         <view class="post-item__meta">
           <text>{{item.authorName}}</text>
+          <text wx:if="{{item.adminLabel}}" class="admin-tag admin-tag--corner">{{item.adminLabel}}</text>
           <text>{{item.replyCount}} 回复</text>
           <text>{{item.createTime}}</text>
         </view>
@@ -76,6 +77,7 @@
             <template is="forumListMedia" data="{{item: item}}" />
             <view class="post-item__meta">
               <text>{{item.authorName}}</text>
+              <text wx:if="{{item.adminLabel}}" class="admin-tag admin-tag--corner">{{item.adminLabel}}</text>
               <text>{{item.replyCount}} 回复</text>
               <text>{{item.createTime}}</text>
             </view>
@@ -97,6 +99,7 @@
           <template is="forumListMedia" data="{{item: item}}" />
           <view class="post-item__meta">
             <text>{{item.authorName}}</text>
+            <text wx:if="{{item.adminLabel}}" class="admin-tag admin-tag--corner">{{item.adminLabel}}</text>
             <text>{{item.replyCount}} 回复</text>
             <text>{{item.createTime}}</text>
           </view>

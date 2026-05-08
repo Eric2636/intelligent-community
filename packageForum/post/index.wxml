@@ -9,6 +9,7 @@
         <view class="post-card__head-main">
           <view class="post-card__author">
             <text>{{post.authorName}}</text>
+            <text wx:if="{{post.adminLabel}}" class="admin-tag">{{post.adminLabel}}</text>
             <text class="post-card__time">{{post.createTime}}</text>
           </view>
         </view>

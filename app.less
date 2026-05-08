@@ -19,3 +19,27 @@ scroll-view::-webkit-scrollbar {
   background-color: #fff;
   overflow-x: hidden;
 }
+
+/* 后台发布内容的标签（所属单位 / 网站管理员） */
+.admin-tag {
+  display: inline-block;
+  padding: 2rpx 10rpx;
+  font-size: 20rpx;
+  line-height: 1.6;
+  color: #0052d9;
+  background: #e8f0fe;
+  border-radius: 999rpx;
+  max-width: 320rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 贴合列表卡片边框的右上角角标 */
+.admin-tag--corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(-16rpx, 16rpx);
+  margin-left: 0;
+}

@@ -30,7 +30,11 @@
         </view>
       </view>
       <view class="detail-card__row"><text class="detail-card__label">地点</text>{{task.location}}</view>
-      <view class="detail-card__row"><text class="detail-card__label">发布者</text>{{task.publisherName}}</view>
+      <view class="detail-card__row">
+        <text class="detail-card__label">发布者</text>
+        {{task.publisherName}}
+        <text wx:if="{{task.adminLabel}}" class="admin-tag">{{task.adminLabel}}</text>
+      </view>
       <view class="detail-card__row" wx:if="{{task.takerName}}"><text class="detail-card__label">接单人</text>{{task.takerName}}</view>
       <view class="detail-card__row"><text class="detail-card__label">发布时间</text>{{task.createdAt}}</view>
       <view wx:if="{{task.status === 'in_progress' && task.claimedAt}}" class="detail-card__row"><text class="detail-card__label">领取时间</text>{{task.claimedAt}}</view>

@@ -53,6 +53,7 @@
       <text class="task-card__desc">{{card.desc}}</text>
       <view class="task-card__meta" wx:if="{{card.location}}">{{card.location}} · {{card.createdAt}}</view>
       <view class="task-card__meta" wx:else>{{card.createdAt}}</view>
+      <text wx:if="{{card.adminLabel}}" class="admin-tag admin-tag--corner">{{card.adminLabel}}</text>
     </view>
     <view wx:if="{{list.length === 0}}" class="task-empty">暂无可领取任务</view>
     <view wx:if="{{listTotal > maxRender}}" class="task-more-hint">已显示前 {{maxRender}} 条，共 {{listTotal}} 条，请用搜索缩小范围</view>

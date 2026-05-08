@@ -262,15 +262,24 @@
   align-items: center;
   gap: 16rpx;
 
-  &__input {
+  &__input-wrap {
     flex: 1;
     min-width: 0;
     height: 72rpx;
-    padding: 0 20rpx;
-    font-size: 28rpx;
+    padding: 0 8rpx 0 20rpx;
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
     background: @bg-color-section;
     border-radius: 36rpx;
     box-sizing: border-box;
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    font-size: 28rpx;
   }
 
   &__side {
@@ -281,14 +290,14 @@
   }
 
   &__addimg {
-    width: 64rpx;
-    height: 64rpx;
-    line-height: 64rpx;
-    text-align: center;
-    font-size: 26rpx;
+    flex-shrink: 0;
+    width: 56rpx;
+    height: 56rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: @color-primary;
-    background: @bg-color-section;
-    border-radius: 12rpx;
+    border-radius: 50%;
   }
 
   &__picked {

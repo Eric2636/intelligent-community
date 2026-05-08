@@ -32,6 +32,9 @@
       <view class="detail-card__price" wx:if="{{item.price}}">{{item.price}}{{item.unit}}</view>
       <view class="detail-card__title">{{item.title}}</view>
       <view class="detail-card__meta">{{item.createdAt}}</view>
+      <view class="detail-card__meta" wx:if="{{item.adminLabel}}">
+        <text class="admin-tag">{{item.adminLabel}}</text>
+      </view>
       <view class="detail-card__desc">{{item.desc}}</view>
       <view class="detail-card__contact">联系：{{item.contact}}</view>
     </view>
@@ -133,9 +136,13 @@
       </view>
 
       <view class="comment-editor">
-        <input class="comment-editor__input" placeholder="文字或图片（支持系统表情）…" value="{{commentInput}}" maxlength="1000" bindinput="onCommentInput" />
+        <view class="comment-editor__input-wrap">
+          <input class="comment-editor__input" placeholder="文字或图片（支持系统表情）…" value="{{commentInput}}" maxlength="1000" bindinput="onCommentInput" />
+          <view class="comment-editor__addimg" bindtap="onAddCommentImages" wx:if="{{commentImages.length < 3}}">
+            <t-icon name="image" size="36rpx" />
+          </view>
+        </view>
         <view class="comment-editor__side">
-          <view class="comment-editor__addimg" bindtap="onAddCommentImages" wx:if="{{commentImages.length < 3}}">图</view>
           <t-button size="small" theme="primary" bindtap="submitComment" loading="{{commentSubmitting}}">发送</t-button>
         </view>
       </view>

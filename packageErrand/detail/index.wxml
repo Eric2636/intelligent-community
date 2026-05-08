@@ -8,6 +8,7 @@
       <view class="errand-detail-card__head">
         <view class="errand-detail-card__author">
           <text>{{errand.authorName}}</text>
+          <text wx:if="{{errand.adminLabel}}" class="admin-tag">{{errand.adminLabel}}</text>
           <text class="errand-detail-card__time">{{errand.createTime}}</text>
         </view>
       </view>

@@ -53,6 +53,7 @@
         <view class="errand-item__meta">
           <text class="errand-item__status">{{item.statusText}}</text>
           <text>{{item.authorName}}</text>
+          <text wx:if="{{item.adminLabel}}" class="admin-tag admin-tag--corner">{{item.adminLabel}}</text>
           <text>{{item.replyCount}} 回复</text>
           <text>{{item.createTime}}</text>
         </view>
@@ -77,6 +78,7 @@
             <view class="errand-item__meta">
               <text class="errand-item__status">{{item.statusText}}</text>
               <text>{{item.authorName}}</text>
+              <text wx:if="{{item.adminLabel}}" class="admin-tag admin-tag--corner">{{item.adminLabel}}</text>
               <text>{{item.replyCount}} 回复</text>
               <text>{{item.createTime}}</text>
             </view>
@@ -99,6 +101,7 @@
           <view class="errand-item__meta">
             <text class="errand-item__status">{{item.statusText}}</text>
             <text>{{item.authorName}}</text>
+            <text wx:if="{{item.adminLabel}}" class="admin-tag admin-tag--corner">{{item.adminLabel}}</text>
             <text>{{item.replyCount}} 回复</text>
             <text>{{item.createTime}}</text>
           </view>

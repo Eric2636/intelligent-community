@@ -1,6 +1,15 @@
 import config from '~/config';
 
-const { baseUrl } = config;
+function normalizeBaseUrl(raw) {
+  return String(raw || '').replace(/\/+$/, '');
+}
+
+function getBaseUrl() {
+  // 优先新字段，兼容旧字段
+  const v = config.apiBaseUrl || config.baseUrl || '';
+  return normalizeBaseUrl(v);
+}
+
 const delay = config.isMock ? 500 : 0;
 function request(url, method = 'GET', data = {}) {
   const header = {
@@ -13,6 +22,7 @@ function request(url, method = 'GET', data = {}) {
     header.Authorization = `Bearer ${tokenString}`;
   }
   return new Promise((resolve, reject) => {
+    const baseUrl = getBaseUrl();
     wx.request({
       url: baseUrl + url,
       method,

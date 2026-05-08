@@ -23,19 +23,11 @@ App({
       /* ignore */
     }
 
-    let apiBase;
-    if (config.useLocalDevApi) {
-      apiBase = `http://${config.devLanHost}:${config.devPort}`;
-      try {
-        if (wx.getSystemInfoSync().platform === 'devtools') {
-          apiBase = `http://127.0.0.1:${config.devPort}`;
-        }
-      } catch (e) {
-        /* ignore */
-      }
-    } else {
-      apiBase = String(config.productionApiBase || '').replace(/\/+$/, '');
-    }
+    const apiBase = String(
+      config.apiBaseUrl ||
+        config.productionApiBase ||
+        (config.devLanHost ? `http://${config.devLanHost}:${config.devPort}` : ''),
+    ).replace(/\/+$/, '');
     this.globalData.apiBaseUrl = apiBase;
     this.globalData.offlineMode = false;
 
