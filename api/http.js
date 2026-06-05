@@ -20,7 +20,7 @@ function getBaseUrl() {
   return `http://127.0.0.1:${config.devPort}`;
 }
 
-function buildUrl(path, query) {
+export function buildUrl(path, query) {
   const base = getBaseUrl().replace(/\/+$/, '');
   const p = String(path || '').replace(/^\/+/, '');
   const qs =
