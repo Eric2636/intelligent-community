@@ -1,5 +1,5 @@
 <view class="my-tasks-page">
-  <view class="my-tasks-tabs">
+  <view class="my-tasks-tabs" wx:if="{{showTabs}}">
     <view
       class="my-tasks-tabs__item {{activeTab === 'published' ? 'my-tasks-tabs__item--active' : ''}}"
       data-tab="published"
@@ -62,7 +62,83 @@
             <view class="task-card__meta" wx:if="{{card.location}}">{{card.location}} · {{card.createdAt}}</view>
             <view class="task-card__meta" wx:else>{{card.createdAt}}</view>
           </view>
-          <view wx:if="{{publishedList.length === 0}}" class="task-empty">暂无发布的任务</view>
+          <t-empty wx:if="{{!loading && publishedList.length === 0}}" description="暂无发布的任务" />
+        </view>
+
+        <view wx:if="{{activeTab === 'draft'}}" class="task-list list-fade-in">
+          <view
+            class="task-card task-card--with-tag"
+            wx:for="{{draftList}}"
+            wx:for-item="card"
+            wx:for-index="cardIdx"
+            wx:key="id"
+            data-id="{{card.id}}"
+            bindtap="goDetail"
+          >
+            <view class="task-card__tag task-card__tag--{{card.status}}">{{card.statusLabel}}</view>
+            <view class="task-card__reward">¥{{card.reward}}</view>
+            <text class="task-card__title">{{card.title}}</text>
+            <view class="task-card__thumbs" wx:if="{{card.images.length}}">
+              <block wx:for="{{card.images}}" wx:for-item="img" wx:for-index="imgIdx" wx:key="*this">
+                <view wx:if="{{imgIdx < 3}}" class="task-card__thumb-wrap">
+                  <image
+                    class="task-card__thumb"
+                    src="{{img}}"
+                    mode="aspectFill"
+                    lazy-load="{{true}}"
+                    data-kind="draft"
+                    data-card-index="{{cardIdx}}"
+                    data-current="{{img}}"
+                    catchtap="onPreviewListImages"
+                  />
+                  <view wx:if="{{imgIdx === 2 && card.images.length > 3}}" class="task-card__thumb-more">+{{card.images.length - 3}}</view>
+                </view>
+              </block>
+            </view>
+            <view class="task-card__media-hint" wx:if="{{card.videos.length}}">含视频</view>
+            <text class="task-card__desc">{{card.desc}}</text>
+            <view class="task-card__meta" wx:if="{{card.location}}">{{card.location}} · {{card.createdAt}}</view>
+            <view class="task-card__meta" wx:else>{{card.createdAt}}</view>
+          </view>
+          <t-empty wx:if="{{!loading && draftList.length === 0}}" description="{{emptyText}}" />
+        </view>
+
+        <view wx:if="{{activeTab === 'cancelled'}}" class="task-list list-fade-in">
+          <view
+            class="task-card task-card--with-tag"
+            wx:for="{{cancelledList}}"
+            wx:for-item="card"
+            wx:for-index="cardIdx"
+            wx:key="id"
+            data-id="{{card.id}}"
+            bindtap="goDetail"
+          >
+            <view class="task-card__tag task-card__tag--{{card.status}}">{{card.statusLabel}}</view>
+            <view class="task-card__reward">¥{{card.reward}}</view>
+            <text class="task-card__title">{{card.title}}</text>
+            <view class="task-card__thumbs" wx:if="{{card.images.length}}">
+              <block wx:for="{{card.images}}" wx:for-item="img" wx:for-index="imgIdx" wx:key="*this">
+                <view wx:if="{{imgIdx < 3}}" class="task-card__thumb-wrap">
+                  <image
+                    class="task-card__thumb"
+                    src="{{img}}"
+                    mode="aspectFill"
+                    lazy-load="{{true}}"
+                    data-kind="cancelled"
+                    data-card-index="{{cardIdx}}"
+                    data-current="{{img}}"
+                    catchtap="onPreviewListImages"
+                  />
+                  <view wx:if="{{imgIdx === 2 && card.images.length > 3}}" class="task-card__thumb-more">+{{card.images.length - 3}}</view>
+                </view>
+              </block>
+            </view>
+            <view class="task-card__media-hint" wx:if="{{card.videos.length}}">含视频</view>
+            <text class="task-card__desc">{{card.desc}}</text>
+            <view class="task-card__meta" wx:if="{{card.location}}">{{card.location}} · {{card.createdAt}}</view>
+            <view class="task-card__meta" wx:else>{{card.createdAt}}</view>
+          </view>
+          <t-empty wx:if="{{!loading && cancelledList.length === 0}}" description="{{emptyText}}" />
         </view>
 
         <view wx:if="{{activeTab === 'taken'}}" class="task-list list-fade-in">
@@ -100,7 +176,7 @@
             <view class="task-card__meta" wx:if="{{card.location}}">{{card.location}} · {{card.createdAt}}</view>
             <view class="task-card__meta" wx:else>{{card.createdAt}}</view>
           </view>
-          <view wx:if="{{takenList.length === 0}}" class="task-empty">暂无领取的任务</view>
+          <t-empty wx:if="{{!loading && takenList.length === 0}}" description="暂无领取的任务" />
         </view>
       </block>
     </t-pull-down-refresh>

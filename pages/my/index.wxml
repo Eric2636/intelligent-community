@@ -1,11 +1,9 @@
-<t-toast id="t-toast" />
-
 <view class="my">
   <image class="my__bg" src="/static/bg_navbar.png" />
   <nav title-text="我的" />
   <view class="my-head">
     <view wx:if="{{isLoad}}" class="my-head__user" bindtap="onNavigateTo">
-      <t-avatar wx:if="{{personalInfo.image || personalInfo.avatar}}" image="{{personalInfo.image || personalInfo.avatar}}" size="large" class="my-head__avatar" />
+      <t-avatar wx:if="{{personalInfo.avatar || personalInfo.avatarUrl || personalInfo.image}}" image="{{personalInfo.avatar || personalInfo.avatarUrl || personalInfo.image}}" size="large" class="my-head__avatar" />
       <t-avatar wx:else icon="user" size="large" class="my-head__avatar" />
       <view class="my-head__info">
         <view class="my-head__name">{{personalInfo.name || '业主'}}</view>
@@ -16,14 +14,21 @@
       </view>
       <t-icon name="chevron-right" size="40rpx" color="#999" />
     </view>
-    <view wx:else class="my-head__guest" bindtap="onLogin">
+    <button
+      wx:else
+      class="my-head__guest my-head__login-btn"
+      loading="{{isLoggingIn}}"
+      disabled="{{isLoggingIn}}"
+      open-type="getPhoneNumber"
+      bindgetphonenumber="onGetPhoneNumber"
+    >
       <t-avatar icon="user" size="large" class="my-head__avatar" />
       <view class="my-head__info">
-        <view class="my-head__name">登录 / 注册</view>
-        <view class="my-head__desc">登录后使用完整功能</view>
+        <view class="my-head__name">手机号验证登录</view>
+        <view class="my-head__desc">验证手机号后使用完整社区功能</view>
       </view>
       <t-icon name="chevron-right" size="40rpx" color="#999" />
-    </view>
+    </button>
   </view>
 
   <view class="my-sections">
@@ -46,5 +51,9 @@
         </view>
       </view>
     </view>
+  </view>
+
+  <view class="my-logout">
+    <button class="my-logout__button" bindtap="onLogout">退出登录</button>
   </view>
 </view>

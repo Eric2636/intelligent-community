@@ -2,8 +2,7 @@
  * 选择本地图片/视频并上传到腾讯云 COS，返回可直接用于 <image>/<video> src 的 HTTPS URL。
  */
 
-import COS from './cos-wx-sdk-v5.min.js';
-import { request } from '~/api/http';
+import { buildUrl, getToken } from '~/api/http';
 
 const DEFAULT_MAX_IMAGES = 9;
 const DEFAULT_MAX_VIDEOS = 2;
@@ -19,18 +18,6 @@ function extFromPath(p) {
   return m ? m[1].toLowerCase() : '';
 }
 
-function assertFileExtAllowedForFolder(ext, folder) {
-  const { type } = parseCosFolder(folder);
-  const e = String(ext || '').toLowerCase();
-  if (!e) {
-    throw new Error('无法识别文件类型，请仅选择图片或视频');
-  }
-  const ok = type === 'vid' ? VIDEO_EXTS.has(e) : IMAGE_EXTS.has(e);
-  if (!ok) {
-    throw new Error(type === 'vid' ? '仅支持上传常见视频格式' : '仅支持上传常见图片格式');
-  }
-}
-
 /** folder 形如 forum/posts/img、task/publish/vid（与 chooseAndUploadMedia 传入的 folder + /img|/vid 一致） */
 function parseCosFolder(folder) {
   const parts = String(folder || '')
@@ -44,13 +31,16 @@ function parseCosFolder(folder) {
   return { module, type };
 }
 
-function publicObjectUrl(bucket, region, key) {
-  const path = key
-    .split('/')
-    .filter(Boolean)
-    .map(encodeURIComponent)
-    .join('/');
-  return `https://${bucket}.cos.${region}.myqcloud.com/${path}`;
+function assertFileExtAllowedForFolder(ext, folder) {
+  const { type } = parseCosFolder(folder);
+  const e = String(ext || '').toLowerCase();
+  if (!e) {
+    throw new Error('无法识别文件类型，请仅选择图片或视频');
+  }
+  const ok = type === 'vid' ? VIDEO_EXTS.has(e) : IMAGE_EXTS.has(e);
+  if (!ok) {
+    throw new Error(type === 'vid' ? '仅支持上传常见视频格式' : '仅支持上传常见图片格式');
+  }
 }
 
 function normalizeWxTempFilePath(p) {
@@ -74,7 +64,7 @@ function tryStat(path) {
         success: () => resolve({ ok: true, path }),
         fail: () => resolve({ ok: false, path }),
       });
-    } catch {
+    } catch (_) {
       resolve({ ok: false, path });
     }
   });
@@ -188,104 +178,42 @@ function formatUploadErr(err) {
   return detail ? `${msg} (${detail})` : msg;
 }
 
-async function fetchCosSts(module, type) {
-  const body = await request({
-    method: 'POST',
-    path: 'api/upload/cos/credentials',
-    data: { module, type },
-    auth: true,
-  });
-  if (body && body.credentials && body.bucket && body.region && body.allowPrefix) return body;
-  if (body && body.statusCode === 401) {
-    throw new Error(
-      '登录已失效或未通过校验，无法获取上传凭证。请重新编译/打开小程序；若刚改过后端 JWT_SECRET，需重新登录。',
-    );
+function parseUploadResponse(raw) {
+  if (raw && typeof raw === 'object') return raw;
+  try {
+    return JSON.parse(raw || '{}');
+  } catch (_) {
+    return {};
   }
-  const msg =
-    (body && (body.message || body.errMsg)) || (typeof body === 'string' ? body : '') || '获取上传凭证失败';
-  throw new Error(msg);
 }
 
-function createCosClient(sts) {
-  const { credentials, expiredTime } = sts;
-  const { tmpSecretId, tmpSecretKey, sessionToken } = credentials;
-  return new COS({
-    getAuthorization(options, callback) {
-      callback({
-        TmpSecretId: tmpSecretId,
-        TmpSecretKey: tmpSecretKey,
-        XCosSecurityToken: sessionToken,
-        ExpiredTime: expiredTime,
-      });
-    },
-  });
-}
-
-/** 内容 MD5（小写十六进制），用于秒传对象 Key；失败返回空串由上层回退为随机 Key */
-function getFileMd5Hex(filePath) {
-  return new Promise((resolve) => {
-    try {
-      if (!filePath || !wx.getFileInfo) {
-        resolve('');
-        return;
-      }
-      wx.getFileInfo({
-        filePath,
-        digestAlgorithm: 'md5',
-        success: (res) => {
-          const d = (res && res.digest) || '';
-          resolve(typeof d === 'string' ? d.toLowerCase() : '');
-        },
-        fail: () => resolve(''),
-      });
-    } catch {
-      resolve('');
-    }
-  });
-}
-
-function isCosNotFoundErr(err) {
-  if (!err) return false;
-  const code = err.statusCode || err.Code || err.code;
-  if (code === 404 || code === '404') return true;
-  const msg = String(err.message || err.error || err.errMsg || '');
-  return /404|NoSuchKey|not exist/i.test(msg);
-}
-
-function headObjectPromise(cos, bucket, region, key) {
+function uploadFilePromise(filePath, module, type) {
   return new Promise((resolve, reject) => {
-    cos.headObject(
-      {
-        Bucket: bucket,
-        Region: region,
-        Key: key,
-      },
-      (err, data) => {
-        if (err) {
-          if (isCosNotFoundErr(err)) resolve(false);
-          else reject(err);
+    const header = {};
+    const token = getToken();
+    if (token) header.Authorization = `Bearer ${token}`;
+    const ext = extFromPath(filePath) || (type === 'vid' ? 'mp4' : 'jpg');
+    wx.uploadFile({
+      url: buildUrl('api/upload/media'),
+      filePath,
+      name: 'file',
+      formData: { module, type, filenameHint: `media.${ext}` },
+      header,
+      success: (res) => {
+        const data = parseUploadResponse(res.data);
+        const url = data.url || (data.data && data.data.url);
+        if (res.statusCode >= 400) {
+          reject(new Error(data.message || data.hint || `HTTP ${res.statusCode}`));
           return;
         }
-        resolve(Boolean(data));
+        if (!url) {
+          reject(new Error(data.message || '上传失败'));
+          return;
+        }
+        resolve(url);
       },
-    );
-  });
-}
-
-function uploadFilePromise(cos, bucket, region, key, filePath) {
-  return new Promise((resolve, reject) => {
-    cos.uploadFile(
-      {
-        Bucket: bucket,
-        Region: region,
-        Key: key,
-        FilePath: filePath,
-      },
-      (err) => {
-        if (err) reject(new Error(formatUploadErr(err)));
-        else resolve();
-      },
-    );
+      fail: reject,
+    });
   });
 }
 
@@ -297,8 +225,10 @@ export async function uploadLocalFilesToCloud(tempFilePaths, folder) {
   const paths = Array.isArray(tempFilePaths) ? tempFilePaths.filter(Boolean) : [];
   if (!paths.length) return [];
 
+  const folderMeta = parseCosFolder(folder);
   for (let i = 0; i < paths.length; i += 1) {
-    assertFileExtAllowedForFolder(extFromPath(paths[i]), folder);
+    const ext = extFromPath(paths[i]);
+    if (ext || folderMeta.type === 'vid') assertFileExtAllowedForFolder(ext, folder);
   }
 
   const settled = await Promise.allSettled(paths.map((p) => persistTempFileForUpload(p)));
@@ -313,55 +243,11 @@ export async function uploadLocalFilesToCloud(tempFilePaths, folder) {
   }
 
   try {
-    const { module, type } = parseCosFolder(folder);
+    const { module, type } = folderMeta;
     const realPaths = await Promise.all(persisted.map((p) => resolveExistingFilePath(p)));
-    const digests = await Promise.all(realPaths.map((p) => getFileMd5Hex(p)));
-
-    const sts = await fetchCosSts(module, type);
-    const { bucket, region, allowPrefix } = sts;
-    const keyPrefix = String(allowPrefix || '').replace(/\*+$/, '');
-    if (!keyPrefix || keyPrefix.includes('..')) {
-      throw new Error('上传路径无效');
-    }
-
-    const cos = createCosClient(sts);
-    const baseTs = Date.now();
-
-    /** @type {Map<string, Promise<string>>} 同批次相同内容共用一个上传/探测结果 */
-    const inflightByKey = new Map();
 
     const urls = await Promise.all(
-      paths.map((_, i) => {
-        const ext = extFromPath(paths[i]);
-        const digest = digests[i];
-        const md5Key =
-          digest && /^[a-f0-9]{32}$/.test(digest) ? `${keyPrefix}${digest}.${ext}` : '';
-        const fallbackKey = `${keyPrefix}${baseTs}_${i}_${Math.random().toString(36).slice(2, 10)}.${ext}`;
-        const objectKey = md5Key || fallbackKey;
-
-        if (inflightByKey.has(objectKey)) {
-          return inflightByKey.get(objectKey);
-        }
-
-        const p = (async () => {
-          const realPath = realPaths[i];
-          if (md5Key) {
-            try {
-              const exists = await headObjectPromise(cos, bucket, region, md5Key);
-              if (exists) return publicObjectUrl(bucket, region, md5Key);
-            } catch (e) {
-              console.warn('[cloudMedia] headObject 失败，将尝试直传', e);
-            }
-            await uploadFilePromise(cos, bucket, region, md5Key, realPath);
-            return publicObjectUrl(bucket, region, md5Key);
-          }
-          await uploadFilePromise(cos, bucket, region, fallbackKey, realPath);
-          return publicObjectUrl(bucket, region, fallbackKey);
-        })();
-
-        inflightByKey.set(objectKey, p);
-        return p;
-      }),
+      realPaths.map((realPath) => uploadFilePromise(realPath, module, type)),
     );
 
     return urls;

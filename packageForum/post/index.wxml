@@ -1,4 +1,4 @@
-<nav title-text="{{post ? post.title : '帖子'}}" show-back="{{true}}" />
+<nav title-text="{{post ? post.title : '帖子'}}" show-back="{{true}}" fallback-url="/pages/forum/index" />
 <view class="post-page">
   <view wx:if="{{loading}}" class="post-loading">
     <t-loading theme="dots" size="48rpx" />
@@ -6,6 +6,10 @@
   <block wx:elif="{{post}}">
     <view class="post-card">
       <view class="post-card__head">
+        <image wx:if="{{post.authorAvatar}}" class="post-card__avatar" src="{{post.authorAvatar}}" mode="aspectFill" />
+        <view wx:else class="post-card__avatar post-card__avatar--placeholder">
+          <t-icon name="user" size="38rpx" color="#8e8e93" />
+        </view>
         <view class="post-card__head-main">
           <view class="post-card__author">
             <text>{{post.authorName}}</text>
@@ -52,13 +56,17 @@
             <t-icon name="{{post.isFavorited ? 'star-filled' : 'star'}}" size="40rpx" />
             <text>{{post.isFavorited ? '已收藏' : '收藏'}}</text>
           </view>
+          <button class="post-card__btn post-card__share" open-type="share">
+            <t-icon name="share" size="40rpx" />
+            <text>分享</text>
+          </button>
         </view>
         <view wx:if="{{post.isAuthor}}" class="post-card__delete" catchtap="onDeletePost">
           <t-icon name="delete-1" size="36rpx" color="#b0b0b0" />
         </view>
       </view>
     </view>
-    <view class="post-replies">
+    <view id="post-comments" class="post-replies">
       <view class="post-replies__title">全部回复 ({{post.replies.length}})</view>
       <view
         class="reply-item"
@@ -67,6 +75,10 @@
         wx:for-index="rIndex"
         wx:key="id"
       >
+        <image wx:if="{{item.authorAvatar}}" class="reply-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
+        <view wx:else class="reply-item__avatar reply-item__avatar--placeholder">
+          <t-icon name="user" size="30rpx" color="#8e8e93" />
+        </view>
         <view class="reply-item__main">
           <view class="reply-item__head">
             <view class="reply-item__head-main">
@@ -127,9 +139,13 @@
               <t-icon name="delete-1" size="36rpx" color="#b0b0b0" />
             </view>
           </view>
+          <view wx:if="{{reactionPanelReplyId === item.id}}" class="reply-reaction-panel">
+            <emoji-panel emojis="{{replyReactionEmojis}}" bindselect="onReplyReactionSelect" />
+            <view wx:if="{{item.myReaction}}" class="reply-reaction-panel__clear" data-rid="{{item.id}}" catchtap="onClearReplyReaction">取消表情</view>
+          </view>
         </view>
       </view>
-      <view wx:if="{{post.replies.length === 0}}" class="post-replies__empty">暂无回复</view>
+      <view wx:if="{{post.replies.length === 0}}" class="post-replies__empty">暂无回复，来抢第一条评论</view>
     </view>
     <!-- 评论底栏：输入区 + 右侧工具与主操作 -->
     <view class="post-reply-bar">
@@ -155,29 +171,25 @@
           </view>
         </scroll-view>
       </view>
+      <emoji-panel wx:if="{{showEmojiPanel}}" bindselect="onReplyEmojiSelect" />
       <view class="post-reply-bar__dock">
         <view class="post-reply-bar__input-box">
-          <textarea
-            class="post-reply-bar__textarea"
+          <input
+            class="post-reply-bar__input"
             placeholder="{{replyPlaceholderText}}"
             placeholder-class="post-reply-bar__ph"
             value="{{replyContent}}"
             maxlength="800"
-            auto-height
-            show-confirm-bar="{{false}}"
-            cursor-spacing="20"
-            adjust-position="{{true}}"
+            focus="{{replyFocus}}"
             bindinput="onReplyInput"
           />
         </view>
         <view class="post-reply-bar__dock-right">
-          <view class="post-reply-bar__tools">
-            <view class="post-reply-bar__tool" bindtap="onReplyAddMedia">
-              <t-icon name="image-add" size="48rpx" color="#5c5c5c" />
-            </view>
-            <view class="post-reply-bar__tool" bindtap="onReplyEmojiHint">
-              <t-icon name="smile" size="48rpx" color="#5c5c5c" />
-            </view>
+          <view class="post-reply-bar__tool" bindtap="onReplyAddMedia">
+            <t-icon name="image-add" size="44rpx" color="#5c5c5c" />
+          </view>
+          <view class="post-reply-bar__tool" bindtap="onReplyEmojiHint">
+            <t-icon name="{{showEmojiPanel ? 'smile-filled' : 'smile'}}" size="44rpx" color="{{showEmojiPanel ? '#007aff' : '#5c5c5c'}}" />
           </view>
           <view
             class="post-reply-bar__publish-slot {{canPublish && !submitting ? 'post-reply-bar__publish-slot--ready' : ''}} {{submitting ? 'post-reply-bar__publish-slot--busy' : ''}}"

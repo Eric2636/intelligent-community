@@ -2,10 +2,6 @@ import { errandAPI } from '~/api/cloud';
 import { invalidateCloudFunction } from '~/utils/apiCache';
 import { invalidateHttpCachePrefix } from '~/utils/persistCache';
 
-function hasUnsupportedEmoji(text) {
-  return /[\uD800-\uDBFF][\uDC00-\uDFFF]/.test(text || '');
-}
-
 function statusTextFrom(s) {
   if (s === 'pending_take') return '待领取';
   if (s === 'in_progress') return '进行中';
@@ -43,6 +39,8 @@ Page({
     submitting: false,
     claimLoading: false,
     completeLoading: false,
+    replyFocus: false,
+    showEmojiPanel: false,
   },
 
   onLoad(options) {
@@ -88,7 +86,7 @@ Page({
   async onLike() {
     const { id, errand } = this.data;
     if (!id || !errand) return;
-    const isLiked = errand.isLiked;
+    const { isLiked } = errand;
     const api = isLiked ? errandAPI.unlikeErrand : errandAPI.likeErrand;
     const res = await api(id);
     if (res.code === 200) {
@@ -156,7 +154,7 @@ Page({
   async onFavorite() {
     const { id, errand } = this.data;
     if (!id || !errand) return;
-    const isFavorited = errand.isFavorited;
+    const { isFavorited } = errand;
     const api = isFavorited ? errandAPI.unfavoriteErrand : errandAPI.favoriteErrand;
     const res = await api(id);
     if (res.code === 200) {
@@ -171,6 +169,19 @@ Page({
     this.setData({ replyContent: e.detail.value || '' });
   },
 
+  onReplyEmojiHint() {
+    this.setData({
+      showEmojiPanel: !this.data.showEmojiPanel,
+      replyFocus: false,
+    });
+  },
+
+  onReplyEmojiSelect(e) {
+    const emoji = String((e.detail && e.detail.emoji) || '');
+    if (!emoji) return;
+    this.setData({ replyContent: `${this.data.replyContent || ''}${emoji}` });
+  },
+
   async submitReply() {
     const { id, errand, replyContent } = this.data;
     const content = (replyContent || '').trim();
@@ -178,15 +189,10 @@ Page({
       wx.showToast({ title: '请输入回复', icon: 'none' });
       return;
     }
-    if (hasUnsupportedEmoji(content)) {
-      wx.showToast({ title: '请修改评论后重试', icon: 'none' });
-      return;
-    }
-
     this.setData({ submitting: true });
     try {
       const res = await errandAPI.publishErrandReply(id, { content });
-      this.setData({ submitting: false, replyContent: '' });
+      this.setData({ submitting: false, replyContent: '', showEmojiPanel: false });
       if (res.code === 200 && res.data) {
         invalidateHttpCachePrefix('http_cache:api/errands:');
         const row = {

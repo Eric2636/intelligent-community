@@ -4,7 +4,7 @@
     <view class="publish-field">
       <input
         class="publish-field__input publish-field__input--title"
-        placeholder="请输入标题（必填）"
+        placeholder="请输入标题"
         value="{{title}}"
         maxlength="60"
         bindinput="onTitleInput"
@@ -14,7 +14,7 @@
     <view class="publish-field">
       <textarea
         class="publish-field__input publish-field__textarea"
-        placeholder="请输入正文（必填）"
+        placeholder="请输入正文"
         value="{{content}}"
         maxlength="2000"
         auto-height
@@ -27,7 +27,7 @@
       <input
         class="publish-field__input publish-field__reward"
         type="digit"
-        placeholder="线下自行支付，请输入金额"
+        placeholder="请输入金额"
         value="{{reward}}"
         bindinput="onRewardInput"
       />

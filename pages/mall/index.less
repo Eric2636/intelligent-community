@@ -1,10 +1,23 @@
 @import '/variable.less';
 
+page {
+  height: 100vh;
+  overflow: hidden;
+  background: @bg-color;
+}
+
+.mall-page::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 .mall-page {
-  min-height: calc(100vh - 56px);
+  height: calc(100vh - 56px - 330rpx);
   padding: 0 0 140rpx;
   background-color: @bg-color;
   overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .mall-search {
@@ -238,6 +251,7 @@
 }
 
 .mall-empty {
+  grid-column: 1 / -1;
   padding: 80rpx;
   text-align: center;
   color: @gy3;
@@ -245,6 +259,7 @@
 }
 
 .mall-more-hint {
+  grid-column: 1 / -1;
   padding: 24rpx;
   text-align: center;
   font-size: 24rpx;

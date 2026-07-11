@@ -1,11 +1,12 @@
 {
   "navigationStyle": "custom",
-  "enablePullDownRefresh": true,
+  "enablePullDownRefresh": false,
   "usingComponents": {
     "nav": "/components/nav",
     "t-input": "tdesign-miniprogram/input/input",
     "t-loading": "tdesign-miniprogram/loading/loading",
     "t-icon": "tdesign-miniprogram/icon/icon",
-    "t-button": "tdesign-miniprogram/button/button"
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-empty": "tdesign-miniprogram/empty/empty"
   }
 }

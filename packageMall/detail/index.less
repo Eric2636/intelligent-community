@@ -2,7 +2,7 @@
 
 .detail-page {
   min-height: calc(100vh - 56px);
-  padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(200rpx + env(safe-area-inset-bottom));
   background: @bg-color;
   overflow-x: hidden;
 }
@@ -15,16 +15,17 @@
 
 .detail-card {
   margin: @spacing-page;
-  padding: 28rpx;
+  padding: 32rpx;
   background: @bg-color-white;
   border-radius: @radius-card;
+  border: 1rpx solid rgba(60, 60, 67, 0.08);
   box-shadow: @shadow-card;
 
   &__thumb {
     width: 100%;
     height: 360rpx;
     background: @bg-color-section;
-    border-radius: @radius-sm;
+    border-radius: 24rpx;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -86,18 +87,63 @@
   }
 }
 
-.comment-card {
+.location-card {
   margin: 0 @spacing-page @spacing-page;
   padding: 28rpx;
   background: @bg-color-white;
   border-radius: @radius-card;
+  border: 1rpx solid rgba(60, 60, 67, 0.08);
   box-shadow: @shadow-card;
 
+  &__address {
+    display: flex;
+    align-items: flex-start;
+    gap: 18rpx;
+    margin-bottom: 22rpx;
+  }
+
+  &__text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 28rpx;
+    font-weight: 600;
+    color: @gy1;
+    line-height: 1.45;
+  }
+
+  &__desc {
+    margin-top: 6rpx;
+    font-size: 24rpx;
+    color: @gy3;
+    line-height: 1.45;
+  }
+
+  &__map {
+    width: 100%;
+    height: 360rpx;
+    border-radius: 20rpx;
+    overflow: hidden;
+  }
+}
+
+.comment-card {
+  margin: 0 @spacing-page @spacing-page;
+  padding: 0 28rpx 28rpx;
+  background: @bg-color-white;
+
   &__header {
+    position: sticky;
+    top: 56px;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20rpx;
+    padding: 22rpx 0 18rpx;
+    background: @bg-color-white;
+    border-bottom: 1rpx solid rgba(60, 60, 67, 0.08);
   }
 
   &__title {
@@ -122,12 +168,11 @@
 .comment-list {
   display: flex;
   flex-direction: column;
-  gap: 28rpx;
 }
 
 .comment-thread {
-  padding-bottom: 8rpx;
-  border-bottom: 1rpx solid @gray3;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid rgba(60, 60, 67, 0.08);
 
   &:last-child {
     border-bottom: none;
@@ -136,18 +181,17 @@
 
 .comment-item {
   display: flex;
+  align-items: flex-start;
   gap: 16rpx;
 
   &--sub {
-    margin-top: 16rpx;
-    margin-left: 40rpx;
-    padding-left: 16rpx;
-    border-left: 4rpx solid @bg-color-section;
+    margin-top: 20rpx;
+    padding-left: 24rpx;
   }
 
   &__avatar {
-    width: 64rpx;
-    height: 64rpx;
+    width: 56rpx;
+    height: 56rpx;
     border-radius: 50%;
     background: @gray3;
     flex-shrink: 0;
@@ -164,10 +208,9 @@
 
   &__top {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 16rpx;
-    margin-bottom: 6rpx;
+    align-items: flex-start;
+    gap: 12rpx;
+    margin-bottom: 8rpx;
   }
 
   &__name {
@@ -180,6 +223,7 @@
     font-size: 22rpx;
     color: @gy3;
     flex-shrink: 0;
+    margin-left: 4rpx;
   }
 
   &__replyto {
@@ -189,9 +233,9 @@
   }
 
   &__content {
-    font-size: 28rpx;
+    font-size: 26rpx;
     color: @gy2;
-    line-height: 1.5;
+    line-height: 1.55;
     white-space: pre-wrap;
     word-break: break-all;
   }
@@ -204,39 +248,61 @@
   }
 
   &__img {
-    width: 160rpx;
-    height: 160rpx;
+    width: 176rpx;
+    height: 176rpx;
     border-radius: @radius-sm;
     background: @gray3;
   }
 
-  &__actions {
-    margin-top: 12rpx;
+  &__actions-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4rpx;
+    margin-top: 14rpx;
+  }
+
+  &__delete {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 24rpx;
-    flex-wrap: wrap;
+    justify-content: center;
+    padding: 10rpx;
+    margin: -8rpx -8rpx -8rpx auto;
+    min-width: 56rpx;
+    min-height: 56rpx;
+    box-sizing: border-box;
   }
+}
 
-  &__action {
-    font-size: 24rpx;
-    color: @color-primary;
+.comment-toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 8rpx;
 
-    &--danger {
-      color: #e34d59;
-    }
-  }
-
-  &__like {
+  &__btn {
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 6rpx;
-    font-size: 24rpx;
-    color: @gy3;
+    min-height: 54rpx;
+    padding: 6rpx 14rpx;
+    border-radius: 32rpx;
+    background: @bg-color-section;
   }
 
-  &__like-num {
-    min-width: 28rpx;
+  &__txt {
+    font-size: 24rpx;
+    color: @gy3;
+
+    &--on {
+      color: #ff2442;
+    }
   }
 }
 
@@ -254,41 +320,102 @@
   &__cancel {
     color: @color-primary;
   }
+
+  &__name {
+    color: @color-primary;
+    font-weight: 500;
+  }
 }
 
 .comment-editor {
   margin-top: 24rpx;
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 16rpx;
+  gap: 10rpx;
 
-  &__input {
+  &__input-box {
     flex: 1;
     min-width: 0;
-    height: 72rpx;
-    padding: 0 20rpx;
+    height: 76rpx;
+    min-height: 76rpx;
+    display: flex;
+    align-items: center;
+    padding: 0 24rpx;
+    background: #fff;
+    border: 1rpx solid rgba(60, 60, 67, 0.1);
+    border-radius: 38rpx;
+    box-sizing: border-box;
+    box-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.04);
+  }
+
+  &__tools {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 8rpx;
+  }
+
+  &__input {
+    display: block;
+    width: 100%;
+    height: 76rpx;
+    min-height: 76rpx;
+    padding: 0;
+    margin: 0;
+    line-height: 76rpx;
     font-size: 28rpx;
-    background: @bg-color-section;
-    border-radius: 36rpx;
+    color: @gy1;
+    background: transparent;
     box-sizing: border-box;
   }
 
-  &__side {
-    display: flex;
-    align-items: center;
-    gap: 12rpx;
-    flex-shrink: 0;
+  &__ph {
+    color: #a8a8ad;
+    font-size: 28rpx;
+    line-height: 76rpx;
   }
 
-  &__addimg {
-    width: 64rpx;
-    height: 64rpx;
-    line-height: 64rpx;
-    text-align: center;
-    font-size: 26rpx;
-    color: @color-primary;
+  &__addimg,
+  &__emoji {
+    flex-shrink: 0;
+    width: 76rpx;
+    height: 76rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 38rpx;
     background: @bg-color-section;
-    border-radius: 12rpx;
+    border: 1rpx solid rgba(60, 60, 67, 0.06);
+    box-sizing: border-box;
+  }
+
+  &__send {
+    flex-shrink: 0;
+    min-width: 108rpx;
+    height: 76rpx;
+    padding: 0 20rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 38rpx;
+    background: @bg-color-section;
+    color: rgba(0, 0, 0, 0.35);
+    font-size: 26rpx;
+    font-weight: 500;
+    box-sizing: border-box;
+  }
+
+  &__send--ready {
+    color: #fff;
+    background: @color-primary;
+    box-shadow: 0 4rpx 14rpx fade(@color-primary, 35%);
+  }
+
+  &__send--busy {
+    pointer-events: none;
+    opacity: 0.85;
   }
 
   &__picked {
@@ -338,27 +465,69 @@
   right: 0;
   padding: @spacing-page;
   padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  z-index: 20;
   background: @bg-color-white;
-  border-top: 1rpx solid @gray3;
+  border-top: 1rpx solid rgba(60, 60, 67, 0.1);
   box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
 
   &__row {
     display: flex;
     align-items: center;
-    gap: 24rpx;
+    gap: 12rpx;
+    width: 100%;
+    min-width: 0;
+  }
+
+  &__action {
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
   }
 
   &__fav {
     flex-shrink: 0;
+    width: 72rpx;
+    min-height: 76rpx;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    gap: 4rpx;
     font-size: 22rpx;
     color: @gy3;
+    line-height: 1.2;
 
     &--active {
       color: @color-price;
     }
+  }
+
+  &__share {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    width: 72rpx;
+    min-height: 76rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4rpx;
+    font-size: 22rpx;
+    color: @gy3;
+    background: transparent;
+    border: none;
+    line-height: 1.2;
+    box-sizing: border-box;
+  }
+
+  &__share::after {
+    border: none;
+  }
+
+  &__share:active {
+    opacity: 0.75;
   }
 
   &__btn {

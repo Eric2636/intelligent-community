@@ -1,3 +1,11 @@
+const TAB_URLS = [
+  '/pages/task/index',
+  '/pages/errand/index',
+  '/pages/forum/index',
+  '/pages/mall/index',
+  '/pages/my/index',
+];
+
 Component({
   options: {
     styleIsolation: 'shared',
@@ -8,6 +16,10 @@ Component({
     showBack: {
       type: Boolean,
       value: false,
+    },
+    fallbackUrl: {
+      type: String,
+      value: '',
     },
   },
   data: {
@@ -27,13 +39,32 @@ Component({
           navHolderPx = top + 48;
         }
         navHolderPx = Math.ceil(navHolderPx);
-      } catch (e) {}
+      } catch (e) {
+        navHolderPx = 88;
+      }
       this.setData({ navHolderPx });
     },
   },
   methods: {
+    goFallback() {
+      const { fallbackUrl } = this.properties;
+      if (!fallbackUrl) {
+        wx.navigateBack();
+        return;
+      }
+      const go = TAB_URLS.indexOf(fallbackUrl) >= 0 ? wx.switchTab : wx.redirectTo;
+      go({ url: fallbackUrl });
+    },
     goBack() {
-      wx.navigateBack();
+      const pages = getCurrentPages();
+      if (pages && pages.length > 1) {
+        wx.navigateBack({
+          delta: 1,
+          fail: () => this.goFallback(),
+        });
+        return;
+      }
+      this.goFallback();
     },
   },
 });

@@ -20,7 +20,7 @@
       <view class="form-label">反馈内容</view>
       <t-textarea
         value="{{content}}"
-        placeholder="请详细描述您的建议或问题..."
+        placeholder="请输入反馈内容"
         bind:input="onContentInput"
         maxlength="500"
         autosize
@@ -31,7 +31,7 @@
       <view class="form-label">联系方式</view>
       <t-input
         value="{{contact}}"
-        placeholder="请输入手机号或邮箱"
+        placeholder="请输入联系方式"
         bind:change="onContactInput"
       />
     </view>

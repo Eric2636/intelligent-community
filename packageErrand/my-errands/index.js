@@ -29,8 +29,7 @@ Page({
   },
 
   onShow() {
-    if (redirectIfEntryHidden('errand')) return;
-    this.loadPosts();
+    redirectIfEntryHidden('errand');
   },
 
   onPullDownRefresh() {

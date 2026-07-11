@@ -2,8 +2,8 @@
 
 .post-page {
   min-height: calc(100vh - 56px);
-  padding-bottom: calc(300rpx + env(safe-area-inset-bottom));
-  background: @bg-color;
+  padding-bottom: calc(164rpx + env(safe-area-inset-bottom));
+  background: @bg-color-white;
   overflow-x: hidden;
 }
 
@@ -14,14 +14,15 @@
 }
 
 .post-card {
-  margin: @spacing-page;
-  padding: 28rpx;
+  padding: 28rpx 28rpx 24rpx;
   background: @bg-color-white;
-  border-radius: @radius-card;
-  box-shadow: @shadow-card;
+  border-bottom: 12rpx solid @bg-color-section;
 
   &__head {
-    margin-bottom: 16rpx;
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+    margin-bottom: 18rpx;
   }
 
   &__head-main {
@@ -29,6 +30,23 @@
     align-items: center;
     justify-content: space-between;
     gap: 16rpx;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__avatar {
+    width: 68rpx;
+    height: 68rpx;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background: @bg-color-section;
+  }
+
+  &__avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &__delete {
@@ -36,14 +54,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12rpx;
-    margin: -8rpx -8rpx -8rpx auto;
+    padding: 10rpx;
+    margin: -8rpx -10rpx -8rpx auto;
     min-width: 64rpx;
     min-height: 64rpx;
     box-sizing: border-box;
   }
 
   &__author {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10rpx;
     font-size: 24rpx;
     color: @gy3;
     flex: 1;
@@ -51,28 +73,29 @@
   }
 
   &__time {
-    margin-left: 12rpx;
+    margin-left: 0;
   }
 
   &__title {
     display: block;
-    font-size: 32rpx;
+    font-size: 38rpx;
     font-weight: 600;
     color: @gy1;
-    margin-bottom: 16rpx;
+    line-height: 1.35;
+    margin-bottom: 18rpx;
   }
 
   &__content {
     display: block;
-    font-size: 28rpx;
+    font-size: 30rpx;
     color: @gy2;
-    line-height: 1.6;
+    line-height: 1.65;
     white-space: pre-wrap;
     word-break: break-all;
   }
 
   &__media {
-    margin-top: 16rpx;
+    margin-top: 18rpx;
   }
 
   &__media-grid {
@@ -82,26 +105,29 @@
   }
 
   &__media-img {
-    width: 220rpx;
-    height: 220rpx;
+    width: 214rpx;
+    height: 214rpx;
     border-radius: @radius-sm;
     background: @gray3;
   }
 
   &__media-video {
     width: 100%;
-    max-height: 400rpx;
+    max-height: 420rpx;
     border-radius: @radius-sm;
     background: #000;
   }
 
   &__meta {
-    margin-top: 20rpx;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22rpx;
+    margin-top: 22rpx;
     font-size: 24rpx;
     color: @gy3;
 
     text + text {
-      margin-left: 24rpx;
+      margin-left: 0;
     }
   }
 
@@ -110,9 +136,9 @@
     flex-direction: row;
     align-items: center;
     flex-wrap: nowrap;
-    margin-top: 24rpx;
-    padding-top: 20rpx;
-    border-top: 1rpx solid @gray3;
+    margin-top: 22rpx;
+    padding-top: 18rpx;
+    border-top: 1rpx solid rgba(60, 60, 67, 0.1);
     gap: 16rpx;
   }
 
@@ -123,7 +149,7 @@
     flex-wrap: nowrap;
     flex: 1;
     min-width: 0;
-    gap: 32rpx;
+    gap: 20rpx;
   }
 
   &__btn {
@@ -131,31 +157,49 @@
     display: flex;
     align-items: center;
     gap: 8rpx;
+    min-height: 60rpx;
+    padding: 0 18rpx;
     font-size: 26rpx;
     color: @gy3;
+    background: @bg-color-section;
+    border-radius: 999rpx;
 
     &--active {
       color: @color-primary;
+      background: fade(@color-primary, 10%);
     }
+  }
+
+  &__share {
+    margin: 0;
+    border: none;
+    line-height: 1;
+    box-sizing: border-box;
+  }
+
+  &__share::after {
+    border: none;
   }
 }
 
 .post-replies {
-  margin: @spacing-page;
-  padding: @spacing-card;
+  padding: 0 28rpx;
   background: @bg-color-white;
-  border-radius: @radius-card;
-  box-shadow: @shadow-card;
 
   &__title {
+    position: sticky;
+    top: 56px;
+    z-index: 2;
+    padding: 22rpx 0 18rpx;
     font-size: 28rpx;
     font-weight: 600;
     color: @gy1;
-    margin-bottom: 20rpx;
+    background: @bg-color-white;
+    border-bottom: 1rpx solid rgba(60, 60, 67, 0.08);
   }
 
   &__empty {
-    padding: 40rpx;
+    padding: 32rpx 0 40rpx;
     text-align: center;
     color: @gy3;
     font-size: 26rpx;
@@ -163,8 +207,11 @@
 }
 
 .reply-item {
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid @gray3;
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid rgba(60, 60, 67, 0.08);
   box-sizing: border-box;
 
   &:last-child {
@@ -172,7 +219,24 @@
   }
 
   &__main {
+    flex: 1;
+    min-width: 0;
     border-left: 4rpx solid transparent;
+  }
+
+  &__avatar {
+    width: 56rpx;
+    height: 56rpx;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background: @bg-color-section;
+  }
+
+  &__avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &__to {
@@ -200,7 +264,7 @@
     background: @bg-color-section;
     padding: 6rpx 14rpx;
     border-radius: 24rpx;
-    border: 1rpx solid @gray3;
+    border: 1rpx solid rgba(60, 60, 67, 0.1);
 
     &--mine {
       background: #fff3f0;
@@ -215,9 +279,9 @@
     align-items: center;
     justify-content: flex-start;
     gap: 4rpx;
-    margin-top: 16rpx;
-    padding-top: 12rpx;
-    border-top: 1rpx solid #f0f0f0;
+    margin-top: 14rpx;
+    padding-top: 0;
+    border-top: none;
   }
 
   &__head {
@@ -260,7 +324,9 @@
   &__content {
     font-size: 26rpx;
     color: @gy2;
-    line-height: 1.5;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-all;
   }
 
   &__media {
@@ -274,8 +340,8 @@
   }
 
   &__media-img {
-    width: 180rpx;
-    height: 180rpx;
+    width: 176rpx;
+    height: 176rpx;
     border-radius: @radius-sm;
     background: @gray3;
   }
@@ -285,6 +351,22 @@
     max-height: 320rpx;
     border-radius: @radius-sm;
     background: #000;
+  }
+}
+
+.reply-reaction-panel {
+  margin-top: 12rpx;
+  overflow: hidden;
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(0, 0, 0, 0.06);
+
+  &__clear {
+    padding: 14rpx 20rpx;
+    text-align: center;
+    color: @gy3;
+    font-size: 24rpx;
+    background: #fff;
+    border-top: 1rpx solid rgba(0, 0, 0, 0.06);
   }
 }
 
@@ -302,9 +384,10 @@
     flex-direction: row;
     align-items: center;
     gap: 6rpx;
-    padding: 8rpx 14rpx;
+    min-height: 54rpx;
+    padding: 6rpx 14rpx;
     border-radius: 32rpx;
-    background: #f7f8fa;
+    background: @bg-color-section;
   }
 
   &__txt {
@@ -332,7 +415,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: #f2f2f4;
+  background: rgba(255, 255, 255, 0.98);
   border-top: 1rpx solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.04);
   padding-bottom: env(safe-area-inset-bottom);
@@ -342,8 +425,8 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 14rpx 24rpx;
-    background: linear-gradient(180deg, #fff9e8 0%, #fff4dc 100%);
+    padding: 12rpx 24rpx;
+    background: #fff8e6;
     border-bottom: 1rpx solid rgba(255, 193, 7, 0.35);
   }
 
@@ -365,9 +448,9 @@
   }
 
   &__preview {
-    background: #ebebed;
+    background: @bg-color-section;
     border-bottom: 1rpx solid rgba(0, 0, 0, 0.05);
-    padding: 16rpx 0 16rpx 24rpx;
+    padding: 12rpx 0 12rpx 20rpx;
   }
 
   &__preview-scroll {
@@ -385,9 +468,9 @@
   &__pv-cell {
     position: relative;
     display: inline-block;
-    width: 120rpx;
-    height: 120rpx;
-    border-radius: 8rpx;
+    width: 104rpx;
+    height: 104rpx;
+    border-radius: 14rpx;
     overflow: hidden;
     background: #fff;
     border: 1rpx solid #e8e8e8;
@@ -423,63 +506,58 @@
   &__dock {
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
-    padding: 18rpx 20rpx 20rpx;
-    gap: 16rpx;
+    align-items: center;
+    padding: 12rpx 20rpx;
+    gap: 10rpx;
     box-sizing: border-box;
   }
 
   &__dock-right {
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
-    flex-shrink: 0;
-    gap: 12rpx;
-  }
-
-  &__tools {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
+    align-items: center;
     flex-shrink: 0;
     gap: 8rpx;
-    padding-bottom: 4rpx;
   }
 
   &__tool {
     width: 76rpx;
     height: 76rpx;
+    min-width: 76rpx;
+    min-height: 76rpx;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 20rpx;
-    background: #fff;
-    box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.06);
-    border: 1rpx solid rgba(0, 0, 0, 0.05);
+    border-radius: 38rpx;
+    background: @bg-color-section;
+    border: 1rpx solid rgba(60, 60, 67, 0.06);
     box-sizing: border-box;
   }
 
   &__input-box {
     flex: 1;
     min-width: 0;
-    max-height: 240rpx;
-    padding: 14rpx 22rpx;
+    height: 76rpx;
+    min-height: 76rpx;
+    display: flex;
+    align-items: center;
+    padding: 0 24rpx;
     background: #fff;
-    border: 1rpx solid rgba(0, 0, 0, 0.08);
-    border-radius: 40rpx;
+    border: 1rpx solid rgba(60, 60, 67, 0.1);
+    border-radius: 38rpx;
     box-sizing: border-box;
     box-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.04);
-    margin-bottom: 0;
   }
 
-  &__textarea {
+  &__input {
+    display: block;
     width: 100%;
-    min-height: 44rpx;
-    max-height: 216rpx;
+    height: 76rpx;
+    min-height: 76rpx;
     padding: 0;
     margin: 0;
-    font-size: 30rpx;
-    line-height: 1.5;
+    font-size: 28rpx;
+    line-height: 76rpx;
     color: @gy1;
     background: transparent;
     box-sizing: border-box;
@@ -487,20 +565,21 @@
 
   &__ph {
     color: #a8a8ad;
-    font-size: 30rpx;
+    font-size: 28rpx;
+    line-height: 76rpx;
   }
 
   &__publish-slot {
     flex-shrink: 0;
-    min-width: 124rpx;
+    min-width: 108rpx;
     min-height: 76rpx;
-    padding: 0 26rpx;
-    margin-bottom: 4rpx;
+    height: 76rpx;
+    padding: 0 20rpx;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 38rpx;
-    background: rgba(0, 0, 0, 0.07);
+    background: @bg-color-section;
     box-sizing: border-box;
     transition: background 0.15s ease;
 
@@ -522,7 +601,7 @@
   }
 
   &__publish {
-    font-size: 28rpx;
+    font-size: 26rpx;
     color: rgba(0, 0, 0, 0.35);
     font-weight: 500;
     letter-spacing: 1rpx;

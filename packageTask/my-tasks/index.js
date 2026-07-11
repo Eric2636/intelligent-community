@@ -2,6 +2,7 @@ import { taskAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 
 const STATUS_TEXT = {
+  draft: '草稿',
   pending_take: '待领取',
   in_progress: '进行中',
   pending_confirm: '待确认',
@@ -30,18 +31,32 @@ Page({
     activeTab: 'published',
     publishedList: [],
     takenList: [],
+    draftList: [],
+    cancelledList: [],
+    showTabs: true,
+    pageTitle: '我的任务',
+    emptyText: '暂无发布的任务',
     loading: true,
     loadingProps: { size: '40rpx' },
   },
 
-  onLoad() {
+  onLoad(options = {}) {
     if (redirectIfEntryHidden('task')) return;
+    const type = options.type === 'draft' || options.type === 'cancelled' ? options.type : 'published';
+    const pageTitle = type === 'draft' ? '我的草稿' : (type === 'cancelled' ? '我的撤回' : '我的任务');
+    const emptyText = type === 'draft' ? '暂无任务草稿' : (type === 'cancelled' ? '暂无撤回的任务' : '暂无发布的任务');
+    this.setData({
+      activeTab: type,
+      showTabs: type === 'published',
+      pageTitle,
+      emptyText,
+    });
+    wx.setNavigationBarTitle({ title: pageTitle });
     this.loadTasks();
   },
 
   onShow() {
-    if (redirectIfEntryHidden('task')) return;
-    this.loadTasks();
+    redirectIfEntryHidden('task');
   },
 
   onPullDownRefresh() {
@@ -49,6 +64,7 @@ Page({
   },
 
   onTabTap(e) {
+    if (!this.data.showTabs) return;
     const tab = e.currentTarget.dataset.tab;
     if (!tab || tab === this.data.activeTab) return;
     this.setData({ activeTab: tab }, () => this.loadTasks());
@@ -59,28 +75,37 @@ Page({
     const { activeTab } = this.data;
     this.setData({ loading: true });
     try {
-      const type = activeTab === 'taken' ? 'taken' : 'published';
+      const type = ['taken', 'draft', 'cancelled'].includes(activeTab) ? activeTab : 'published';
       const res = await taskAPI.getMyTasks(type);
       if (res.code === 200) {
         const raw = res.data || [];
         const list = raw.map(normalizeTaskRow);
-        if (activeTab === 'published') {
-          this.setData({ publishedList: list, loading: false });
-        } else {
-          this.setData({ takenList: list, loading: false });
-        }
+        const updates = { loading: false };
+        if (activeTab === 'taken') updates.takenList = list;
+        else if (activeTab === 'draft') updates.draftList = list;
+        else if (activeTab === 'cancelled') updates.cancelledList = list;
+        else updates.publishedList = list;
+        this.setData(updates);
       } else {
+        wx.showToast({ title: res.message || '获取任务失败', icon: 'none' });
         this.setData({ loading: false });
       }
     } catch (err) {
       console.error('加载我的任务失败', err);
+      wx.showToast({ title: (err && (err.message || err.errMsg)) || '网络错误，请重试', icon: 'none' });
       this.setData({ loading: false });
     }
   },
 
   onPreviewListImages(e) {
     const { kind, cardIndex, current } = e.currentTarget.dataset;
-    const list = kind === 'taken' ? this.data.takenList : this.data.publishedList;
+    const listMap = {
+      taken: this.data.takenList,
+      draft: this.data.draftList,
+      cancelled: this.data.cancelledList,
+      published: this.data.publishedList,
+    };
+    const list = listMap[kind] || this.data.publishedList;
     const item = list[Number(cardIndex)];
     if (!item || !item.images || !item.images.length) return;
     wx.previewImage({
@@ -92,6 +117,10 @@ Page({
   goDetail(e) {
     const { id } = e.currentTarget.dataset;
     if (!id) return;
+    if (this.data.activeTab === 'draft') {
+      wx.navigateTo({ url: `/packageTask/publish/index?draftId=${encodeURIComponent(id)}` });
+      return;
+    }
     wx.navigateTo({ url: `/packageTask/detail/index?id=${id}` });
   },
 });
