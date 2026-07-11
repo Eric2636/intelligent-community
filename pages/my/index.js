@@ -1,4 +1,3 @@
-import useToastBehavior from '~/behaviors/useToast';
 import { userAPI } from '~/api/cloud';
 import { mallFavoritesUrl, mallMyItemsUrl, mallOrdersUrl } from '~/utils/mallPaths';
 import { isModuleEnabled } from '~/utils/moduleEntryGuard';
@@ -13,7 +12,8 @@ import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 /** 业主互助分区 */
 const RAW_SECTION_TASK = [
   { module: 'task', nameEnc: 'j+u8ivXgkdfeyO/P', icon: 'root-list', url: 'task', descEnc: 'j/yIivPvk+T0yOr/kcr6yc6/gMGriODykvbhyd7VkfjY' },
-  { module: 'task', nameEnc: 'j9Wli+7LnOz/yvrL', icon: 'notification', url: 'notice', descEnc: 'jdiWiOXFkdTrytbVk8nmy8C5j+KC' },
+  { module: 'task', name: '我的草稿', icon: 'edit', url: 'taskDrafts', desc: '查看未发布的任务草稿' },
+  { module: 'task', name: '我的撤回', icon: 'rollback', url: 'taskCancelled', desc: '查看已撤销发布的任务' },
 ];
 
 /** 小区留言分区 */
@@ -32,6 +32,7 @@ const RAW_SECTION_MALL = [
 /** 更多服务：跑腿 + 通用（module: null 不受模块开关影响） */
 const RAW_SECTION_MORE = [
   { module: 'errand', name: '小区跑腿', icon: 'service', url: 'errand', desc: '发布取件代拿等便民跑腿需求' },
+  { module: null, nameEnc: 'j9Wli+7LnOz/yvrL', icon: 'notification', url: 'notice', descEnc: 'jdiWiOXFkdTrytbVk8nmy8C5j+KC' },
   { module: null, nameEnc: 'j+eihcjlkOPoxMPm', icon: 'edit', url: 'feedback', descEnc: 'j+y9idXAkNffxcvAkvrvxOGfgMG1' },
   { module: null, nameEnc: 'jOaeidXqk+T0yd7C', icon: 'info-circle', url: 'about', descEnc: 'jdmKiPzlkdfuyt7jkMr3yv+5j/+B' },
   { module: null, nameEnc: 'gc2TitLK', icon: 'setting', url: '/pages/setting/index', descEnc: 'gdeLiODTkdTrxOX0k+bRxdiPjt6D' },
@@ -59,13 +60,33 @@ function buildSection(id, title, rawItems) {
   return { id, title, items };
 }
 
-Page({
-  behaviors: [useToastBehavior],
+function normalizePersonalInfo(user) {
+  if (!user) return {};
+  const avatar = user.avatar || user.avatarUrl || user.image || '';
+  return {
+    ...user,
+    avatar,
+    avatarUrl: user.avatarUrl || avatar,
+    image: user.image || avatar,
+  };
+}
 
+Page({
   data: {
     isLoad: false,
+    isLoggingIn: false,
     personalInfo: {},
     menuSections: [],
+  },
+
+  onShow() {
+    const app = getApp();
+    if (!app.globalData.userInfo || !app.globalData.userInfo.phoneNumber) {
+      app.refreshLoginCode?.().catch((err) => {
+        console.warn('[my] 预取 wx.login code 失败', err);
+      });
+    }
+    syncCustomTabBar(this, 'my');
   },
 
   onLoad() {
@@ -73,7 +94,13 @@ Page({
     this._onModuleEntryVisibilityChange = () => {
       this.refreshMenuList();
     };
+    this._onUserInfoChange = () => {
+      this.refreshPersonalInfo();
+    };
     app.eventBus.on('moduleEntryVisibilityChange', this._onModuleEntryVisibilityChange);
+    app.eventBus.on('userInfoChange', this._onUserInfoChange);
+    this.refreshMenuList();
+    this.refreshPersonalInfo();
   },
 
   onUnload() {
@@ -81,24 +108,26 @@ Page({
     if (this._onModuleEntryVisibilityChange) {
       app.eventBus.off('moduleEntryVisibilityChange', this._onModuleEntryVisibilityChange);
     }
+    if (this._onUserInfoChange) {
+      app.eventBus.off('userInfoChange', this._onUserInfoChange);
+    }
   },
 
-  async onShow() {
-    syncCustomTabBar(this);
-    this.refreshMenuList();
-
-    const token = wx.getStorageSync('access_token');
+  async refreshPersonalInfo() {
     const app = getApp();
+    const token = wx.getStorageSync('access_token');
+    const userInfo = app.globalData.userInfo || {};
+    const hasPhone = Boolean(String(userInfo.phoneNumber || userInfo.phone || '').trim());
     if (app.globalData.useCloudBase && token) {
       const personalInfo = await this.getPersonalInfo();
       this.setData({
-        isLoad: true,
-        personalInfo: personalInfo || {},
+        isLoad: Boolean(personalInfo && (personalInfo.phoneNumber || personalInfo.phone)),
+        personalInfo: normalizePersonalInfo(personalInfo),
       });
     } else {
       this.setData({
-        isLoad: !!token,
-        personalInfo: {},
+        isLoad: !!token && hasPhone,
+        personalInfo: token && hasPhone ? normalizePersonalInfo(userInfo) : {},
       });
     }
   },
@@ -133,22 +162,56 @@ Page({
         } catch (err) {
           console.error('获取用户信息失败', err);
         }
-        const openid = app.globalData.openid;
+        const { openid } = app.globalData;
         return {
           name: '用户',
           avatar: '',
+          avatarUrl: '',
           openid: openid || '',
         };
-      } else {
-        return {};
       }
+      return {};
     } catch (e) {
       return {};
     }
   },
 
-  onLogin() {
-    wx.navigateTo({ url: '/pages/login/login' });
+  async onGetPhoneNumber(e) {
+    if (this.data.isLoggingIn) return;
+    const detail = e.detail || {};
+    if (detail.errMsg && !/ok/i.test(detail.errMsg)) {
+      wx.showToast({ title: '已取消手机号授权', icon: 'none' });
+      return;
+    }
+    if (!detail.code) {
+      wx.showToast({ title: '未获取到手机号授权凭证', icon: 'none' });
+      return;
+    }
+
+    this.setData({ isLoggingIn: true });
+    try {
+      const app = getApp();
+      wx.showLoading({ title: '验证中...' });
+      await app.phoneLogin(detail.code);
+      wx.hideLoading();
+
+      if (app.globalData.offlineMode) {
+        wx.showToast({ title: '网络不可用，请稍后重试', icon: 'none' });
+        return;
+      }
+
+      this.setData({
+        isLoad: true,
+        personalInfo: normalizePersonalInfo(app.globalData.userInfo),
+      });
+      wx.showToast({ title: '登录成功', icon: 'success' });
+    } catch (err) {
+      wx.hideLoading();
+      wx.showToast({ title: (err && err.message) || '手机号验证失败', icon: 'none' });
+      console.error('手机号验证登录失败', err);
+    } finally {
+      this.setData({ isLoggingIn: false });
+    }
   },
 
   onNavigateTo() {
@@ -159,6 +222,8 @@ Page({
     const { url, name } = e.currentTarget.dataset;
     const routes = {
       task: '/packageTask/my-tasks/index',
+      taskDrafts: '/packageTask/my-tasks/index?type=draft',
+      taskCancelled: '/packageTask/my-tasks/index?type=cancelled',
       errand: '/packageErrand/my-errands/index',
       posts: '/packageForum/my-posts/index',
       favorites: '/packageForum/favorites/index',
@@ -177,6 +242,31 @@ Page({
       wx.navigateTo({ url });
       return;
     }
-    this.onShowToast('#t-toast', name || '敬请期待');
+    wx.showToast({ title: name || '敬请期待', icon: 'none' });
+  },
+
+  onLogout() {
+    wx.showModal({
+      title: '退出登录',
+      content: '确定要退出当前账号吗？',
+      success: (res) => {
+        if (!res.confirm) return;
+        const app = getApp();
+        try {
+          wx.removeStorageSync('access_token');
+        } catch (e) {
+          /* ignore */
+        }
+        app.globalData.openid = '';
+        app.globalData.userInfo = null;
+        app.globalData.offlineMode = false;
+        this.setData({ isLoad: false, personalInfo: {} });
+        app.eventBus.emit('userInfoChange');
+        wx.showToast({ title: '已退出登录', icon: 'none' });
+        setTimeout(() => {
+          wx.reLaunch({ url: '/pages/login/login' });
+        }, 300);
+      },
+    });
   },
 });

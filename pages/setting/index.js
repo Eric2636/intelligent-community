@@ -1,8 +1,6 @@
-import useToastBehavior from '~/behaviors/useToast';
-import config from '~/config';
+import config from '~/config/index';
 
 Page({
-  behaviors: [useToastBehavior],
   data: {
     menuData: [
       [
@@ -99,7 +97,7 @@ Page({
     }
 
     if (url) return;
-    this.onShowToast('#t-toast', title);
+    wx.showToast({ title, icon: 'none' });
   },
 
   requestSubscribeMessage() {

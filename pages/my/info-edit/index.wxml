@@ -1,5 +1,15 @@
 <t-navbar left-arrow title="个人信息" />
 <view class="info-edit">
+  <view class="info-edit__avatar-panel">
+    <image wx:if="{{personInfo.avatar}}" class="info-edit__avatar-img" src="{{personInfo.avatar}}" mode="aspectFill" />
+    <view wx:else class="info-edit__avatar-placeholder">
+      <t-icon name="user" size="64rpx" color="#8e8e93" />
+    </view>
+    <view class="info-edit__avatar-actions">
+      <button class="info-edit__avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseWechatAvatar">微信头像</button>
+      <button class="info-edit__avatar-btn info-edit__avatar-btn--plain" bindtap="onChooseCustomAvatar">自定义</button>
+    </view>
+  </view>
   <t-cell class="info-edit__cell" title="用户名">
     <t-input bind:change="onNameChange" borderless placeholder="请输入用户名" slot="note" value="{{personInfo.name}}" />
   </t-cell>
@@ -22,23 +32,10 @@
       disableDefaultPadding="{{true}}"
       indicator
       maxcharacter="50"
-      placeholder="请输入个人简介"
+      placeholder="请输入简介"
       slot="note"
       t-class="info-edit__introduction"
       value="{{personInfo.introduction}}"
-    />
-  </t-cell>
-  <t-cell bordered="{{false}}" class="info-edit__cell" title="相片墙">
-    <t-upload
-      bind:drop="onPhotosDrop"
-      bind:remove="onPhotosRemove"
-      bind:success="onPhotosSuccess"
-      draggable
-      files="{{personInfo.photos}}"
-      gridConfig="{{gridConfig}}"
-      media-type="{{ ['image'] }}"
-      slot="note"
-      t-class="info-edit__photos"
     />
   </t-cell>
 </view>

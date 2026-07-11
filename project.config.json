@@ -1,7 +1,32 @@
 {
   "description": "项目配置文件，详见文档：https://developers.weixin.qq.com/miniprogram/dev/devtools/projectconfig.html",
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      {
+        "type": "folder",
+        "value": "Users"
+      },
+      {
+        "type": "folder",
+        "value": "docs"
+      },
+      {
+        "type": "folder",
+        "value": ".idea"
+      },
+      {
+        "type": "folder",
+        "value": "node_modules"
+      },
+      {
+        "type": "file",
+        "value": "static/icons/community-harmony-source.png"
+      },
+      {
+        "type": "file",
+        "value": "static/icons/community-service-a-source.png"
+      }
+    ],
     "include": []
   },
   "setting": {
@@ -56,17 +81,11 @@
   "miniprogramRoot": "",
   "compileType": "miniprogram",
   "libVersion": "3.7.8",
-  "appid": "wx08174a59578eb710",
+  "appid": "wx1d34b805b9ede3d5",
   "projectname": "miniprogram-starter",
   "condition": {
     "miniprogram": {
       "list": [
-        {
-          "name": "login",
-          "pathName": "pages/login/login",
-          "query": "",
-          "scene": null
-        },
         {
           "name": "my",
           "pathName": "pages/my/index",
@@ -77,19 +96,6 @@
           "name": "info-edit",
           "pathName": "pages/my/info-edit/index",
           "query": "",
-          "scene": null
-        },
-        {
-          "name": "dataCenter",
-          "pathName": "pages/dataCenter/index",
-          "query": "",
-          "scene": null
-        },
-        {
-          "name": "release",
-          "pathName": "pages/release/index",
-          "query": "",
-          "launchMode": "default",
           "scene": null
         },
         {

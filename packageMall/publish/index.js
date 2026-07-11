@@ -5,12 +5,13 @@ Page({
   data: {
     categories: [],
     categoryIndex: 0,
-    categoryName: '日用品',
-    categoryId: 'daily',
+    categoryName: '跳蚤市场',
+    categoryId: 'flea',
     title: '',
     price: '',
     desc: '',
     contact: '',
+    location: null,
     mainImages: [],
     subImages: [],
     videos: [],
@@ -20,9 +21,14 @@ Page({
   onLoad() {
     mallAPI.getCategories().then((res) => {
       if (res.code !== 200) return;
-      const list = (res.data || []).filter((c) => c.id !== 'all');
-      const categoryName = list[0] ? list[0].name : '日用品';
-      this.setData({ categories: list, categoryName });
+      const list = res.data || [];
+      const first = list[0] || null;
+      this.setData({
+        categories: list,
+        categoryIndex: 0,
+        categoryId: first ? first.id : 'flea',
+        categoryName: first ? first.name : '跳蚤市场',
+      });
     });
   },
 
@@ -37,6 +43,30 @@ Page({
   onPriceInput(e) { this.setData({ price: e.detail.value }); },
   onDescInput(e) { this.setData({ desc: e.detail.value }); },
   onContactInput(e) { this.setData({ contact: e.detail.value }); },
+
+  chooseLocation() {
+    wx.chooseLocation({
+      success: (res) => {
+        this.setData({
+          location: {
+            name: res.name || '',
+            address: res.address || '',
+            latitude: res.latitude,
+            longitude: res.longitude,
+          },
+        });
+      },
+      fail: (err) => {
+        if (err && /auth deny|auth denied|authorize/i.test(err.errMsg || '')) {
+          wx.showToast({ title: '请允许位置权限后再选择门店', icon: 'none' });
+        }
+      },
+    });
+  },
+
+  clearLocation() {
+    this.setData({ location: null });
+  },
 
   async onAddMainImages() {
     const { mainImages, subImages } = this.data;
@@ -115,7 +145,7 @@ Page({
   },
 
   async submit() {
-    const { categoryId, title, price, desc, contact, mainImages, subImages, videos } = this.data;
+    const { categoryId, title, price, desc, contact, location, mainImages, subImages, videos } = this.data;
     const t = (title || '').trim();
     if (!t) {
       wx.showToast({ title: '请输入标题', icon: 'none' });
@@ -137,13 +167,17 @@ Page({
       unit: '元',
       desc: (desc || '').trim(),
       contact: (contact || '').trim() || '保密',
+      locationName: location ? location.name : undefined,
+      locationAddress: location ? location.address : undefined,
+      latitude: location ? location.latitude : undefined,
+      longitude: location ? location.longitude : undefined,
       mainImages,
       subImages,
       videos,
     });
     this.setData({ submitting: false });
     if (res.code === 200 && res.data) {
-      wx.showToast({ title: '发布成功' });
+      wx.showToast({ title: '发布成功', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 800);
     }
   },

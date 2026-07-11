@@ -4,13 +4,16 @@
     <view class="publish-field">
       <view class="publish-field__label">分类</view>
       <picker mode="selector" range="{{categories}}" range-key="name" value="{{categoryIndex}}" bindchange="onCategoryChange">
-        <view class="publish-field__picker">{{categoryName}}</view>
+        <view class="publish-field__select">
+          <text class="publish-field__select-text {{categoryName ? '' : 'publish-field__select-text--placeholder'}}">{{categoryName || '请选择分类'}}</text>
+          <t-icon name="chevron-down" size="36rpx" color="#8e8e93" />
+        </view>
       </picker>
     </view>
     <view class="publish-field">
       <input
         class="publish-field__input"
-        placeholder="标题（必填）"
+        placeholder="请输入标题"
         value="{{title}}"
         maxlength="40"
         bindinput="onTitleInput"
@@ -20,7 +23,7 @@
       <input
         class="publish-field__input"
         type="digit"
-        placeholder="价格（选填，元）"
+        placeholder="请输入价格"
         value="{{price}}"
         bindinput="onPriceInput"
       />
@@ -28,7 +31,7 @@
     <view class="publish-field">
       <textarea
         class="publish-field__input publish-field__textarea"
-        placeholder="描述（选填）"
+        placeholder="请输入描述"
         value="{{desc}}"
         maxlength="500"
         bindinput="onDescInput"
@@ -37,10 +40,28 @@
     <view class="publish-field">
       <input
         class="publish-field__input"
-        placeholder="联系方式（选填）"
+        placeholder="请输入联系方式"
         value="{{contact}}"
         bindinput="onContactInput"
       />
+    </view>
+
+    <view class="publish-field">
+      <view class="publish-field__label">门店地点（选填）</view>
+      <view wx:if="{{location}}" class="location-picker">
+        <view class="location-picker__main" bindtap="chooseLocation">
+          <t-icon name="location" size="40rpx" color="#0052d9" />
+          <view class="location-picker__text">
+            <view class="location-picker__name">{{location.name || '已选择门店'}}</view>
+            <view class="location-picker__address">{{location.address}}</view>
+          </view>
+        </view>
+        <view class="location-picker__clear" catchtap="clearLocation">清除</view>
+      </view>
+      <view wx:else class="location-picker location-picker--empty" bindtap="chooseLocation">
+        <t-icon name="location" size="40rpx" color="#0052d9" />
+        <text>选择门店地点</text>
+      </view>
     </view>
 
     <view class="publish-field">

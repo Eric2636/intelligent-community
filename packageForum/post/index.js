@@ -2,6 +2,14 @@ import { forumAPI } from '~/api/cloud';
 import { chooseAndUploadMedia, MEDIA_LIMITS } from '~/utils/cloudMedia';
 import { FORUM_REPLY_EMOJI_LIST } from '~/utils/forumReplyEmoji';
 
+function firstUrl(list) {
+  return Array.isArray(list) && list.length ? String(list[0] || '') : '';
+}
+
+function withImage(payload, imageUrl) {
+  return imageUrl ? { ...payload, imageUrl } : payload;
+}
+
 /** 与任务详情等页一致：自建后端 userId + 兼容 openid */
 function getMeIds() {
   try {
@@ -46,9 +54,10 @@ function normalizeReply(r, me) {
     depth,
     padLeftRpx: depth > 0 ? 24 + depth * 28 : 0,
     isAuthor: isSameAuthor(r.authorId, me),
-    likeCount: r.likeCount ?? 0,
+    authorAvatar: r.authorAvatar || '',
+    likeCount: r.likeCount == null ? 0 : r.likeCount,
     isLiked: Boolean(r.isLiked),
-    favoriteCount: r.favoriteCount ?? 0,
+    favoriteCount: r.favoriteCount == null ? 0 : r.favoriteCount,
     isFavorited: Boolean(r.isFavorited),
     reactionCounts: rc,
     reactionList: reactionCountsToList(rc),
@@ -70,6 +79,7 @@ function normalizeForumPost(raw) {
     videos,
     replies,
     isAuthor: isSameAuthor(raw.authorId, me),
+    authorAvatar: raw.authorAvatar || '',
   };
 }
 
@@ -84,12 +94,18 @@ Page({
     submitting: false,
     deletingPost: false,
     canPublish: false,
+    replyFocus: false,
     replyTarget: null,
-    replyPlaceholderText: '发条友善的评论吧~',
+    replyPlaceholderText: '请输入评论',
+    showEmojiPanel: false,
+    replyReactionEmojis: FORUM_REPLY_EMOJI_LIST,
+    reactionPanelReplyId: '',
+    anchor: '',
   },
 
   onLoad(options) {
     const postId = (options.postId || '').trim();
+    const anchor = (options.anchor || '').trim();
 
     if (!postId || postId === 'undefined') {
       wx.showToast({
@@ -100,14 +116,14 @@ Page({
       return;
     }
 
-    this.setData({ postId });
+    this.setData({ postId, anchor });
     this.loadPost();
   },
 
   async onLike() {
     const { postId, post } = this.data;
     if (!postId) return;
-    const isLiked = post.isLiked;
+    const {isLiked} = post;
     const api = isLiked ? forumAPI.unlikePost : forumAPI.likePost;
     const res = await api(postId);
     if (res.code === 200) {
@@ -182,7 +198,7 @@ Page({
   async onFavorite() {
     const { postId, post } = this.data;
     if (!postId) return;
-    const isFavorited = post.isFavorited;
+    const {isFavorited} = post;
     const api = isFavorited ? forumAPI.unfavoritePost : forumAPI.favoritePost;
     const res = await api(postId);
     if (res.code === 200) {
@@ -209,10 +225,15 @@ Page({
       const res = await forumAPI.getPostDetail(postId);
 
       if (res.code === 200 && res.data) {
-        this.setData({
-          post: normalizeForumPost(res.data),
-          loading: silent ? this.data.loading : false,
-        });
+        this.setData(
+          {
+            post: normalizeForumPost(res.data),
+            loading: silent ? this.data.loading : false,
+          },
+          () => {
+            if (this.data.anchor === 'comments') this.scrollToComments();
+          },
+        );
       } else if (res.code === 404) {
         if (!silent) {
           this.setData({ post: null, loading: false });
@@ -224,15 +245,13 @@ Page({
             wx.navigateBack();
           }, 1500);
         }
-      } else {
-        if (!silent) {
+      } else if (!silent) {
           this.setData({ post: null, loading: false });
           wx.showToast({
             title: res.message || '加载失败',
             icon: 'none',
           });
         }
-      }
     } catch (err) {
       if (!silent) {
         this.setData({ post: null, loading: false });
@@ -242,6 +261,74 @@ Page({
         });
       }
     }
+  },
+
+  scrollToComments() {
+    setTimeout(() => {
+      wx.pageScrollTo({
+        selector: '#post-comments',
+        duration: 300,
+        fail: () => {},
+      });
+    }, 120);
+  },
+
+  onShareAppMessage() {
+    const { postId, post } = this.data;
+    const title = post
+      ? `${post.postType === 'ANNOUNCEMENT' ? '公告｜' : ''}${post.title || '小区留言'}`
+      : '小区留言';
+    this.recordPostShare();
+    return withImage(
+      {
+        title,
+        path: `/packageForum/post/index?postId=${encodeURIComponent(postId || '')}`,
+      },
+      firstUrl(post && post.images),
+    );
+  },
+
+  onShareTimeline() {
+    const { postId, post } = this.data;
+    const title = post
+      ? `${post.postType === 'ANNOUNCEMENT' ? '公告｜' : ''}${post.title || '小区留言'}`
+      : '小区留言';
+    this.recordPostShare();
+    return withImage(
+      {
+        title,
+        query: `postId=${encodeURIComponent(postId || '')}`,
+      },
+      firstUrl(post && post.images),
+    );
+  },
+
+  recordPostShare() {
+    const { postId, post } = this.data;
+    if (!postId || !post) return;
+    const currentShareCount = Number(post.shareCount || post.forwardCount || 0);
+    this.setData({
+      post: {
+        ...post,
+        shareCount: currentShareCount + 1,
+        forwardCount: currentShareCount + 1,
+      },
+    });
+    forumAPI.recordPostShare(postId)
+      .then((res) => {
+        if (res && res.code === 200 && res.data && res.data.shareCount != null) {
+          this.setData({
+            post: {
+              ...this.data.post,
+              shareCount: res.data.shareCount,
+              forwardCount: res.data.shareCount,
+            },
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('记录帖子分享失败', err);
+      });
   },
 
   patchReply(post, replyId, patch) {
@@ -258,22 +345,22 @@ Page({
   onCancelReplyTarget() {
     this.setData({
       replyTarget: null,
-      replyPlaceholderText: '发条友善的评论吧~',
+      replyPlaceholderText: '请输入评论',
     });
   },
 
   onReplyToTap(e) {
-    const rid = e.currentTarget.dataset.rid;
+    const {rid} = e.currentTarget.dataset;
     const name = e.currentTarget.dataset.name || '邻居';
     if (!rid) return;
     this.setData({
       replyTarget: { id: rid, authorName: name },
-      replyPlaceholderText: `回复 @${name}`,
+      replyPlaceholderText: '请输入评论',
     });
   },
 
   async onReplyLike(e) {
-    const rid = e.currentTarget.dataset.rid;
+    const {rid} = e.currentTarget.dataset;
     const { postId, post } = this.data;
     if (!rid || !post) return;
     const reply = (post.replies || []).find((x) => String(x.id) === String(rid));
@@ -294,7 +381,7 @@ Page({
   },
 
   async onReplyFavorite(e) {
-    const rid = e.currentTarget.dataset.rid;
+    const {rid} = e.currentTarget.dataset;
     const { postId, post } = this.data;
     if (!rid || !post) return;
     const reply = (post.replies || []).find((x) => String(x.id) === String(rid));
@@ -315,37 +402,43 @@ Page({
     }
   },
 
-  onReplyEmojiOpen(e) {
-    const rid = e.currentTarget.dataset.rid;
+  async setReplyReaction(rid, emoji) {
     const { post } = this.data;
     if (!rid || !post) return;
-    const reply = (post.replies || []).find((x) => String(x.id) === String(rid));
-    const itemList = [...FORUM_REPLY_EMOJI_LIST];
-    if (reply && reply.myReaction) itemList.push('取消我的表情');
-    wx.showActionSheet({
-      itemList,
-      success: async (res) => {
-        const idx = res.tapIndex;
-        let emoji = '';
-        if (reply && reply.myReaction && idx === itemList.length - 1) {
-          emoji = '';
-        } else {
-          emoji = FORUM_REPLY_EMOJI_LIST[idx];
-        }
-        try {
-          const r = await forumAPI.setReplyReaction(this.data.postId, rid, emoji);
-          if (r.code === 200 && r.data) {
-            const next = this.patchReply(post, rid, {
-              reactionCounts: r.data.reactionCounts,
-              myReaction: r.data.myReaction,
-            });
-            this.setData({ post: next });
-          } else wx.showToast({ title: (r && r.message) || '操作失败', icon: 'none' });
-        } catch (err) {
-          wx.showToast({ title: (err && err.message) || '网络错误', icon: 'none' });
-        }
-      },
+    try {
+      const r = await forumAPI.setReplyReaction(this.data.postId, rid, emoji);
+      if (r.code === 200 && r.data) {
+        const next = this.patchReply(post, rid, {
+          reactionCounts: r.data.reactionCounts,
+          myReaction: r.data.myReaction,
+        });
+        this.setData({ post: next, reactionPanelReplyId: '' });
+      } else wx.showToast({ title: (r && r.message) || '操作失败', icon: 'none' });
+    } catch (err) {
+      wx.showToast({ title: (err && err.message) || '网络错误', icon: 'none' });
+    }
+  },
+
+  onReplyEmojiOpen(e) {
+    const { rid } = e.currentTarget.dataset;
+    if (!rid) return;
+    this.setData({
+      reactionPanelReplyId: this.data.reactionPanelReplyId === rid ? '' : rid,
+      showEmojiPanel: false,
     });
+  },
+
+  onReplyReactionSelect(e) {
+    const emoji = String((e.detail && e.detail.emoji) || '');
+    const { reactionPanelReplyId } = this.data;
+    if (!emoji || !reactionPanelReplyId) return;
+    this.setReplyReaction(reactionPanelReplyId, emoji);
+  },
+
+  onClearReplyReaction(e) {
+    const { rid } = e.currentTarget.dataset;
+    if (!rid) return;
+    this.setReplyReaction(rid, '');
   },
 
   onReplyInput(e) {
@@ -355,7 +448,19 @@ Page({
   },
 
   onReplyEmojiHint() {
-    wx.showToast({ title: '可使用键盘内的表情符号', icon: 'none' });
+    this.setData({
+      showEmojiPanel: !this.data.showEmojiPanel,
+      reactionPanelReplyId: '',
+      replyFocus: false,
+    });
+  },
+
+  onReplyEmojiSelect(e) {
+    const emoji = String((e.detail && e.detail.emoji) || '');
+    if (!emoji) return;
+    const replyContent = `${this.data.replyContent || ''}${emoji}`;
+    const canPublish = computeCanPublish(replyContent, this.data.replyImages, this.data.replyVideos);
+    this.setData({ replyContent, canPublish });
   },
 
   async onReplyAddMedia() {
@@ -376,6 +481,7 @@ Page({
         replyImages: nextImages,
         replyVideos: nextVideos,
         canPublish,
+        showEmojiPanel: false,
       });
     } catch (e) {
       console.error(e);
@@ -397,14 +503,14 @@ Page({
   },
 
   onPreviewPostImages(e) {
-    const current = e.currentTarget.dataset.current;
+    const {current} = e.currentTarget.dataset;
     const urls = this.data.post.images || [];
     if (!urls.length) return;
     wx.previewImage({ current, urls });
   },
 
   onPreviewReplyImage(e) {
-    const rid = e.currentTarget.dataset.rid;
+    const {rid} = e.currentTarget.dataset;
     const current = e.currentTarget.dataset.src;
     const { post } = this.data;
     const reply = (post.replies || []).find((x) => String(x.id) === String(rid));
@@ -441,7 +547,8 @@ Page({
         replyVideos: [],
         canPublish: false,
         replyTarget: null,
-        replyPlaceholderText: '发条友善的评论吧~',
+        replyPlaceholderText: '请输入评论',
+        showEmojiPanel: false,
       });
       if (res.code === 200) {
         wx.showToast({ title: '回复成功' });

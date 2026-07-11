@@ -14,8 +14,7 @@ Page({
   },
 
   onShow() {
-    if (redirectIfEntryHidden('mall')) return;
-    this.loadList();
+    redirectIfEntryHidden('mall');
   },
 
   onPullDownRefresh() {

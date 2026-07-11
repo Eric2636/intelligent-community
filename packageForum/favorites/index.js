@@ -14,8 +14,7 @@ Page({
   },
 
   onShow() {
-    if (redirectIfEntryHidden('forum')) return;
-    this.loadList();
+    redirectIfEntryHidden('forum');
   },
 
   onPullDownRefresh() {

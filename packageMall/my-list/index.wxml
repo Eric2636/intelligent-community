@@ -6,11 +6,15 @@
   >
     <view class="item-grid">
       <view class="item-card" wx:for="{{itemList}}" wx:key="id" bind:tap="goDetail" data-id="{{item.id}}">
-        <image class="item-image" src="{{item.image || '/static/default-item.png'}}" mode="aspectFill" lazy-load />
+        <view class="item-status {{item.visibility === 'ONLINE' ? 'item-status--online' : 'item-status--offline'}}">
+          {{item.visibility === 'ONLINE' ? '已上架' : '待上架'}}
+        </view>
+        <image wx:if="{{item.coverImage}}" class="item-image" src="{{item.coverImage}}" mode="aspectFill" lazy-load />
+        <view wx:else class="item-image item-image--placeholder">暂无图片</view>
         <view class="item-info">
           <view class="item-title">{{item.title}}</view>
           <view class="item-price">¥{{item.price}}</view>
-          <view class="item-category">{{item.categoryName}}</view>
+          <view class="item-category">{{item.categoryName || item.categoryId}}</view>
         </view>
       </view>
     </view>

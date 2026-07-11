@@ -1,18 +1,15 @@
 {
   "lazyCodeLoading": "requiredComponents",
   "pages": [
+    "pages/login/login",
     "pages/task/index",
     "pages/errand/index",
     "pages/forum/index",
     "pages/mall/index",
     "pages/my/index"
   ],
-  "usingComponents": {
-    "t-toast": "tdesign-miniprogram/toast/toast"
-  },
   "subpackages": [
     { "root": "pages/my/info-edit", "name": "edit", "pages": ["index"] },
-    { "root": "pages/login", "name": "login", "pages": ["login"] },
     { "root": "pages/setting", "name": "setting", "pages": ["index"] },
     { "root": "packageForum", "name": "forum", "pages": ["post/index", "publish/index", "my-posts/index", "favorites/index"] },
     { "root": "packageMall", "name": "mall", "pages": ["detail/index", "publish/index", "my-list/index", "order-list/index", "order-detail/index", "favorites/index"] },
@@ -25,6 +22,11 @@
     "navigationBarBackgroundColor": "#fff",
     "navigationBarTitleText": "智能社区",
     "navigationBarTextStyle": "black"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于选择和展示门店地点"
+    }
   },
   "tabBar": {
     "custom": true,

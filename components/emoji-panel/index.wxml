@@ -1,0 +1,9 @@
+<view class="emoji-panel">
+  <view
+    class="emoji-panel__item"
+    wx:for="{{emojis}}"
+    wx:key="*this"
+    data-emoji="{{item}}"
+    catchtap="onEmojiTap"
+  >{{item}}</view>
+</view>

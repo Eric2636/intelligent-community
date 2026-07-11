@@ -8,6 +8,8 @@ Page({
     mediaImages: [],
     mediaVideos: [],
     submitting: false,
+    contentFocus: false,
+    showEmojiPanel: false,
   },
 
   onTitleInput(e) {
@@ -16,6 +18,14 @@ Page({
 
   onContentInput(e) {
     this.setData({ content: e.detail.value });
+  },
+  onEmojiHint() {
+    this.setData({ showEmojiPanel: !this.data.showEmojiPanel, contentFocus: false });
+  },
+  onEmojiSelect(e) {
+    const emoji = String((e.detail && e.detail.emoji) || '');
+    if (!emoji) return;
+    this.setData({ content: `${this.data.content || ''}${emoji}` });
   },
 
   async onAddMedia() {
@@ -32,6 +42,7 @@ Page({
       this.setData({
         mediaImages: mediaImages.concat(images),
         mediaVideos: mediaVideos.concat(videos),
+        showEmojiPanel: false,
       });
     } catch (e) {
       console.error(e);

@@ -1,39 +1,58 @@
-<t-navbar left-arrow />
 <view class="page login">
-  <view class="login__header">
-    <view class="login__title">欢迎使用</view>
-    <view class="login__subtitle">智能社区</view>
-  </view>
+  <t-navbar title="" />
 
   <view class="login__content">
+    <view wx:if="{{loginSuccess}}" class="login__success">
+      <view class="login__success-icon">
+        <t-icon name="check" size="56rpx" />
+      </view>
+      <view class="login__success-title">授权成功</view>
+      <view class="login__success-desc">正在进入社区首页</view>
+    </view>
+
+    <block wx:else>
+      <view class="login__brand">
+        <view class="login__logo">
+          <t-icon name="logo-wechat" size="72rpx" />
+        </view>
+        <view class="login__title">智能社区</view>
+        <view class="login__subtitle">申请使用你的微信绑定手机号</view>
+        <view class="login__desc">
+          用于创建社区账号、识别登录身份，并为你提供业主互助、小区跑腿、邻里留言等服务。
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="login__footer" wx:if="{{!loginSuccess}}">
     <view class="login__agreement">
       <view class="login__agreement-row">
-        <t-radio-group allow-uncheck borderless value="{{agreed}}" bind:change="onAgreementChange">
-          <t-radio
-            value="agree"
-            label="同意 "
-            t-class="radio-class"
-            t-class-icon="radio-class-icon"
-            t-class-label="radio-class-label"
-          />
-        </t-radio-group>
+        <t-checkbox
+          checked="{{agreed}}"
+          label="同意 "
+          borderless
+          bind:change="onAgreementChange"
+          t-class="checkbox-class"
+          t-class-icon="checkbox-class-icon"
+          t-class-label="checkbox-class-label"
+        />
         <text class="login__link" catchtap="openAgreement">《用户协议》</text>
         <text>和</text>
         <text class="login__link" catchtap="openPrivacy">《隐私政策》</text>
       </view>
     </view>
 
-    <view class="login__button">
-      <t-button
-        theme="primary"
-        size="large"
-        block
-        disabled="{{!agreed}}"
-        icon="logo-wechat"
-        bindtap="login"
-      >
-        微信授权登录
-      </t-button>
+    <button
+      class="login__phone-button"
+      loading="{{loggingIn}}"
+      disabled="{{!agreed || loggingIn}}"
+      open-type="getPhoneNumber"
+      bindgetphonenumber="onGetPhoneNumber"
+    >
+      {{loggingIn ? '登录中' : '手机号一键登录'}}
+    </button>
+    <view class="login__button-tip">
+      {{agreed ? '点击后将拉起微信手机号授权' : '请先阅读并勾选协议'}}
     </view>
   </view>
 </view>

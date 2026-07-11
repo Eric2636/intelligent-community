@@ -2,10 +2,6 @@ import { errandAPI } from '~/api/cloud';
 import { invalidateCloudFunction } from '~/utils/apiCache';
 import { invalidateHttpCachePrefix } from '~/utils/persistCache';
 
-function hasUnsupportedEmoji(text) {
-  return /[\uD800-\uDBFF][\uDC00-\uDFFF]/.test(text || '');
-}
-
 Page({
   data: {
     title: '',
@@ -43,11 +39,6 @@ Page({
       wx.showToast({ title: '请输入佣金', icon: 'none' });
       return;
     }
-    if (hasUnsupportedEmoji(title) || hasUnsupportedEmoji(content)) {
-      wx.showToast({ title: '请修改标题或正文后重试', icon: 'none' });
-      return;
-    }
-
     this.setData({ submitting: true });
     try {
       const res = await errandAPI.publishErrand({

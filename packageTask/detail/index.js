@@ -1,5 +1,5 @@
 import { taskAPI } from '~/api/cloud';
-import { config } from '~/config';
+import { config } from '~/config/index';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 
 const STATUS_TEXT = {
@@ -10,6 +10,14 @@ const STATUS_TEXT = {
   completed: '已完成',
   cancelled: '已取消',
 };
+
+function firstUrl(list) {
+  return Array.isArray(list) && list.length ? String(list[0] || '') : '';
+}
+
+function withImage(payload, imageUrl) {
+  return imageUrl ? { ...payload, imageUrl } : payload;
+}
 
 Page({
   data: {
@@ -25,6 +33,8 @@ Page({
     showRating: false,
     ratingScore: 5,
     ratingComment: '',
+    proofFocus: false,
+    showProofEmojiPanel: false,
   },
 
   onLoad(options) {
@@ -49,31 +59,66 @@ Page({
   async loadDetail() {
     const { id } = this.data;
     this.setData({ loading: true });
-    const res = await taskAPI.getTaskDetail(id);
-    if (res.code !== 200 || !res.data) {
+    try {
+      const res = await taskAPI.getTaskDetail(id);
+      if (res.code !== 200 || !res.data) {
+        wx.showToast({ title: (res && res.message) || '获取任务详情失败', icon: 'none' });
+        return;
+      }
+      const raw = res.data;
+      const task = {
+        ...raw,
+        images: Array.isArray(raw.images) ? raw.images : [],
+        videos: Array.isArray(raw.videos) ? raw.videos : [],
+      };
+      const app = getApp();
+      const me = (app.globalData && app.globalData.userInfo) || null;
+      const myUserId = me && me.id ? String(me.id) : '';
+      const myOpenid = me && me.openid ? String(me.openid) : '';
+      // 自建后端优先用 userId（JWT sub），兼容历史云开发 openid 字段
+      const isPublisher =
+        (myUserId && String(task.publisherId || '') === myUserId) ||
+        (myOpenid && String(task.publisherOpenid || '') === myOpenid);
+      const isTaker =
+        (myUserId && String(task.takerId || '') === myUserId) ||
+        (myOpenid && String(task.takerOpenid || '') === myOpenid);
+      const otherPartyId = isPublisher ? task.takerId : task.publisherId;
+      const otherPartyName = isPublisher ? task.takerName : task.publisherName;
+      this.setData({ task, isPublisher, isTaker, otherPartyId, otherPartyName });
+    } catch (err) {
+      console.error('加载任务详情失败', err);
+      wx.showToast({ title: (err && (err.message || err.errMsg)) || '获取任务详情失败', icon: 'none' });
+    } finally {
       this.setData({ loading: false });
-      return;
     }
-    const raw = res.data;
-    const task = {
-      ...raw,
-      images: Array.isArray(raw.images) ? raw.images : [],
-      videos: Array.isArray(raw.videos) ? raw.videos : [],
-    };
-    const app = getApp();
-    const me = (app.globalData && app.globalData.userInfo) || null;
-    const myUserId = me && me.id ? String(me.id) : '';
-    const myOpenid = me && me.openid ? String(me.openid) : '';
-    // 自建后端优先用 userId（JWT sub），兼容历史云开发 openid 字段
-    const isPublisher =
-      (myUserId && String(task.publisherId || '') === myUserId) ||
-      (myOpenid && String(task.publisherOpenid || '') === myOpenid);
-    const isTaker =
-      (myUserId && String(task.takerId || '') === myUserId) ||
-      (myOpenid && String(task.takerOpenid || '') === myOpenid);
-    const otherPartyId = isPublisher ? task.takerId : task.publisherId;
-    const otherPartyName = isPublisher ? task.takerName : task.publisherName;
-    this.setData({ task, loading: false, isPublisher, isTaker, otherPartyId, otherPartyName });
+  },
+
+  onShareAppMessage() {
+    const { id, task } = this.data;
+    const title = task
+      ? `${task.title || '业主互助'}${task.reward ? `｜佣金 ¥${task.reward}` : ''}`
+      : '业主互助';
+    return withImage(
+      {
+        title,
+        path: `/packageTask/detail/index?id=${encodeURIComponent(id || '')}`,
+      },
+      firstUrl(task && task.images),
+    );
+  },
+
+  onShareTimeline() {
+    const { id, task } = this.data;
+    const title = task
+      ? `${task.title || '业主互助'}${task.reward ? `｜佣金 ¥${task.reward}` : ''}`
+      : '业主互助';
+    return withImage(
+      {
+        title,
+        query: `id=${encodeURIComponent(id || '')}`,
+      },
+      firstUrl(task && task.images),
+    );
   },
 
   onClaim() {
@@ -98,6 +143,19 @@ Page({
   onProofInput(e) {
     this.setData({ proofText: e.detail.value });
   },
+  onTaskEmojiHint() {
+    this.setData({
+      showProofEmojiPanel: !this.data.showProofEmojiPanel,
+      proofFocus: false,
+    });
+  },
+  onProofEmojiSelect(e) {
+    const emoji = e.detail && e.detail.emoji ? e.detail.emoji : '';
+    if (!emoji) return;
+    this.setData({
+      proofText: `${this.data.proofText || ''}${emoji}`,
+    });
+  },
 
   onSubmitComplete() {
     const { id, proofText } = this.data;
@@ -109,6 +167,7 @@ Page({
     taskAPI.submitComplete(id, text).then((r) => {
       if (r.code === 200) {
         wx.showToast({ title: '已提交' });
+        this.setData({ showProofEmojiPanel: false });
         this.loadDetail();
       }
     });
@@ -190,8 +249,15 @@ Page({
         taskAPI.cancelTask(id).then((r) => {
           if (r.code === 200) {
             wx.showToast({ title: '已撤销' });
-            this.loadDetail();
+            setTimeout(() => {
+              wx.switchTab({ url: '/pages/task/index' });
+            }, 600);
+          } else {
+            wx.showToast({ title: r.message || '撤销失败', icon: 'none' });
           }
+        }).catch((err) => {
+          console.error('撤销发布失败', err);
+          wx.showToast({ title: (err && (err.message || err.errMsg)) || '撤销失败', icon: 'none' });
         });
       },
     });

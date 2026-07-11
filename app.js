@@ -1,13 +1,30 @@
 // app.js
 import config from './config';
-import Mock from './mock/index';
 import createBus from './utils/eventBus';
 import { readStoredModuleTabs, STORAGE_KEY } from './utils/moduleEntryGuard';
 import { request as httpRequest } from './api/http';
 import { cacheGet, cacheSet } from './utils/persistCache';
 
-if (config.isMock) {
-  Mock();
+function normalizeUserInfo(user) {
+  if (!user) return null;
+  const avatar = user.avatar || user.avatarUrl || user.image || '';
+  return {
+    ...user,
+    nickName: user.nickName || user.name || '',
+    avatar,
+    avatarUrl: user.avatarUrl || avatar,
+  };
+}
+
+function hasWechatProfile(user) {
+  if (!user) return false;
+  const name = String(user.nickName || user.name || '').trim();
+  const avatar = String(user.avatarUrl || user.avatar || '').trim();
+  return Boolean(avatar || (name && !/^用户\d+$/.test(name)));
+}
+
+function isFreshLoginCode(ticket) {
+  return Boolean(ticket && ticket.code && Date.now() - ticket.createdAt < 4 * 60 * 1000);
 }
 
 App({
@@ -16,9 +33,9 @@ App({
     const storedTabs = readStoredModuleTabs();
     this.globalData.moduleEntryTabs = storedTabs && Array.isArray(storedTabs.tabs) ? storedTabs.tabs : null;
 
-    // 关闭 vConsole 调试器，避免真机/预览时出现调试面板
+    // 真机预览排查时打开微信内置 vConsole，正式发布前在 config.js 关闭。
     try {
-      wx.setEnableDebug({ enableDebug: false });
+      wx.setEnableDebug({ enableDebug: Boolean(config.enableVConsole) });
     } catch (e) {
       /* ignore */
     }
@@ -41,7 +58,7 @@ App({
 
     // 先读取本地缓存的用户信息（离线 B1 用）
     const cachedMe = cacheGet('offline_cache_user_me');
-    if (cachedMe) this.globalData.userInfo = cachedMe;
+    if (cachedMe) this.globalData.userInfo = normalizeUserInfo(cachedMe);
 
     const updateManager = wx.getUpdateManager();
     updateManager.onCheckForUpdate(() => {});
@@ -55,18 +72,14 @@ App({
       });
     });
 
-    // 启动即登录（必须登录才能浏览；失败则进入离线模式）
     // 启动自检：先打一下 health，确认小程序侧能否发出 HTTP 请求（开发调试用）
     try {
       await httpRequest({ method: 'GET', path: 'api/health', auth: false });
     } catch (e) {
       console.warn('启动自检：health 请求失败', e);
     }
-    await this.login();
-    console.log('>>> login 执行完毕, offlineMode:', this.globalData.offlineMode);
-    console.log('>>> 准备调用 syncModuleEntryTabsFromApi');
+
     await this.syncModuleEntryTabsFromApi();
-    console.log('>>> syncModuleEntryTabsFromApi 执行完毕');
   },
 
   onShow() {
@@ -107,7 +120,51 @@ App({
     this.eventBus.emit('moduleEntryVisibilityChange');
   },
 
-  async login() {
+  async getWechatProfile() {
+    return new Promise((resolve, reject) => {
+      if (!wx.getUserProfile) {
+        reject(new Error('当前微信版本不支持获取用户信息'));
+        return;
+      }
+      wx.getUserProfile({
+        desc: '用于展示社区身份信息',
+        success: (res) => resolve(res.userInfo || {}),
+        fail: reject,
+      });
+    });
+  },
+
+  async syncWechatProfile(profile = {}) {
+    const profileUpdate = {
+      name: profile.nickName || undefined,
+      avatar: profile.avatarUrl || undefined,
+      gender: profile.gender,
+    };
+    if (!profileUpdate.name && !profileUpdate.avatar && profileUpdate.gender === undefined) return;
+
+    let user = this.globalData.userInfo || {};
+    try {
+      user = await httpRequest({
+        method: 'PATCH',
+        path: 'api/user/me',
+        data: profileUpdate,
+        auth: true,
+      });
+    } catch (e) {
+      console.warn('同步微信资料失败，仅使用本地展示资料', e);
+    }
+
+    this.globalData.userInfo = normalizeUserInfo({
+      ...(user || {}),
+      ...(profile.nickName ? { name: profile.nickName, nickName: profile.nickName } : {}),
+      ...(profile.avatarUrl ? { avatar: profile.avatarUrl, avatarUrl: profile.avatarUrl } : {}),
+      ...(profile.gender !== undefined ? { gender: profile.gender } : {}),
+    });
+    cacheSet('offline_cache_user_me', this.globalData.userInfo, 7 * 24 * 3600);
+    this.eventBus.emit('userInfoChange');
+  },
+
+  async login(profile = {}) {
     try {
       // 每次启动都用最新登录态覆盖旧 token，避免旧 token 导致后续接口持续 401
       try {
@@ -138,10 +195,12 @@ App({
       }
 
       wx.setStorageSync('access_token', res.token);
-      this.globalData.userInfo = res.user || null;
+
+      this.globalData.userInfo = normalizeUserInfo(res.user);
       this.globalData.openid = (res.user && res.user.openid) || '';
       this.globalData.offlineMode = false;
-      if (res.user) cacheSet('offline_cache_user_me', res.user, 7 * 24 * 3600);
+      if (this.globalData.userInfo) cacheSet('offline_cache_user_me', this.globalData.userInfo, 7 * 24 * 3600);
+      if (hasWechatProfile(profile)) await this.syncWechatProfile(profile);
       console.log('>>> login 成功, token:', res.token ? '已设置' : '无');
     } catch (err) {
       console.warn('>>> 自建后端登录失败，进入离线模式', err);
@@ -154,8 +213,71 @@ App({
       this.globalData.offlineMode = true;
       // 离线模式：尽量用缓存用户信息
       const cachedMe = cacheGet('offline_cache_user_me');
-      if (cachedMe) this.globalData.userInfo = cachedMe;
+      if (cachedMe) this.globalData.userInfo = normalizeUserInfo(cachedMe);
     }
+  },
+
+  async phoneLogin(phoneCode) {
+    const code = String(phoneCode || '').trim();
+    if (!code) throw new Error('未获取到手机号授权凭证');
+
+    try {
+      wx.removeStorageSync('access_token');
+    } catch (e) {
+      /* ignore */
+    }
+
+    const jsCode = await this.getLoginCode();
+    if (!jsCode) throw new Error('wx.login 未返回 code');
+    try {
+      const account = wx.getAccountInfoSync ? wx.getAccountInfoSync() : {};
+      console.info('[phoneLogin] miniProgram appId:', account?.miniProgram?.appId || '');
+    } catch (e) {
+      /* ignore */
+    }
+
+    const res = await httpRequest({
+      method: 'POST',
+      path: 'api/auth/wechat/phone-login',
+      data: { code: jsCode, phoneCode: code },
+      auth: false,
+    });
+
+    if (!res || !res.token) {
+      throw new Error((res && res.message) || '手机号登录失败');
+    }
+
+    wx.setStorageSync('access_token', res.token);
+    this.globalData.userInfo = normalizeUserInfo(res.user);
+    this.globalData.openid = (res.user && res.user.openid) || '';
+    this.globalData.offlineMode = false;
+    if (this.globalData.userInfo) cacheSet('offline_cache_user_me', this.globalData.userInfo, 7 * 24 * 3600);
+    await this.syncModuleEntryTabsFromApi();
+    this.eventBus.emit('userInfoChange');
+    return res;
+  },
+
+  async refreshLoginCode() {
+    const loginRes = await new Promise((resolve, reject) => {
+      wx.login({
+        timeout: 10000,
+        success: resolve,
+        fail: reject,
+      });
+    });
+    const code = loginRes && loginRes.code;
+    if (!code) throw new Error('wx.login 未返回 code');
+    this.globalData.loginCodeTicket = { code, createdAt: Date.now() };
+    return code;
+  },
+
+  async getLoginCode() {
+    const ticket = this.globalData.loginCodeTicket;
+    if (isFreshLoginCode(ticket)) {
+      this.globalData.loginCodeTicket = null;
+      return ticket.code;
+    }
+    return this.refreshLoginCode();
   },
 
   globalData: {
@@ -165,6 +287,7 @@ App({
     useCloudBase: false,
     offlineMode: false,
     apiBaseUrl: '',
+    loginCodeTicket: null,
     moduleEntryTabs: null,
     /** 底部自定义 TabBar 当前选中 key，与 tab 页路由同步（跨页面组件实例共享） */
     tabBarSelectedKey: '',

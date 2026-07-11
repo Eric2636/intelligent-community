@@ -1,4 +1,4 @@
-<nav title-text="{{item ? item.title : '详情'}}" show-back="{{true}}" />
+<nav title-text="{{item ? item.title : '详情'}}" show-back="{{true}}" fallback-url="/pages/mall/index" />
 <view class="detail-page">
   <view wx:if="{{loading}}" class="detail-loading">
     <t-loading theme="dots" size="48rpx" />
@@ -32,8 +32,31 @@
       <view class="detail-card__price" wx:if="{{item.price}}">{{item.price}}{{item.unit}}</view>
       <view class="detail-card__title">{{item.title}}</view>
       <view class="detail-card__meta">{{item.createdAt}}</view>
+      <view class="detail-card__meta" wx:if="{{item.adminLabel}}">
+        <text class="admin-tag">{{item.adminLabel}}</text>
+      </view>
       <view class="detail-card__desc">{{item.desc}}</view>
       <view class="detail-card__contact">联系：{{item.contact}}</view>
+    </view>
+
+    <view wx:if="{{item.locationName || item.locationAddress}}" class="location-card">
+      <view class="location-card__address" bindtap="openLocation">
+        <t-icon name="location" size="44rpx" color="#0052d9" />
+        <view class="location-card__text">
+          <view class="location-card__name">{{item.locationName || '门店地点'}}</view>
+          <view class="location-card__desc">{{item.locationAddress}}</view>
+        </view>
+      </view>
+      <map
+        wx:if="{{item.latitude && item.longitude}}"
+        class="location-card__map"
+        latitude="{{item.latitude}}"
+        longitude="{{item.longitude}}"
+        scale="16"
+        markers="{{locationMarkers}}"
+        show-location="{{false}}"
+        bindtap="openLocation"
+      />
     </view>
 
     <view class="comment-card">
@@ -42,7 +65,7 @@
         <text class="comment-card__count">{{commentTotal}}</text>
       </view>
 
-      <view wx:if="{{comments.length === 0}}" class="comment-card__empty">暂无评论</view>
+      <t-empty wx:if="{{comments.length === 0}}" description="暂无评论" />
 
       <view wx:else class="comment-list">
         <block wx:for="{{comments}}" wx:key="id">
@@ -68,13 +91,20 @@
                     />
                   </block>
                 </view>
-                <view class="comment-item__actions">
-                  <text class="comment-item__action" data-id="{{item.id}}" catchtap="onReplyTap">回复</text>
-                  <view class="comment-item__like" data-id="{{item.id}}" data-liked="{{item.liked ? 1 : 0}}" catchtap="onToggleLike">
-                    <t-icon name="{{item.liked ? 'thumb-up-filled' : 'thumb-up'}}" size="32rpx" color="{{item.liked ? '#ff2442' : '#999'}}" />
-                    <text class="comment-item__like-num">{{item.likeCount}}</text>
+                <view class="comment-item__actions-row">
+                  <view class="comment-toolbar">
+                    <view class="comment-toolbar__btn" data-id="{{item.id}}" data-liked="{{item.liked ? 1 : 0}}" catchtap="onToggleLike">
+                      <t-icon name="{{item.liked ? 'thumb-up-filled' : 'thumb-up'}}" size="36rpx" color="{{item.liked ? '#ff2442' : '#666'}}" />
+                      <text class="comment-toolbar__txt {{item.liked ? 'comment-toolbar__txt--on' : ''}}">{{item.likeCount || 0}}</text>
+                    </view>
+                    <view class="comment-toolbar__btn" data-id="{{item.id}}" data-name="{{item.userName || '用户'}}" catchtap="onReplyTap">
+                      <t-icon name="chat" size="36rpx" color="#666" />
+                      <text class="comment-toolbar__txt">评论</text>
+                    </view>
                   </view>
-                  <text wx:if="{{item.userId === currentUserId}}" class="comment-item__action comment-item__action--danger" data-id="{{item.id}}" catchtap="onDeleteComment">删除</text>
+                  <view wx:if="{{item.userId === currentUserId}}" class="comment-item__delete" data-id="{{item.id}}" catchtap="onDeleteComment">
+                    <t-icon name="delete-1" size="36rpx" color="#b0b0b0" />
+                  </view>
                 </view>
               </view>
             </view>
@@ -102,12 +132,20 @@
                       />
                     </block>
                   </view>
-                  <view class="comment-item__actions">
-                    <view class="comment-item__like" data-id="{{sub.id}}" data-liked="{{sub.liked ? 1 : 0}}" catchtap="onToggleLike">
-                      <t-icon name="{{sub.liked ? 'thumb-up-filled' : 'thumb-up'}}" size="32rpx" color="{{sub.liked ? '#ff2442' : '#999'}}" />
-                      <text class="comment-item__like-num">{{sub.likeCount}}</text>
+                  <view class="comment-item__actions-row">
+                    <view class="comment-toolbar">
+                      <view class="comment-toolbar__btn" data-id="{{sub.id}}" data-liked="{{sub.liked ? 1 : 0}}" catchtap="onToggleLike">
+                        <t-icon name="{{sub.liked ? 'thumb-up-filled' : 'thumb-up'}}" size="36rpx" color="{{sub.liked ? '#ff2442' : '#666'}}" />
+                        <text class="comment-toolbar__txt {{sub.liked ? 'comment-toolbar__txt--on' : ''}}">{{sub.likeCount || 0}}</text>
+                      </view>
+                      <view class="comment-toolbar__btn" data-id="{{sub.id}}" data-name="{{sub.userName || '用户'}}" catchtap="onReplyTap">
+                        <t-icon name="chat" size="36rpx" color="#666" />
+                        <text class="comment-toolbar__txt">评论</text>
+                      </view>
                     </view>
-                    <text wx:if="{{sub.userId === currentUserId}}" class="comment-item__action comment-item__action--danger" data-id="{{sub.id}}" catchtap="onDeleteComment">删除</text>
+                    <view wx:if="{{sub.userId === currentUserId}}" class="comment-item__delete" data-id="{{sub.id}}" catchtap="onDeleteComment">
+                      <t-icon name="delete-1" size="36rpx" color="#b0b0b0" />
+                    </view>
                   </view>
                 </view>
               </view>
@@ -117,7 +155,7 @@
       </view>
 
       <view wx:if="{{replyParentId}}" class="comment-reply-hint">
-        <text>正在回复评论</text>
+        <text>回复 <text class="comment-reply-hint__name">@{{replyTargetName || '邻居'}}</text></text>
         <text class="comment-reply-hint__cancel" bindtap="onCancelReply">取消</text>
       </view>
 
@@ -132,25 +170,50 @@
         </view>
       </view>
 
+      <emoji-panel wx:if="{{showCommentEmojiPanel}}" bindselect="onCommentEmojiSelect" />
+
       <view class="comment-editor">
-        <input class="comment-editor__input" placeholder="文字或图片（支持系统表情）…" value="{{commentInput}}" maxlength="1000" bindinput="onCommentInput" />
-        <view class="comment-editor__side">
-          <view class="comment-editor__addimg" bindtap="onAddCommentImages" wx:if="{{commentImages.length < 3}}">图</view>
-          <t-button size="small" theme="primary" bindtap="submitComment" loading="{{commentSubmitting}}">发送</t-button>
+        <view class="comment-editor__input-box">
+          <input class="comment-editor__input" placeholder="请输入评论" placeholder-class="comment-editor__ph" value="{{commentInput}}" maxlength="1000" focus="{{commentFocus}}" bindinput="onCommentInput" />
+        </view>
+        <view class="comment-editor__tools">
+          <view class="comment-editor__addimg" bindtap="onAddCommentImages" wx:if="{{commentImages.length < 3}}">
+            <t-icon name="image-add" size="44rpx" color="#5c5c5c" />
+          </view>
+          <view class="comment-editor__emoji" bindtap="onCommentEmojiHint">
+            <t-icon name="{{showCommentEmojiPanel ? 'smile-filled' : 'smile'}}" size="44rpx" color="{{showCommentEmojiPanel ? '#007aff' : '#5c5c5c'}}" />
+          </view>
+          <view class="comment-editor__send {{(commentInput || commentImages.length) && !commentSubmitting ? 'comment-editor__send--ready' : ''}} {{commentSubmitting ? 'comment-editor__send--busy' : ''}}" bindtap="submitComment">
+            <view wx:if="{{commentSubmitting}}" class="comment-editor__loading">
+              <t-loading theme="dots" size="32rpx" />
+            </view>
+            <text wx:else>发送</text>
+          </view>
         </view>
       </view>
     </view>
 
     <view class="detail-bar">
       <view wx:if="{{!isMine}}" class="detail-bar__row">
-        <t-button theme="primary" size="large" block bindtap="onBuy">立即购买</t-button>
+        <t-button class="detail-bar__action" theme="primary" size="large" block bindtap="onContact">联系商家</t-button>
+        <t-button wx:if="{{item.latitude && item.longitude}}" class="detail-bar__action" variant="outline" size="large" block bindtap="openLocation">导航到店</t-button>
+        <button class="detail-bar__share" open-type="share">
+          <t-icon name="share" size="44rpx" />
+          <text>分享</text>
+        </button>
         <view class="detail-bar__fav {{item.isFavorited ? 'detail-bar__fav--active' : ''}}" bindtap="onFavorite">
           <t-icon name="{{item.isFavorited ? 'star-filled' : 'star'}}" size="44rpx" />
           <text>{{item.isFavorited ? '已收藏' : '收藏'}}</text>
         </view>
       </view>
-      <t-button wx:if="{{!isMine}}" class="detail-bar__btn" variant="outline" size="large" block bindtap="onContact">联系 TA</t-button>
-      <t-button wx:if="{{isMine}}" theme="primary" size="large" block bindtap="onContact">联系 TA</t-button>
+      <view wx:if="{{isMine}}" class="detail-bar__row">
+        <t-button class="detail-bar__action" theme="primary" size="large" block bindtap="onContact">联系商家</t-button>
+        <t-button wx:if="{{item.latitude && item.longitude}}" class="detail-bar__action" variant="outline" size="large" block bindtap="openLocation">导航到店</t-button>
+        <button class="detail-bar__share" open-type="share">
+          <t-icon name="share" size="44rpx" />
+          <text>分享</text>
+        </button>
+      </view>
     </view>
   </block>
   <view wx:else class="detail-loading">信息不存在</view>

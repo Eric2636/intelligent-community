@@ -5,10 +5,13 @@
     <t-icon name="search" size="40rpx" class="forum-search-bar__icon" />
     <t-input
       class="forum-search-bar__input"
-      placeholder="搜索帖子标题"
+      style="--td-input-bg-color: transparent; --td-input-vertical-padding: 0; --td-input-border-left-space: 0; height: 72rpx; padding: 0;"
+      borderless
+      placeholder="请输入搜索内容"
       value="{{keyword}}"
       clearable
       bindchange="onSearchInput"
+      bindclear="onSearchClear"
       bindconfirm="onSearchConfirm"
     />
     <view class="forum-search-bar__btn" bindtap="onSearchConfirm">搜索</view>
@@ -36,6 +39,48 @@
     </view>
   </view>
   <block wx:else>
+    <view class="forum-announcement" wx:if="{{announcements.length > 0}}">
+      <view class="forum-announcement__head">
+        <view class="forum-announcement__label">
+          <t-icon name="notification" size="28rpx" />
+          <text>公告</text>
+        </view>
+        <text class="forum-announcement__count" wx:if="{{announcements.length > 1}}">{{announcements.length}} 条</text>
+      </view>
+      <swiper
+        wx:if="{{announcements.length > 1}}"
+        class="forum-announcement__swiper"
+        current="{{announcementCurrent}}"
+        circular
+        autoplay
+        interval="4500"
+        duration="400"
+        bindchange="onAnnouncementChange"
+      >
+        <swiper-item wx:for="{{announcements}}" wx:key="id">
+          <view class="forum-announcement__item" data-id="{{item.id || item._id}}" bindtap="goPost">
+            <view class="forum-announcement__title">{{item.title}}</view>
+            <view class="forum-announcement__summary" wx:if="{{item.summary}}">{{item.summary}}</view>
+          </view>
+        </swiper-item>
+      </swiper>
+      <view class="forum-announcement__dots" wx:if="{{announcements.length > 1}}">
+        <view
+          wx:for="{{announcements}}"
+          wx:key="id"
+          class="forum-announcement__dot {{index === announcementCurrent ? 'forum-announcement__dot--active' : ''}}"
+        ></view>
+      </view>
+      <view
+        wx:else
+        class="forum-announcement__item"
+        data-id="{{announcements[0].id || announcements[0]._id}}"
+        bindtap="goPost"
+      >
+        <view class="forum-announcement__title">{{announcements[0].title}}</view>
+        <view class="forum-announcement__summary" wx:if="{{announcements[0].summary}}">{{announcements[0].summary}}</view>
+      </view>
+    </view>
     <view class="forum-section" wx:if="{{pinned.length > 0}}">
       <view class="forum-section__title">
         <t-icon name="pushpin" size="28rpx" /> 置顶
@@ -47,14 +92,33 @@
         data-id="{{item.id || item._id}}"
         bindtap="goPost"
       >
-        <view class="post-item__headline">
-          <text class="post-item__title">{{item.title}}</text>
+        <view class="post-item__author-row">
+          <view class="post-item__author-main">
+            <image wx:if="{{item.authorAvatar}}" class="post-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
+            <view wx:else class="post-item__avatar post-item__avatar--placeholder">
+              <t-icon name="user" size="28rpx" color="#8e8e93" />
+            </view>
+            <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
+          </view>
+          <view class="post-item__top-right">
+            <text wx:if="{{item.adminLabel}}" class="admin-tag">{{item.adminLabel}}</text>
+          </view>
         </view>
+        <text class="post-item__title">{{item.title}}</text>
         <template is="forumListMedia" data="{{item: item}}" />
-        <view class="post-item__meta">
-          <text>{{item.authorName}}</text>
-          <text>{{item.replyCount}} 回复</text>
-          <text>{{item.createTime}}</text>
+        <view class="post-item__actions">
+          <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
+            <t-icon name="share" size="30rpx" color="#8e8e93" />
+            <text>{{item.shareCount || item.forwardCount || 0}}</text>
+          </button>
+          <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
+            <t-icon name="chat-bubble" size="30rpx" color="#8e8e93" />
+            <text>{{item.replyCount || 0}}</text>
+          </view>
+          <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike">
+            <t-icon name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
+            <text>{{item.likeCount || 0}}</text>
+          </view>
         </view>
       </view>
     </view>
@@ -70,14 +134,33 @@
             data-id="{{item.id || item._id}}"
             bindtap="goPost"
           >
-            <view class="post-item__headline">
-              <text class="post-item__title">{{item.title}}</text>
+            <view class="post-item__author-row">
+              <view class="post-item__author-main">
+                <image wx:if="{{item.authorAvatar}}" class="post-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
+                <view wx:else class="post-item__avatar post-item__avatar--placeholder">
+                  <t-icon name="user" size="28rpx" color="#8e8e93" />
+                </view>
+                <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
+              </view>
+              <view class="post-item__top-right">
+                <text wx:if="{{item.adminLabel}}" class="admin-tag">{{item.adminLabel}}</text>
+              </view>
             </view>
+            <text class="post-item__title">{{item.title}}</text>
             <template is="forumListMedia" data="{{item: item}}" />
-            <view class="post-item__meta">
-              <text>{{item.authorName}}</text>
-              <text>{{item.replyCount}} 回复</text>
-              <text>{{item.createTime}}</text>
+            <view class="post-item__actions">
+              <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
+                <t-icon name="share" size="30rpx" color="#8e8e93" />
+                <text>{{item.shareCount || item.forwardCount || 0}}</text>
+              </button>
+              <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
+                <t-icon name="chat-bubble" size="30rpx" color="#8e8e93" />
+                <text>{{item.replyCount || 0}}</text>
+              </view>
+              <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike">
+                <t-icon name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
+                <text>{{item.likeCount || 0}}</text>
+              </view>
             </view>
           </view>
           <view class="forum-virtual__spacer forum-virtual__spacer--bottom" style="height: {{(list.length - virtualStart - displayList.length) * ITEM_HEIGHT_RPX}}rpx;"></view>
@@ -91,22 +174,41 @@
           data-id="{{item.id || item._id}}"
           bindtap="goPost"
         >
-          <view class="post-item__headline">
-            <text class="post-item__title">{{item.title}}</text>
+          <view class="post-item__author-row">
+            <view class="post-item__author-main">
+              <image wx:if="{{item.authorAvatar}}" class="post-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
+              <view wx:else class="post-item__avatar post-item__avatar--placeholder">
+                <t-icon name="user" size="28rpx" color="#8e8e93" />
+              </view>
+              <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
+            </view>
+            <view class="post-item__top-right">
+              <text wx:if="{{item.adminLabel}}" class="admin-tag">{{item.adminLabel}}</text>
+            </view>
           </view>
+          <text class="post-item__title">{{item.title}}</text>
           <template is="forumListMedia" data="{{item: item}}" />
-          <view class="post-item__meta">
-            <text>{{item.authorName}}</text>
-            <text>{{item.replyCount}} 回复</text>
-            <text>{{item.createTime}}</text>
+          <view class="post-item__actions">
+            <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
+              <t-icon name="share" size="30rpx" color="#8e8e93" />
+              <text>{{item.shareCount || item.forwardCount || 0}}</text>
+            </button>
+            <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
+              <t-icon name="chat-bubble" size="30rpx" color="#8e8e93" />
+              <text>{{item.replyCount || 0}}</text>
+            </view>
+            <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike">
+              <t-icon name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
+              <text>{{item.likeCount || 0}}</text>
+            </view>
           </view>
         </view>
       </block>
-      <view wx:if="{{list.length === 0 && pinned.length === 0}}" class="forum-empty">暂无帖子，快来发帖吧</view>
-      <view wx:if="{{list.length > 0 && hasMore === false}}" class="forum-nomore">没有更多了</view>
+      <t-empty wx:if="{{!loading && list.length === 0 && pinned.length === 0}}" description="暂无帖子，快来发帖吧" />
+      <view wx:if="{{showNoMore}}" class="forum-nomore">没有更多了</view>
     </view>
   </block>
 </scroll-view>
 <view class="forum-fab" bindtap="goPublish">
-  <t-icon name="add" size="48rpx" color="#fff" bindtap="goPublish" />
+  <t-icon name="add" size="48rpx" color="#fff" />
 </view>

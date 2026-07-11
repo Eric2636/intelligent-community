@@ -4,7 +4,7 @@
     <view class="publish-field">
       <input
         class="publish-field__input publish-field__input--title"
-        placeholder="请输入标题（必填）"
+        placeholder="请输入标题"
         value="{{title}}"
         maxlength="60"
         bindinput="onTitleInput"
@@ -13,13 +13,21 @@
     <view class="publish-field">
       <textarea
         class="publish-field__input publish-field__textarea"
-        placeholder="请输入正文（可与图片/视频二选一）"
+        placeholder="请输入正文"
         value="{{content}}"
         maxlength="2000"
         auto-height
+        focus="{{contentFocus}}"
         bindinput="onContentInput"
       />
-      <view class="publish-field__hint">可使用系统键盘输入表情；最多 9 张图、2 段视频</view>
+      <view class="publish-field__toolbar">
+        <view class="publish-field__emoji" bindtap="onEmojiHint">
+          <t-icon name="{{showEmojiPanel ? 'smile-filled' : 'smile'}}" size="36rpx" color="#007aff" />
+          <text>表情</text>
+        </view>
+        <view class="publish-field__hint">点击表情插入；最多 9 张图、2 段视频</view>
+      </view>
+      <emoji-panel wx:if="{{showEmojiPanel}}" bindselect="onEmojiSelect" />
     </view>
 
     <view class="media-picker" wx:if="{{mediaImages.length || mediaVideos.length}}">

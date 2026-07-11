@@ -93,9 +93,9 @@
 - 填写个人简介
 - 上传相片墙
 
-#### 登录页面 (`pages/login/login`)
-- 微信授权登录
-- 用户协议确认
+#### 微信授权登录
+- 在个人中心直接拉取微信资料并完成登录
+- 无独立登录页面
 
 #### 设置中心 (`pages/setting/index`)
 - 通用设置（占位）
@@ -133,9 +133,6 @@
 - `pages/my/index` - 个人中心首页
 
 ### 分包页面
-#### 登录相关
-- `pages/login/login` - 微信授权登录
-
 #### 其他页面
 - `pages/my/info-edit/index` - 个人信息编辑
 - `pages/setting/index` - 设置中心

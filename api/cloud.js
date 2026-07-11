@@ -1,13 +1,14 @@
 // 自建后端 HTTP API 调用工具
 import { request as httpRequest } from '~/api/http';
-import { cacheGet, cacheSet } from '~/utils/persistCache';
+import { cacheGet, cacheSet, invalidateHttpCachePrefix } from '~/utils/persistCache';
+import { formatDateTimeFields } from '~/utils/date';
 
 /** 401 不应回退到离线缓存，否则界面仍像「已登录可用」，只有上传等接口会暴露失败 */
 function shouldUseOfflineCache(err) {
   return !(err && err.statusCode === 401);
 }
 
-/** 带缓存的 HTTP 请求，TTL 秒内命中缓存则直接返回 */
+/** 带离线兜底的 HTTP 请求：正常始终请求后端，失败时才读本地缓存 */
 function cachedRequest(path, query, ttlSeconds = 60, options = {}) {
   const cacheKey = `http_cache:${path}:${JSON.stringify(query || {})}`;
   return httpRequest({ method: 'GET', path, query, auth: true, ...options })
@@ -18,9 +19,25 @@ function cachedRequest(path, query, ttlSeconds = 60, options = {}) {
     .catch((err) => {
       if (!shouldUseOfflineCache(err)) throw err;
       const cached = cacheGet(cacheKey);
-      if (cached) return cached;
+      if (cached) return formatDateTimeFields(cached);
       throw err;
     });
+}
+
+function clearTaskListCache() {
+  invalidateHttpCachePrefix('offline_cache_task_list:');
+}
+
+function clearPostListCache() {
+  invalidateHttpCachePrefix('http_cache:api/posts:');
+}
+
+function clearItemListCache() {
+  invalidateHttpCachePrefix('http_cache:api/items:');
+}
+
+function clearErrandListCache() {
+  invalidateHttpCachePrefix('http_cache:api/errands:');
 }
 
 /**
@@ -30,12 +47,14 @@ export const taskAPI = {
   // 获取待领取的任务列表（keyword 可选，仅标题模糊匹配）
   getTaskList(params = {}) {
     const keyword = params && params.keyword ? String(params.keyword).trim() : '';
-    const cacheKey = `offline_cache_task_list:${keyword || '_'}`;
+    const page = params && params.page ? Number(params.page) : 1;
+    const pageSize = params && params.pageSize ? Number(params.pageSize) : 50;
+    const cacheKey = `offline_cache_task_list:${keyword || '_'}:${page}:${pageSize}`;
 
     return httpRequest({
       method: 'POST',
       path: 'api/tasks/list',
-      data: { keyword: keyword || undefined },
+      data: { keyword: keyword || undefined, page, pageSize },
       auth: true,
     })
       .then((res) => {
@@ -45,7 +64,7 @@ export const taskAPI = {
       .catch((err) => {
         if (!shouldUseOfflineCache(err)) throw err;
         const cached = cacheGet(cacheKey);
-        if (cached) return cached;
+        if (cached) return formatDateTimeFields(cached);
         throw err;
       });
   },
@@ -66,6 +85,9 @@ export const taskAPI = {
       path: 'api/tasks',
       data,
       auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearTaskListCache();
+      return res;
     });
   },
 
@@ -85,6 +107,9 @@ export const taskAPI = {
       method: 'POST',
       path: `api/tasks/${taskId}/publish`,
       auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearTaskListCache();
+      return res;
     });
   },
 
@@ -142,6 +167,9 @@ export const taskAPI = {
       method: 'POST',
       path: `api/tasks/${taskId}/republish`,
       auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearTaskListCache();
+      return res;
     });
   },
 
@@ -208,6 +236,12 @@ export const forumAPI = {
     return this.getPosts(params);
   },
 
+  // 获取有效公告（展示在小区留言顶部，短缓存避免过期公告停留太久）
+  getAnnouncements(params = {}) {
+    const limit = params && params.limit ? Number(params.limit) : 5;
+    return cachedRequest('api/posts/announcements', { limit }, 30);
+  },
+
   // 获取帖子详情
   getPostDetail(postId) {
     if (!postId) {
@@ -230,6 +264,9 @@ export const forumAPI = {
       path: 'api/posts',
       data: { authorName, ...data },
       auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearPostListCache();
+      return res;
     });
   },
 
@@ -243,6 +280,9 @@ export const forumAPI = {
       path: `api/posts/${postId}/replies`,
       data: { authorName, ...data },
       auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearPostListCache();
+      return res;
     });
   },
 
@@ -294,6 +334,9 @@ export const forumAPI = {
       method: 'DELETE',
       path: `api/posts/${postId}`,
       auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearPostListCache();
+      return res;
     });
   },
 
@@ -303,6 +346,9 @@ export const forumAPI = {
       method: 'DELETE',
       path: `api/posts/${postId}/replies/${replyId}`,
       auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearPostListCache();
+      return res;
     });
   },
 
@@ -321,6 +367,9 @@ export const forumAPI = {
       method: 'POST',
       path: `api/posts/${postId}/like`,
       auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearPostListCache();
+      return res;
     });
   },
 
@@ -330,6 +379,9 @@ export const forumAPI = {
       method: 'DELETE',
       path: `api/posts/${postId}/like`,
       auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearPostListCache();
+      return res;
     });
   },
 
@@ -348,6 +400,18 @@ export const forumAPI = {
       method: 'DELETE',
       path: `api/posts/${postId}/favorite`,
       auth: true,
+    });
+  },
+
+  // 记录帖子分享次数（微信分享回调需同步返回，调用方通常 fire-and-forget）
+  recordPostShare(postId) {
+    return httpRequest({
+      method: 'POST',
+      path: `api/posts/${postId}/share`,
+      auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearPostListCache();
+      return res;
     });
   },
 
@@ -441,6 +505,9 @@ export const mallAPI = {
       path: 'api/items',
       data,
       auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearItemListCache();
+      return res;
     });
   },
 
@@ -557,6 +624,9 @@ export const errandAPI = {
       path: 'api/errands',
       data: { authorName, ...data },
       auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearErrandListCache();
+      return res;
     });
   },
 
@@ -649,19 +719,19 @@ export const userAPI = {
   getUserInfo() {
     return httpRequest({
       method: 'GET',
-      path: 'api/users/me',
+      path: 'api/user/me',
       auth: true,
-    });
+    }).then((res) => (res && res.code === 200 ? res : { code: 200, data: res }));
   },
 
   // 更新用户信息
   updateUserInfo(data) {
     return httpRequest({
       method: 'PATCH',
-      path: 'api/users/me',
+      path: 'api/user/me',
       data,
       auth: true,
-    });
+    }).then((res) => (res && res.code === 200 ? res : { code: 200, data: res }));
   },
 };
 
@@ -674,7 +744,7 @@ export const commonAPI = {
     return httpRequest({
       method: 'GET',
       path: 'api/app-settings/module-entry-tabs',
-      auth: true,
+      auth: false,
     });
   },
 
