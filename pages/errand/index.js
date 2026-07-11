@@ -25,6 +25,7 @@ Page({
     list: [],
     loading: true,
     refreshing: false,
+    showNoMore: false,
     hasMore: true,
     page: 1,
     pageSize: 10,
@@ -45,13 +46,13 @@ Page({
 
   onShow() {
     syncCustomTabBar(this);
-    if (redirectIfEntryHidden('errand')) return;
-    this.loadErrands();
+    redirectIfEntryHidden('errand');
   },
 
   async onRefresh() {
     this.setData({
       refreshing: true,
+      showNoMore: false,
       page: 1,
       hasMore: true,
     });
@@ -60,7 +61,11 @@ Page({
   },
 
   async onLoadMore() {
-    if (!this.data.hasMore || this.data.loading) return;
+    if (this.data.loading) return;
+    if (!this.data.hasMore) {
+      this.showNoMoreTip();
+      return;
+    }
     this.setData({ page: this.data.page + 1 });
     await this.loadErrands(false);
   },
@@ -80,12 +85,20 @@ Page({
     this.loadErrands(true);
   },
 
-  onPullDownRefresh() {
-    this.onRefresh().then(() => wx.stopPullDownRefresh());
+  showNoMoreTip() {
+    if (this._noMoreTimer) clearTimeout(this._noMoreTimer);
+    this.setData({ showNoMore: true });
+    this._noMoreTimer = setTimeout(() => {
+      this.setData({ showNoMore: false });
+      this._noMoreTimer = null;
+    }, 2000);
   },
 
   async loadErrands(refresh = true) {
-    this.setData({ loading: true });
+    this.setData({
+      loading: true,
+      showNoMore: refresh ? false : this.data.showNoMore,
+    });
 
     try {
       const res = await errandAPI.getErrandList({
@@ -112,6 +125,7 @@ Page({
         let pinnedNext = this.data.pinned;
         if (refresh) pinnedNext = pinnedNorm;
         else if (pinnedNorm.length > 0) pinnedNext = pinnedNorm;
+        if (!refresh && chunk.length === 0) this.showNoMoreTip();
 
         this.setData({
           pinned: pinnedNext,

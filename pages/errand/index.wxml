@@ -4,7 +4,9 @@
     <t-icon name="search" size="40rpx" class="errand-search-bar__icon" />
     <t-input
       class="errand-search-bar__input"
-      placeholder="搜索跑腿标题、内容"
+      style="--td-input-bg-color: transparent; --td-input-vertical-padding: 0; --td-input-border-left-space: 0; height: 72rpx; padding: 0;"
+      borderless
+      placeholder="请输入搜索内容"
       value="{{keyword}}"
       clearable
       bindchange="onSearchInput"
@@ -107,8 +109,8 @@
           </view>
         </view>
       </block>
-      <view wx:if="{{list.length === 0 && pinned.length === 0}}" class="errand-empty">暂无跑腿内容，快来发布吧</view>
-      <view wx:if="{{list.length > 0 && hasMore === false}}" class="errand-nomore">没有更多了</view>
+      <t-empty wx:if="{{!loading && list.length === 0 && pinned.length === 0}}" description="暂无跑腿内容，快来发布吧" />
+      <view wx:if="{{showNoMore}}" class="errand-nomore">没有更多了</view>
     </view>
   </block>
 </scroll-view>

@@ -2,6 +2,8 @@
   "navigationStyle": "custom",
   "usingComponents": {
     "nav": "/components/nav",
+    "emoji-panel": "/components/emoji-panel",
+    "t-icon": "tdesign-miniprogram/icon/icon",
     "t-button": "tdesign-miniprogram/button/button"
   }
 }

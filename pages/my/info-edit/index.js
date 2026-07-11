@@ -1,16 +1,49 @@
 import { areaList } from './areaData.js';
 import { userAPI } from '~/api/cloud';
+import { uploadLocalFilesToCloud } from '~/utils/cloudMedia';
+
+function defaultPersonInfo() {
+  return {
+    name: '',
+    avatar: '',
+    gender: 0,
+    birth: '',
+    address: [],
+    introduction: '',
+    photos: [],
+  };
+}
+
+function normalizePhotoUrls(rawPhotos) {
+  if (!Array.isArray(rawPhotos)) return [];
+  return rawPhotos
+    .map((item) => {
+      if (typeof item === 'string') return item;
+      if (item && typeof item === 'object') {
+        return item.url || item.path || item.thumb || (item.response && item.response.url) || '';
+      }
+      return '';
+    })
+    .map((url) => String(url || '').trim())
+    .filter((url) => /^https?:\/\//i.test(url));
+}
+
+function buildUserInfoPayload(personInfo) {
+  const gender = Number(personInfo.gender);
+  return {
+    name: String(personInfo.name || '').trim(),
+    avatar: String(personInfo.avatar || personInfo.avatarUrl || personInfo.image || '').trim(),
+    gender: Number.isInteger(gender) && gender >= 0 && gender <= 2 ? gender : 0,
+    birth: String(personInfo.birth || '').trim(),
+    address: Array.isArray(personInfo.address) ? personInfo.address : [],
+    brief: String(personInfo.introduction || personInfo.brief || '').trim(),
+    photos: normalizePhotoUrls(personInfo.photos),
+  };
+}
 
 Page({
   data: {
-    personInfo: {
-      name: '',
-      gender: 0,
-      birth: '',
-      address: [],
-      introduction: '',
-      photos: [],
-    },
+    personInfo: defaultPersonInfo(),
     genderOptions: [
       {
         label: '男',
@@ -50,45 +83,34 @@ Page({
   async getPersonalInfo() {
     try {
       const app = getApp();
-      if (app.globalData.useCloudBase) {
-        // 云开发环境：调用云函数获取用户信息
+      const token = wx.getStorageSync('access_token');
+      if (token) {
         const res = await userAPI.getUserInfo();
-        if (res.code === 200 && res.data) {
-          this.setData(
-            {
-              personInfo: res.data,
-            },
-            () => {
-              const { personInfo } = this.data;
-              this.setData({
-                addressText: `${areaList.provinces[personInfo.address[0]]} ${areaList.cities[personInfo.address[1]]}`,
-              });
-            },
-          );
-        } else {
-          // 没有用户信息时，设置默认值
-          this.setData({
+        const data = res && res.code === 200 && res.data ? res.data : app.globalData.userInfo;
+        this.setData(
+          {
             personInfo: {
-              name: '',
-              gender: 0,
-              birth: '',
-              address: [],
-              introduction: '',
-              photos: [],
+              ...defaultPersonInfo(),
+              ...(data || {}),
+              avatar: (data && (data.avatar || data.avatarUrl || data.image)) || '',
+              introduction: (data && (data.brief || data.introduction)) || '',
+              photos: normalizePhotoUrls(data && data.photos),
             },
-          });
-        }
-      } else {
-        // 非云开发环境，不加载用户信息
-        this.setData({
-          personInfo: {
-            name: '',
-            gender: 0,
-            birth: '',
-            address: [],
-            introduction: '',
-            photos: [],
           },
+          () => {
+            const { personInfo } = this.data;
+            const address = Array.isArray(personInfo.address) ? personInfo.address : [];
+            this.setData({
+              addressText:
+                address.length >= 2
+                  ? `${areaList.provinces[address[0]] || ''} ${areaList.cities[address[1]] || ''}`.trim()
+                  : '',
+            });
+          },
+        );
+      } else {
+        this.setData({
+          personInfo: defaultPersonInfo(),
         });
       }
     } catch (err) {
@@ -176,6 +198,49 @@ Page({
     this.personInfoFieldChange('introduction', e);
   },
 
+  async uploadAvatar(tempFilePath) {
+    const path = String(tempFilePath || '').trim();
+    if (!path) return;
+    try {
+      wx.showLoading({ title: '上传头像...', mask: true });
+      const urls = await uploadLocalFilesToCloud([path], 'avatar/profile/img');
+      wx.hideLoading();
+      if (urls && urls[0]) {
+        this.setData({
+          'personInfo.avatar': urls[0],
+        });
+      }
+    } catch (err) {
+      wx.hideLoading();
+      wx.showToast({ title: (err && err.message) || '头像上传失败', icon: 'none' });
+    }
+  },
+
+  onChooseWechatAvatar(e) {
+    const avatarUrl = e.detail && e.detail.avatarUrl;
+    this.uploadAvatar(avatarUrl);
+  },
+
+  async onChooseCustomAvatar() {
+    try {
+      const res = await new Promise((resolve, reject) => {
+        wx.chooseMedia({
+          count: 1,
+          mediaType: ['image'],
+          sourceType: ['album', 'camera'],
+          sizeType: ['compressed'],
+          success: resolve,
+          fail: reject,
+        });
+      });
+      const file = res && res.tempFiles && res.tempFiles[0];
+      if (file && file.tempFilePath) await this.uploadAvatar(file.tempFilePath);
+    } catch (err) {
+      if (err && err.errMsg && err.errMsg.includes('cancel')) return;
+      wx.showToast({ title: (err && err.message) || '选择头像失败', icon: 'none' });
+    }
+  },
+
   onPhotosRemove(e) {
     const { index } = e.detail;
     const { photos } = this.data.personInfo;
@@ -203,14 +268,25 @@ Page({
   async onSaveInfo() {
     const { personInfo } = this.data;
     const app = getApp();
+    const token = wx.getStorageSync('access_token');
+    const payload = buildUserInfoPayload(personInfo);
 
-    if (app.globalData.useCloudBase) {
+    if (token) {
       try {
         wx.showLoading({ title: '保存中...' });
-        const res = await userAPI.updateUserInfo(personInfo);
+        const res = await userAPI.updateUserInfo(payload);
         wx.hideLoading();
 
         if (res.code === 200) {
+          const saved = res.data || payload;
+          app.globalData.userInfo = {
+            ...(app.globalData.userInfo || {}),
+            ...saved,
+            nickName: (saved && saved.name) || payload.name || '',
+            avatar: (saved && (saved.avatar || saved.avatarUrl || saved.image)) || payload.avatar || '',
+            avatarUrl: (saved && (saved.avatarUrl || saved.avatar || saved.image)) || payload.avatar || '',
+          };
+          app.eventBus.emit('userInfoChange');
           wx.showToast({
             title: '保存成功',
             icon: 'success',
@@ -234,7 +310,7 @@ Page({
       }
     } else {
       wx.showToast({
-        title: '请使用云开发模式',
+        title: '请先登录',
         icon: 'none',
       });
     }

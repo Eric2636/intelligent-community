@@ -46,10 +46,32 @@
   }
 
   &__hint {
-    margin-top: 12rpx;
     font-size: 22rpx;
     color: @gy3;
     line-height: 1.4;
+  }
+
+  &__toolbar {
+    margin-top: 12rpx;
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+  }
+
+  &__emoji {
+    flex-shrink: 0;
+    min-width: 104rpx;
+    height: 52rpx;
+    padding: 0 16rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6rpx;
+    font-size: 24rpx;
+    color: @color-primary;
+    background: rgba(0, 122, 255, 0.08);
+    border-radius: 26rpx;
+    box-sizing: border-box;
   }
 }
 

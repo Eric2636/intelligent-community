@@ -1,7 +1,14 @@
 import { mallAPI } from '~/api/cloud';
-import { mallOrderDetailUrl } from '~/utils/mallPaths';
 import { getCurrentUserId } from '~/utils/getOpenid';
 import { chooseAndUploadMedia } from '~/utils/cloudMedia';
+
+function firstUrl(list) {
+  return Array.isArray(list) && list.length ? String(list[0] || '') : '';
+}
+
+function withImage(payload, imageUrl) {
+  return imageUrl ? { ...payload, imageUrl } : payload;
+}
 
 function countCommentTree(roots) {
   if (!Array.isArray(roots)) return 0;
@@ -21,13 +28,17 @@ Page({
     loading: true,
     isMine: false,
     previewImages: [],
+    locationMarkers: [],
     comments: [],
     commentTotal: 0,
     commentInput: '',
     commentImages: [],
     commentSubmitting: false,
+    commentFocus: false,
+    showCommentEmojiPanel: false,
     currentUserId: '',
     replyParentId: '',
+    replyTargetName: '',
   },
 
   onLoad(options) {
@@ -51,26 +62,85 @@ Page({
       const subImages = Array.isArray(res.data.subImages) ? res.data.subImages : [];
       const legacyImages = Array.isArray(res.data.images) ? res.data.images : [];
       const previewImages = (mainImages.length ? mainImages.concat(subImages) : legacyImages).filter(Boolean);
-      this.setData({ item: res.data, loading: false, isMine, previewImages });
+      const latitude = Number(res.data.latitude);
+      const longitude = Number(res.data.longitude);
+      const hasLocation = Number.isFinite(latitude) && Number.isFinite(longitude);
+      const locationMarkers = hasLocation
+        ? [{
+          id: 1,
+          latitude,
+          longitude,
+          title: res.data.locationName || res.data.locationAddress || '门店地点',
+          callout: {
+            content: res.data.locationName || '门店地点',
+            display: 'ALWAYS',
+            padding: 8,
+            borderRadius: 8,
+            bgColor: '#ffffff',
+            color: '#1f2329',
+          },
+        }]
+        : [];
+      this.setData({ item: res.data, loading: false, isMine, previewImages, locationMarkers });
       this.loadComments();
     } else {
       this.setData({ loading: false });
     }
   },
 
+  onShareAppMessage() {
+    const { id, item, previewImages } = this.data;
+    const title = item
+      ? `${item.title || '小区市场'}${item.price ? `｜¥${item.price}` : ''}`
+      : '小区市场';
+    return withImage(
+      {
+        title,
+        path: `/packageMall/detail/index?id=${encodeURIComponent(id || '')}`,
+      },
+      firstUrl(previewImages),
+    );
+  },
+
+  onShareTimeline() {
+    const { id, item, previewImages } = this.data;
+    const title = item
+      ? `${item.title || '小区市场'}${item.price ? `｜¥${item.price}` : ''}`
+      : '小区市场';
+    return withImage(
+      {
+        title,
+        query: `id=${encodeURIComponent(id || '')}`,
+      },
+      firstUrl(previewImages),
+    );
+  },
+
   onCommentInput(e) {
     this.setData({ commentInput: e.detail.value });
   },
+  onCommentEmojiHint() {
+    this.setData({
+      showCommentEmojiPanel: !this.data.showCommentEmojiPanel,
+      commentFocus: false,
+    });
+  },
+  onCommentEmojiSelect(e) {
+    const emoji = e.detail && e.detail.emoji ? e.detail.emoji : '';
+    if (!emoji) return;
+    this.setData({
+      commentInput: `${this.data.commentInput || ''}${emoji}`,
+    });
+  },
 
   onReplyTap(e) {
-    const { id } = e.currentTarget.dataset;
+    const { id, name } = e.currentTarget.dataset;
     if (!id) return;
-    this.setData({ replyParentId: id });
-    wx.showToast({ title: '已选择回复对象', icon: 'none' });
+    this.setData({ replyParentId: id, replyTargetName: name || '邻居' });
   },
 
   onCancelReply() {
-    this.setData({ replyParentId: '' });
+    this.setData({ replyParentId: '', replyTargetName: '' });
   },
 
   async onAddCommentImages() {
@@ -89,7 +159,7 @@ Page({
         existingVideoCount: 0,
       });
       if (!images.length) return;
-      this.setData({ commentImages: commentImages.concat(images) });
+      this.setData({ commentImages: commentImages.concat(images), showCommentEmojiPanel: false });
     } catch (err) {
       console.error(err);
     }
@@ -107,7 +177,7 @@ Page({
     if (typeof list === 'string') {
       try {
         list = JSON.parse(list);
-      } catch {
+      } catch (err) {
         list = [];
       }
     }
@@ -151,7 +221,13 @@ Page({
     });
     this.setData({ commentSubmitting: false });
     if (res.code === 200) {
-      this.setData({ commentInput: '', commentImages: [], replyParentId: '' });
+      this.setData({
+        commentInput: '',
+        commentImages: [],
+        replyParentId: '',
+        replyTargetName: '',
+        showCommentEmojiPanel: false,
+      });
       wx.showToast({ title: '已发布', icon: 'success' });
       this.loadComments();
     } else {
@@ -197,27 +273,55 @@ Page({
 
   onPreviewSwiperMedia(e) {
     const { previewImages } = this.data;
-    const current = e.currentTarget.dataset.current;
+    const { current } = e.currentTarget.dataset;
     if (!previewImages.length) return;
     wx.previewImage({ current, urls: previewImages });
   },
 
   onContact() {
-    if (this.data.item && this.data.item.contact) {
-      wx.showToast({ title: '请通过页面联系方式沟通', icon: 'none' });
-    } else {
-      wx.showToast({ title: '请联系发布者', icon: 'none' });
+    const contact = String((this.data.item && this.data.item.contact) || '').trim();
+    if (!contact) {
+      wx.showToast({ title: '暂无商家联系方式', icon: 'none' });
+      return;
     }
+    const phone = contact.replace(/[^\d+]/g, '');
+    if (/^(?:\+?86)?1\d{10}$/.test(phone) || /^0\d{2,3}\d{7,8}$/.test(phone)) {
+      wx.makePhoneCall({
+        phoneNumber: phone.replace(/^\+?86/, ''),
+        fail: () => {
+          wx.setClipboardData({ data: contact });
+        },
+      });
+      return;
+    }
+    wx.setClipboardData({
+      data: contact,
+      success: () => wx.showToast({ title: '联系方式已复制', icon: 'none' }),
+    });
+  },
+
+  openLocation() {
+    const item = this.data.item || {};
+    const latitude = Number(item.latitude);
+    const longitude = Number(item.longitude);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+    wx.openLocation({
+      latitude,
+      longitude,
+      name: item.locationName || '门店地点',
+      address: item.locationAddress || item.locationName || '',
+      scale: 16,
+    });
   },
 
   async onFavorite() {
-    const item = this.data.item;
+    const { item } = this.data;
     if (!item || !item._id) return;
     if (!getCurrentUserId()) {
       wx.showToast({ title: '请先登录', icon: 'none' });
       return;
     }
-    const isFavorited = item.isFavorited;
+    const { isFavorited } = item;
     const api = isFavorited ? mallAPI.unfavoriteItem : mallAPI.favoriteItem;
     const res = await api(item._id);
     if (res.code === 200) {
@@ -226,34 +330,4 @@ Page({
     } else wx.showToast({ title: res.message || '操作失败', icon: 'none' });
   },
 
-  async onBuy() {
-    const item = this.data.item;
-    const uid = getCurrentUserId();
-    if (!uid) {
-      wx.showToast({ title: '请先登录', icon: 'none' });
-      return;
-    }
-    if (item.publisherId === uid) {
-      wx.showToast({ title: '不能购买自己发布的商品', icon: 'none' });
-      return;
-    }
-    wx.showLoading({ title: '提交中...' });
-    const res = await mallAPI.createOrder({
-      itemId: item._id,
-      itemTitle: item.title,
-      itemPrice: item.price,
-      itemUnit: item.unit || '元',
-      sellerId: item.publisherId,
-      contact: item.contact,
-    });
-    wx.hideLoading();
-    if (res.code === 200 && res.data && res.data.orderId) {
-      wx.showToast({ title: '订单已创建', icon: 'success' });
-      setTimeout(() => {
-        wx.navigateTo({ url: mallOrderDetailUrl(res.data.orderId) });
-      }, 500);
-    } else {
-      wx.showToast({ title: res.message || '下单失败', icon: 'none' });
-    }
-  },
 });

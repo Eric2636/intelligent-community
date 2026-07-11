@@ -1,42 +1,49 @@
 <nav title-text="小区市场" />
-<view class="mall-page">
-  <view class="mall-search">
-    <view class="mall-search__bar">
-      <t-icon name="search" size="40rpx" class="mall-search__icon" />
-      <t-input
-        class="mall-search__input"
-        placeholder="搜索商品标题、描述"
-        value="{{keyword}}"
-        clearable
-        bindchange="onSearchInput"
-        bindconfirm="onSearchConfirm"
-      />
-      <view class="mall-search__btn" bindtap="onSearchConfirm">搜索</view>
-    </view>
+<view class="mall-search">
+  <view class="mall-search__bar">
+    <t-icon name="search" size="40rpx" class="mall-search__icon" />
+    <t-input
+      class="mall-search__input"
+      style="--td-input-bg-color: transparent; --td-input-vertical-padding: 0; --td-input-border-left-space: 0; height: 72rpx; padding: 0;"
+      borderless
+      placeholder="请输入搜索内容"
+      value="{{keyword}}"
+      clearable
+      bindchange="onSearchInput"
+      bindclear="onSearchClear"
+      bindconfirm="onSearchConfirm"
+    />
+    <view class="mall-search__btn" bindtap="onSearchConfirm">搜索</view>
   </view>
-  <view class="mall-order">
-    <view class="mall-order__item {{orderBy === 'time' ? 'mall-order__item--active' : ''}}" data-order="time" bindtap="onOrderChange">最新</view>
-    <view class="mall-order__item {{orderBy === 'price_asc' ? 'mall-order__item--active' : ''}}" data-order="price_asc" bindtap="onOrderChange">价格升序</view>
-    <view class="mall-order__item {{orderBy === 'price_desc' ? 'mall-order__item--active' : ''}}" data-order="price_desc" bindtap="onOrderChange">价格降序</view>
+</view>
+<view class="mall-order">
+  <view class="mall-order__item {{orderBy === 'time' ? 'mall-order__item--active' : ''}}" data-order="time" bindtap="onOrderChange">最新</view>
+  <view class="mall-order__item {{orderBy === 'price_asc' ? 'mall-order__item--active' : ''}}" data-order="price_asc" bindtap="onOrderChange">价格升序</view>
+  <view class="mall-order__item {{orderBy === 'price_desc' ? 'mall-order__item--active' : ''}}" data-order="price_desc" bindtap="onOrderChange">价格降序</view>
+</view>
+<view class="mall-category">
+  <view class="mall-category__label">分类</view>
+  <view class="mall-category__wrap">
+    <view
+      wx:for="{{categories}}"
+      wx:key="id"
+      class="mall-category__chip {{currentCategory === item.id ? 'mall-category__chip--active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onCategoryTap"
+    >{{item.name}}</view>
   </view>
-  <view class="mall-category">
-    <view class="mall-category__label">分类</view>
-    <view class="mall-category__wrap">
-      <view
-        class="mall-category__chip {{currentCategory === 'all' ? 'mall-category__chip--active' : ''}}"
-        data-id="all"
-        bindtap="onCategoryTap"
-      >全部</view>
-      <view
-        wx:for="{{categories}}"
-        wx:key="id"
-        class="mall-category__chip {{currentCategory === item.id ? 'mall-category__chip--active' : ''}}"
-        data-id="{{item.id}}"
-        bindtap="onCategoryTap"
-      >{{item.name}}</view>
-    </view>
-  </view>
-  <view wx:if="{{loading}}" class="mall-loading">
+</view>
+<scroll-view
+  class="mall-page"
+  scroll-y
+  enhanced="{{true}}"
+  show-scrollbar="{{false}}"
+  refresher-enabled="{{true}}"
+  refresher-triggered="{{refreshing}}"
+  bindrefresherrefresh="onRefresh"
+  bindscrolltolower="onLoadMore"
+>
+  <view wx:if="{{loading && list.length === 0}}" class="mall-loading">
     <view class="mall-skeleton">
       <view class="mall-skeleton__item" wx:for="{{[1,2,3,4,5,6]}}" wx:key="*this">
         <view class="mall-skeleton__thumb"></view>
@@ -61,6 +68,7 @@
           class="mall-card__img"
           src="{{item.coverImage}}"
           mode="aspectFill"
+          lazy-load="{{true}}"
         />
         <t-icon wx:else name="image" size="64rpx" color="#999" />
       </view>
@@ -74,10 +82,13 @@
       </view>
       <t-icon name="chevron-right" size="32rpx" class="mall-card__arrow" />
     </view>
-    <view wx:if="{{list.length === 0}}" class="mall-empty">暂无信息</view>
-    <view wx:if="{{listTotal > maxRender}}" class="mall-more-hint">已显示前 {{maxRender}} 条，共 {{listTotal}} 条，请用搜索或分类缩小范围</view>
+    <view wx:if="{{!loading && list.length === 0}}" class="mall-empty">
+      <t-empty description="暂无信息" />
+    </view>
+    <view wx:if="{{loadingMore}}" class="mall-more-hint">加载中...</view>
+    <view wx:if="{{showNoMore}}" class="mall-more-hint">没有更多了</view>
   </view>
-  <view class="mall-fab" bindtap="goPublish">
-    <t-icon name="add" size="48rpx" color="#fff" bindtap="goPublish" />
-  </view>
+</scroll-view>
+<view class="mall-fab" bindtap="goPublish">
+  <t-icon name="add" size="48rpx" color="#fff" />
 </view>

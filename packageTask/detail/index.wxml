@@ -1,4 +1,4 @@
-<nav title-text="{{task ? task.title : '任务详情'}}" show-back="{{true}}" />
+<nav title-text="{{task ? task.title : '任务详情'}}" show-back="{{true}}" fallback-url="/pages/task/index" />
 <view class="detail-page">
   <view wx:if="{{loading}}" class="detail-loading"><t-loading theme="dots" size="48rpx" /></view>
   <block wx:elif="{{task}}">
@@ -45,6 +45,11 @@
       </view>
     </view>
 
+    <button class="detail-share-btn" open-type="share">
+      <t-icon name="share" size="36rpx" />
+      <text>分享给邻居</text>
+    </button>
+
     <view class="detail-actions">
       <block wx:if="{{task.status === 'draft' && isPublisher}}">
         <t-button theme="primary" size="large" block bindtap="onPublishDraft">发布任务</t-button>
@@ -57,7 +62,15 @@
       </block>
       <block wx:elif="{{task.status === 'in_progress' && isTaker}}">
         <view class="detail-proof">
-          <textarea placeholder="请填写完成说明（必填）" value="{{proofText}}" bindinput="onProofInput" class="detail-proof__input" />
+          <textarea placeholder="请输入完成说明" value="{{proofText}}" focus="{{proofFocus}}" bindinput="onProofInput" class="detail-proof__input" />
+          <view class="detail-proof__toolbar">
+            <view class="detail-proof__emoji" bindtap="onTaskEmojiHint">
+              <t-icon name="{{showProofEmojiPanel ? 'smile-filled' : 'smile'}}" size="36rpx" color="#007aff" />
+              <text>表情</text>
+            </view>
+            <text class="detail-proof__hint">点击表情插入</text>
+          </view>
+          <emoji-panel wx:if="{{showProofEmojiPanel}}" bindselect="onProofEmojiSelect" />
           <t-button theme="primary" size="large" block bindtap="onSubmitComplete">提交完成</t-button>
           <t-button theme="default" size="large" block bindtap="onAbandon" style="margin-top: 16rpx;">放弃任务</t-button>
         </view>
@@ -92,7 +105,7 @@
           <text class="detail-rating__star {{ratingScore >= 4 ? 'on' : ''}}" data-score="4" bindtap="onRatingStar">★</text>
           <text class="detail-rating__star {{ratingScore >= 5 ? 'on' : ''}}" data-score="5" bindtap="onRatingStar">★</text>
         </view>
-        <textarea placeholder="选填评价内容" value="{{ratingComment}}" bindinput="onRatingComment" class="detail-rating__input" />
+        <textarea placeholder="请输入评价" value="{{ratingComment}}" bindinput="onRatingComment" class="detail-rating__input" />
         <t-button theme="primary" size="medium" block bindtap="onSubmitRating">提交评价</t-button>
       </view>
     </view>

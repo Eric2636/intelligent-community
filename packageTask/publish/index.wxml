@@ -1,20 +1,28 @@
-<nav title-text="发布任务" show-back="{{true}}" />
+<nav title-text="{{draftId ? '编辑草稿' : '发布任务'}}" show-back="{{true}}" />
 <view class="publish-page">
   <view class="publish-form">
     <view class="publish-field">
       <view class="publish-field__label">任务标题 <text class="publish-field__required">*</text></view>
-      <input class="publish-field__input" placeholder="例如：帮忙取快递" value="{{title}}" maxlength="40" bindinput="onTitleInput" />
+      <input class="publish-field__input" placeholder="请输入标题" value="{{title}}" maxlength="40" bindinput="onTitleInput" />
     </view>
     <view class="publish-field">
-      <view class="publish-field__label">任务说明</view>
+      <view class="publish-field__label">任务说明 <text class="publish-field__required">*</text></view>
       <textarea
         class="publish-field__input publish-field__textarea"
-        placeholder="请描述任务"
+        placeholder="请输入任务说明"
         value="{{desc}}"
         maxlength="500"
+        focus="{{descFocus}}"
         bindinput="onDescInput"
       />
-      <view class="publish-field__hint">可使用系统键盘输入表情；最多 9 张图、2 段视频</view>
+      <view class="publish-field__toolbar">
+        <view class="publish-field__emoji" bindtap="onEmojiHint">
+          <t-icon name="{{showEmojiPanel ? 'smile-filled' : 'smile'}}" size="36rpx" color="#007aff" />
+          <text>表情</text>
+        </view>
+        <view class="publish-field__hint">点击表情插入；最多 9 张图、2 段视频</view>
+      </view>
+      <emoji-panel wx:if="{{showEmojiPanel}}" bindselect="onEmojiSelect" />
     </view>
 
     <view class="media-picker" wx:if="{{mediaImages.length || mediaVideos.length}}">
@@ -50,11 +58,11 @@
 
     <view class="publish-field">
       <view class="publish-field__label">佣金（元）<text class="publish-field__required">*</text></view>
-      <input class="publish-field__input" type="digit" placeholder="线下支付，请输入金额" value="{{reward}}" bindinput="onRewardInput" />
+      <input class="publish-field__input" type="digit" placeholder="请输入金额" value="{{reward}}" bindinput="onRewardInput" />
     </view>
     <view class="publish-field">
       <view class="publish-field__label">地点</view>
-      <input class="publish-field__input" placeholder="例如：小区南门" value="{{location}}" bindinput="onLocationInput" />
+      <input class="publish-field__input" placeholder="请输入地点" value="{{location}}" bindinput="onLocationInput" />
     </view>
     <view class="publish-actions">
       <t-button class="publish-actions__btn" theme="default" size="large" block bindtap="saveDraft" loading="{{savingDraft}}">保存草稿</t-button>

@@ -18,7 +18,7 @@ function getBaseUrl() {
   return `http://127.0.0.1:${config.devPort}`;
 }
 
-function buildUrl(path, query) {
+export function buildUrl(path, query) {
   const base = getBaseUrl().replace(/\/+$/, '');
   const p = String(path || '').replace(/^\/+/, '');
   const qs =
@@ -51,10 +51,7 @@ export function request({ method = 'GET', path, query, data, auth = true, timeou
   const header = { 'content-type': 'application/json' };
   if (auth) {
     const token = getToken();
-    if (!token) {
-      return Promise.reject(new Error('未登录：本地没有 access_token，请确认已联网且微信登录成功'));
-    }
-    header.Authorization = `Bearer ${token}`;
+    if (token) header.Authorization = `Bearer ${token}`;
   }
   const url = buildUrl(path, query);
 

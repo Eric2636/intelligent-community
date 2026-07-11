@@ -16,8 +16,7 @@ Page({
   },
 
   onShow() {
-    if (redirectIfEntryHidden('mall')) return;
-    this.loadOrders();
+    redirectIfEntryHidden('mall');
   },
 
   onTabChange(e) {

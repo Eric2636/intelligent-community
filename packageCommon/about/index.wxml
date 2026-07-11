@@ -1,6 +1,6 @@
 <view class="about-page">
   <view class="header">
-    <image class="logo" src="/static/logo.png" mode="aspectFit" />
+    <view class="logo">智</view>
     <view class="app-name">{{appName}}</view>
     <view class="version" bind:tap="onVersionTap">v{{version}}</view>
   </view>

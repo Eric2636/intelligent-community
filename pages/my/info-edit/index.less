@@ -4,6 +4,59 @@ page {
 
 .info-edit {
   --td-input-vertical-padding: 0;
+  padding-bottom: 160rpx;
+}
+
+.info-edit__avatar-panel {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+  background: #fff;
+  border-bottom: 1rpx solid rgba(60, 60, 67, 0.08);
+}
+
+.info-edit__avatar-img,
+.info-edit__avatar-placeholder {
+  width: 128rpx;
+  height: 128rpx;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f1f1f3;
+}
+
+.info-edit__avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-edit__avatar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-left: 28rpx;
+}
+
+.info-edit__avatar-btn {
+  height: 64rpx;
+  line-height: 64rpx;
+  margin: 0;
+  padding: 0 28rpx;
+  border-radius: 999rpx;
+  border: none;
+  background: #007aff;
+  color: #fff;
+  font-size: 26rpx;
+}
+
+.info-edit__avatar-btn::after {
+  border: none;
+}
+
+.info-edit__avatar-btn--plain {
+  color: #1d1d1f;
+  background: #f1f1f3;
 }
 
 .info-edit__cell {
@@ -24,10 +77,6 @@ page {
   width: 100%;
   padding: 0 !important;
   height: 200rpx;
-}
-
-.info-edit__photos {
-  width: 100%;
 }
 
 .info-edit__save {

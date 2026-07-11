@@ -1,4 +1,4 @@
-<nav title-text="{{errand ? errand.title : '跑腿'}}" show-back="{{true}}" />
+<nav title-text="{{errand ? errand.title : '跑腿'}}" show-back="{{true}}" fallback-url="/pages/errand/index" />
 <view class="errand-detail-page">
   <view wx:if="{{loading}}" class="errand-detail-loading">
     <t-loading theme="dots" size="48rpx" />
@@ -45,25 +45,46 @@
     <view class="errand-replies">
       <view class="errand-replies__title">全部回复 ({{errand.replies.length}})</view>
       <view class="errand-reply-item" wx:for="{{errand.replies}}" wx:key="id">
-        <view class="errand-reply-item__head">
-          <text class="errand-reply-item__author">{{item.authorName}}</text>
-          <text class="errand-reply-item__time">{{item.createTime}}</text>
+        <image wx:if="{{item.authorAvatar}}" class="errand-reply-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
+        <view wx:else class="errand-reply-item__avatar errand-reply-item__avatar--placeholder">
+          <t-icon name="user" size="30rpx" color="#8e8e93" />
         </view>
-        <text class="errand-reply-item__content">{{item.content}}</text>
+        <view class="errand-reply-item__main">
+          <view class="errand-reply-item__head">
+            <text class="errand-reply-item__author">{{item.authorName}}</text>
+            <text class="errand-reply-item__time">{{item.createTime}}</text>
+          </view>
+          <text class="errand-reply-item__content">{{item.content}}</text>
+        </view>
       </view>
-      <view wx:if="{{errand.replies.length === 0}}" class="errand-replies__empty">暂无回复</view>
+      <t-empty wx:if="{{errand.replies.length === 0}}" description="暂无回复" />
     </view>
     <view class="errand-reply-bar">
+      <emoji-panel wx:if="{{showEmojiPanel}}" bindselect="onReplyEmojiSelect" />
       <view class="errand-reply-bar__row">
-        <textarea
-          class="errand-reply-bar__input"
-          placeholder="请输入评论"
-          value="{{replyContent}}"
-          maxlength="800"
-          auto-height
-          bindinput="onReplyInput"
-        />
-        <t-button theme="primary" size="small" bindtap="submitReply" loading="{{submitting}}">发送</t-button>
+        <view class="errand-reply-bar__input-box">
+          <input
+            class="errand-reply-bar__input"
+            placeholder="请输入评论"
+            placeholder-class="errand-reply-bar__ph"
+            value="{{replyContent}}"
+            maxlength="800"
+            focus="{{replyFocus}}"
+            bindinput="onReplyInput"
+          />
+        </view>
+        <view class="errand-reply-bar__tool" bindtap="onReplyEmojiHint">
+          <t-icon name="{{showEmojiPanel ? 'smile-filled' : 'smile'}}" size="44rpx" color="{{showEmojiPanel ? '#007aff' : '#5c5c5c'}}" />
+        </view>
+        <view
+          class="errand-reply-bar__send {{replyContent && !submitting ? 'errand-reply-bar__send--ready' : ''}} {{submitting ? 'errand-reply-bar__send--busy' : ''}}"
+          bindtap="submitReply"
+        >
+          <view wx:if="{{submitting}}" class="errand-reply-bar__loading">
+            <t-loading theme="dots" size="32rpx" />
+          </view>
+          <text wx:else>发送</text>
+        </view>
       </view>
     </view>
   </block>

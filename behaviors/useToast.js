@@ -1,20 +1,11 @@
-import Toast, { hideToast } from 'tdesign-miniprogram/toast/index';
-
 const useToastBehavior = Behavior({
   methods: {
-    onShowToast(selector, message) {
-      Toast({
-        context: this,
-        selector,
-        message,
-      });
+    onShowToast(_selector, message) {
+      wx.showToast({ title: message || '', icon: 'none' });
     },
 
-    onHideToast(selector) {
-      hideToast({
-        context: this,
-        selector,
-      });
+    onHideToast() {
+      wx.hideToast();
     },
   },
 });
