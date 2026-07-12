@@ -1,6 +1,7 @@
 import { errandAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
+import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 
 function normalizeErrandItem(item) {
   if (!item) return item;
@@ -41,12 +42,21 @@ Page({
 
   onLoad() {
     if (redirectIfEntryHidden('errand')) return;
+    this._skipNextShowRefresh = true;
     this.loadErrands();
   },
 
   onShow() {
     syncCustomTabBar(this);
-    redirectIfEntryHidden('errand');
+    if (redirectIfEntryHidden('errand')) return;
+    if (this._skipNextShowRefresh) {
+      this._skipNextShowRefresh = false;
+      return;
+    }
+    if (consumeListRefresh(LIST_REFRESH_KEYS.errand)) {
+      this.setData({ page: 1, hasMore: true });
+      this.loadErrands(true);
+    }
   },
 
   async onRefresh() {

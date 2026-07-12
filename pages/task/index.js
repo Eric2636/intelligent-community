@@ -1,6 +1,7 @@
 import { taskAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
+import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 
 Page({
   data: {
@@ -29,6 +30,7 @@ Page({
       this._skipNextShowRefresh = false;
       return;
     }
+    consumeListRefresh(LIST_REFRESH_KEYS.task);
     this.loadList(true);
   },
 

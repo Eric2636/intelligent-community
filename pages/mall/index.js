@@ -2,6 +2,7 @@ import { mallAPI } from '~/api/cloud';
 import { mallDetailUrl, mallPublishUrl } from '~/utils/mallPaths';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
+import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 
 Page({
   data: {
@@ -23,13 +24,21 @@ Page({
 
   onLoad() {
     if (redirectIfEntryHidden('mall')) return;
+    this._skipNextShowRefresh = true;
     this.loadCategories();
     this.loadList();
   },
 
   onShow() {
     syncCustomTabBar(this);
-    redirectIfEntryHidden('mall');
+    if (redirectIfEntryHidden('mall')) return;
+    if (this._skipNextShowRefresh) {
+      this._skipNextShowRefresh = false;
+      return;
+    }
+    if (consumeListRefresh(LIST_REFRESH_KEYS.mall)) {
+      Promise.all([this.loadCategories(), this.loadList(true)]);
+    }
   },
 
   async onRefresh() {

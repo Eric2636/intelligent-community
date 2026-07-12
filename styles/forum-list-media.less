@@ -1,20 +1,20 @@
 @import '/variable.less';
 
 .forum-list-media {
-  margin: 0 0 10rpx;
+  margin: 0 0 12rpx;
 
   &__row {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    gap: 6rpx;
+    gap: 8rpx;
   }
 
   &__thumb-wrap {
     position: relative;
-    width: 112rpx;
-    height: 112rpx;
-    border-radius: 6rpx;
+    width: 128rpx;
+    height: 128rpx;
+    border-radius: @image-radius;
     overflow: hidden;
     flex-shrink: 0;
     background: @gray3;
@@ -41,7 +41,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22rpx;
+    font-size: @font-size-caption;
     font-weight: 600;
     pointer-events: none;
   }

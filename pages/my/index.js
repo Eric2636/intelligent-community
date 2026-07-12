@@ -3,6 +3,7 @@ import { mallFavoritesUrl, mallMyItemsUrl, mallOrdersUrl } from '~/utils/mallPat
 import { isModuleEnabled } from '~/utils/moduleEntryGuard';
 import { decryptText } from '~/utils/textCipher';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
+import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 
 /**
  * 每个入口带 module：与 `isModuleEnabled` 的 key 一致；null 表示不限模块（始终可显）
@@ -82,11 +83,16 @@ Page({
   onShow() {
     const app = getApp();
     if (!app.globalData.userInfo || !app.globalData.userInfo.phoneNumber) {
-      app.refreshLoginCode?.().catch((err) => {
-        console.warn('[my] 预取 wx.login code 失败', err);
-      });
+      if (app.refreshLoginCode) {
+        app.refreshLoginCode().catch((err) => {
+          console.warn('[my] 预取 wx.login code 失败', err);
+        });
+      }
     }
     syncCustomTabBar(this, 'my');
+    if (consumeListRefresh(LIST_REFRESH_KEYS.user)) {
+      this.refreshPersonalInfo();
+    }
   },
 
   onLoad() {

@@ -2,6 +2,14 @@
 import { request as httpRequest } from '~/api/http';
 import { cacheGet, cacheSet, invalidateHttpCachePrefix } from '~/utils/persistCache';
 import { formatDateTimeFields } from '~/utils/date';
+import {
+  LIST_REFRESH_KEYS,
+  markErrandLists,
+  markForumLists,
+  markListRefresh,
+  markMallLists,
+  markTaskLists,
+} from '~/utils/listRefresh';
 
 /** 401 不应回退到离线缓存，否则界面仍像「已登录可用」，只有上传等接口会暴露失败 */
 function shouldUseOfflineCache(err) {
@@ -38,6 +46,11 @@ function clearItemListCache() {
 
 function clearErrandListCache() {
   invalidateHttpCachePrefix('http_cache:api/errands:');
+}
+
+function refreshAfterSuccess(res, refresh) {
+  if (res && res.code === 200) refresh();
+  return res;
 }
 
 /**
@@ -87,7 +100,7 @@ export const taskAPI = {
       auth: true,
     }).then((res) => {
       if (res && res.code === 200) clearTaskListCache();
-      return res;
+      return refreshAfterSuccess(res, markTaskLists);
     });
   },
 
@@ -98,7 +111,7 @@ export const taskAPI = {
       path: 'api/tasks/draft',
       data,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markTaskLists));
   },
 
   // 发布草稿
@@ -109,7 +122,7 @@ export const taskAPI = {
       auth: true,
     }).then((res) => {
       if (res && res.code === 200) clearTaskListCache();
-      return res;
+      return refreshAfterSuccess(res, markTaskLists);
     });
   },
 
@@ -124,7 +137,7 @@ export const taskAPI = {
       path: `api/tasks/${taskId}/claim`,
       data: { takerName: name },
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markTaskLists));
   },
 
   // 提交完成
@@ -134,7 +147,7 @@ export const taskAPI = {
       path: `api/tasks/${taskId}/submit-complete`,
       data: { proofText, proofImages },
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markTaskLists));
   },
 
   // 创建任务赏金支付单（返回 payment 用于 wx.requestPayment）
@@ -149,7 +162,7 @@ export const taskAPI = {
       method: 'POST',
       path: `api/tasks/${taskId}/confirm-complete`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markTaskLists));
   },
 
   // 取消任务
@@ -158,7 +171,7 @@ export const taskAPI = {
       method: 'POST',
       path: `api/tasks/${taskId}/revoke`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markTaskLists));
   },
 
   // 发布者重新发布（恢复到待领取）
@@ -169,7 +182,7 @@ export const taskAPI = {
       auth: true,
     }).then((res) => {
       if (res && res.code === 200) clearTaskListCache();
-      return res;
+      return refreshAfterSuccess(res, markTaskLists);
     });
   },
 
@@ -179,7 +192,7 @@ export const taskAPI = {
       method: 'DELETE',
       path: `api/tasks/${taskId}`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markTaskLists));
   },
 
   // 接单人放弃任务
@@ -188,7 +201,7 @@ export const taskAPI = {
       method: 'POST',
       path: `api/tasks/${taskId}/abandon`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markTaskLists));
   },
 
   // 获取我的任务
@@ -208,7 +221,7 @@ export const taskAPI = {
       path: 'api/tasks/ratings',
       data,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, () => markListRefresh(LIST_REFRESH_KEYS.taskMine)));
   },
 
   // 获取收到的评价
@@ -266,7 +279,7 @@ export const forumAPI = {
       auth: true,
     }).then((res) => {
       if (res && res.code === 200) clearPostListCache();
-      return res;
+      return refreshAfterSuccess(res, markForumLists);
     });
   },
 
@@ -282,7 +295,7 @@ export const forumAPI = {
       auth: true,
     }).then((res) => {
       if (res && res.code === 200) clearPostListCache();
-      return res;
+      return refreshAfterSuccess(res, markForumLists);
     });
   },
 
@@ -291,7 +304,7 @@ export const forumAPI = {
       method: 'POST',
       path: `api/posts/${postId}/replies/${replyId}/like`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markForumLists));
   },
 
   unlikeReply(postId, replyId) {
@@ -299,7 +312,7 @@ export const forumAPI = {
       method: 'DELETE',
       path: `api/posts/${postId}/replies/${replyId}/like`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markForumLists));
   },
 
   favoriteReply(postId, replyId) {
@@ -307,7 +320,7 @@ export const forumAPI = {
       method: 'POST',
       path: `api/posts/${postId}/replies/${replyId}/favorite`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markForumLists));
   },
 
   unfavoriteReply(postId, replyId) {
@@ -315,7 +328,7 @@ export const forumAPI = {
       method: 'DELETE',
       path: `api/posts/${postId}/replies/${replyId}/favorite`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markForumLists));
   },
 
   /** emoji 传空字符串表示取消；再次点同一表情为取消 */
@@ -325,7 +338,7 @@ export const forumAPI = {
       path: `api/posts/${postId}/replies/${replyId}/reaction`,
       data: { emoji: emoji == null ? '' : String(emoji) },
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markForumLists));
   },
 
   // 删除自己的帖子（级联删除回复、赞、收藏）
@@ -336,7 +349,7 @@ export const forumAPI = {
       auth: true,
     }).then((res) => {
       if (res && res.code === 200) clearPostListCache();
-      return res;
+      return refreshAfterSuccess(res, markForumLists);
     });
   },
 
@@ -348,7 +361,7 @@ export const forumAPI = {
       auth: true,
     }).then((res) => {
       if (res && res.code === 200) clearPostListCache();
-      return res;
+      return refreshAfterSuccess(res, markForumLists);
     });
   },
 
@@ -369,7 +382,7 @@ export const forumAPI = {
       auth: true,
     }).then((res) => {
       if (res && res.code === 200) clearPostListCache();
-      return res;
+      return refreshAfterSuccess(res, markForumLists);
     });
   },
 
@@ -381,7 +394,7 @@ export const forumAPI = {
       auth: true,
     }).then((res) => {
       if (res && res.code === 200) clearPostListCache();
-      return res;
+      return refreshAfterSuccess(res, markForumLists);
     });
   },
 
@@ -391,7 +404,7 @@ export const forumAPI = {
       method: 'POST',
       path: `api/posts/${postId}/favorite`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markForumLists));
   },
 
   // 取消收藏
@@ -400,7 +413,7 @@ export const forumAPI = {
       method: 'DELETE',
       path: `api/posts/${postId}/favorite`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markForumLists));
   },
 
   // 记录帖子分享次数（微信分享回调需同步返回，调用方通常 fire-and-forget）
@@ -411,7 +424,7 @@ export const forumAPI = {
       auth: true,
     }).then((res) => {
       if (res && res.code === 200) clearPostListCache();
-      return res;
+      return refreshAfterSuccess(res, markForumLists);
     });
   },
 
@@ -470,7 +483,7 @@ export const mallAPI = {
       path: `api/items/${itemId}/comments`,
       data,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markMallLists));
   },
 
   // 删除商品评论（仅本人）
@@ -479,7 +492,7 @@ export const mallAPI = {
       method: 'DELETE',
       path: `api/items/${itemId}/comments/${commentId}`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markMallLists));
   },
 
   likeItemComment(itemId, commentId) {
@@ -487,7 +500,7 @@ export const mallAPI = {
       method: 'POST',
       path: `api/items/${itemId}/comments/${commentId}/like`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markMallLists));
   },
 
   unlikeItemComment(itemId, commentId) {
@@ -495,7 +508,7 @@ export const mallAPI = {
       method: 'DELETE',
       path: `api/items/${itemId}/comments/${commentId}/like`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markMallLists));
   },
 
   // 发布商品
@@ -507,7 +520,7 @@ export const mallAPI = {
       auth: true,
     }).then((res) => {
       if (res && res.code === 200) clearItemListCache();
-      return res;
+      return refreshAfterSuccess(res, markMallLists);
     });
   },
 
@@ -526,7 +539,7 @@ export const mallAPI = {
       method: 'POST',
       path: `api/items/${itemId}/favorite`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markMallLists));
   },
 
   // 取消收藏商品
@@ -535,7 +548,7 @@ export const mallAPI = {
       method: 'DELETE',
       path: `api/items/${itemId}/favorite`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markMallLists));
   },
 
   // 获取我的收藏商品
@@ -554,7 +567,10 @@ export const mallAPI = {
       path: 'api/orders',
       data,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, () => {
+      markMallLists();
+      markListRefresh(LIST_REFRESH_KEYS.mallOrders);
+    }));
   },
 
   // 获取我的订单
@@ -582,7 +598,10 @@ export const mallAPI = {
       path: `api/orders/${orderId}`,
       data: { status },
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, () => {
+      markMallLists();
+      markListRefresh(LIST_REFRESH_KEYS.mallOrders);
+    }));
   },
 
   // 获取分类列表
@@ -626,7 +645,7 @@ export const errandAPI = {
       auth: true,
     }).then((res) => {
       if (res && res.code === 200) clearErrandListCache();
-      return res;
+      return refreshAfterSuccess(res, markErrandLists);
     });
   },
 
@@ -639,7 +658,7 @@ export const errandAPI = {
       path: `api/errands/${errandId}/claim`,
       data: { claimerName },
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markErrandLists));
   },
 
   // 发布者确认跑腿已完成（线下佣金自行结算）
@@ -648,7 +667,7 @@ export const errandAPI = {
       method: 'POST',
       path: `api/errands/${errandId}/complete`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markErrandLists));
   },
 
   // 发布跑腿回复
@@ -661,7 +680,7 @@ export const errandAPI = {
       path: `api/errands/${errandId}/replies`,
       data: { authorName, ...data },
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markErrandLists));
   },
 
   // 点赞跑腿
@@ -670,7 +689,7 @@ export const errandAPI = {
       method: 'POST',
       path: `api/errands/${errandId}/like`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markErrandLists));
   },
 
   // 取消点赞跑腿
@@ -679,7 +698,7 @@ export const errandAPI = {
       method: 'DELETE',
       path: `api/errands/${errandId}/like`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markErrandLists));
   },
 
   // 收藏跑腿
@@ -688,7 +707,7 @@ export const errandAPI = {
       method: 'POST',
       path: `api/errands/${errandId}/favorite`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markErrandLists));
   },
 
   // 取消收藏跑腿
@@ -697,7 +716,7 @@ export const errandAPI = {
       method: 'DELETE',
       path: `api/errands/${errandId}/favorite`,
       auth: true,
-    });
+    }).then((res) => refreshAfterSuccess(res, markErrandLists));
   },
 
   // 获取我的跑腿（role: published | claimed）
@@ -731,7 +750,7 @@ export const userAPI = {
       path: 'api/user/me',
       data,
       auth: true,
-    }).then((res) => (res && res.code === 200 ? res : { code: 200, data: res }));
+    }).then((res) => refreshAfterSuccess(res && res.code === 200 ? res : { code: 200, data: res }, () => markListRefresh(LIST_REFRESH_KEYS.user)));
   },
 };
 
