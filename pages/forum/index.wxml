@@ -96,7 +96,7 @@
           <view class="post-item__author-main">
             <image wx:if="{{item.authorAvatar}}" class="post-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
             <view wx:else class="post-item__avatar post-item__avatar--placeholder">
-              <t-icon name="user" size="28rpx" color="#8e8e93" />
+              <t-icon name="user" size="32rpx" color="#8e8e93" />
             </view>
             <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
           </view>
@@ -138,7 +138,7 @@
               <view class="post-item__author-main">
                 <image wx:if="{{item.authorAvatar}}" class="post-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
                 <view wx:else class="post-item__avatar post-item__avatar--placeholder">
-                  <t-icon name="user" size="28rpx" color="#8e8e93" />
+                  <t-icon name="user" size="32rpx" color="#8e8e93" />
                 </view>
                 <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
               </view>
@@ -178,7 +178,7 @@
             <view class="post-item__author-main">
               <image wx:if="{{item.authorAvatar}}" class="post-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
               <view wx:else class="post-item__avatar post-item__avatar--placeholder">
-                <t-icon name="user" size="28rpx" color="#8e8e93" />
+                <t-icon name="user" size="32rpx" color="#8e8e93" />
               </view>
               <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
             </view>

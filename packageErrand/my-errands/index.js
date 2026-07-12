@@ -1,12 +1,17 @@
 import { errandAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
+import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
+
+const STATUS_TEXT = {
+  pending_take: '待领取',
+  in_progress: '进行中',
+  completed: '已完成',
+};
 
 function normalizeItem(item) {
   if (!item) return item;
   const status = item.status || 'pending_take';
-  const statusText =
-    item.statusText ||
-    (status === 'pending_take' ? '待领取' : status === 'in_progress' ? '进行中' : status === 'completed' ? '已完成' : '待领取');
+  const statusText = item.statusText || STATUS_TEXT[status] || '待领取';
   return {
     ...item,
     status,
@@ -25,11 +30,17 @@ Page({
 
   onLoad() {
     if (redirectIfEntryHidden('errand')) return;
+    this._skipNextShowRefresh = true;
     this.loadPosts();
   },
 
   onShow() {
-    redirectIfEntryHidden('errand');
+    if (redirectIfEntryHidden('errand')) return;
+    if (this._skipNextShowRefresh) {
+      this._skipNextShowRefresh = false;
+      return;
+    }
+    if (consumeListRefresh(LIST_REFRESH_KEYS.errandMine)) this.loadPosts();
   },
 
   onPullDownRefresh() {
@@ -37,7 +48,7 @@ Page({
   },
 
   onRoleTab(e) {
-    const role = e.currentTarget.dataset.role;
+    const { role } = e.currentTarget.dataset;
     if (!role || role === this.data.activeRole) return;
     const emptyText = role === 'claimed' ? '暂无领取的跑腿' : '暂无发布的跑腿';
     this.setData({ activeRole: role, emptyText, postList: [] }, () => this.loadPosts());

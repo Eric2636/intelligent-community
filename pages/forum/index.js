@@ -2,6 +2,7 @@ import { forumAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { normalizeForumListPost, forumListPostHasMedia } from '~/utils/forumPostList';
+import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 
 function getPostIdFromEvent(e) {
   const { id } = e.currentTarget.dataset;
@@ -45,6 +46,7 @@ Page({
       this._skipNextShowRefresh = false;
       return;
     }
+    consumeListRefresh(LIST_REFRESH_KEYS.forum);
     this.setData({ page: 1, hasMore: true });
     Promise.all([this.loadAnnouncements(), this.loadPosts(true)]);
   },
