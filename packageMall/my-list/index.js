@@ -1,6 +1,7 @@
 import { mallAPI } from '~/api/cloud';
 import { mallDetailUrl } from '~/utils/mallPaths';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
+import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 
 Page({
   data: {
@@ -10,11 +11,17 @@ Page({
 
   onLoad() {
     if (redirectIfEntryHidden('mall')) return;
+    this._skipNextShowRefresh = true;
     this.loadItems();
   },
 
   onShow() {
-    redirectIfEntryHidden('mall');
+    if (redirectIfEntryHidden('mall')) return;
+    if (this._skipNextShowRefresh) {
+      this._skipNextShowRefresh = false;
+      return;
+    }
+    if (consumeListRefresh(LIST_REFRESH_KEYS.mallMine)) this.loadItems();
   },
 
   onPullDownRefresh() {

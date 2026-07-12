@@ -1,5 +1,6 @@
 import { taskAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
+import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 
 const STATUS_TEXT = {
   draft: '草稿',
@@ -12,7 +13,9 @@ const STATUS_TEXT = {
 
 function normalizeTaskRow(item) {
   if (!item) return item;
-  const id = item.id != null ? String(item.id) : (item._id != null ? String(item._id) : '');
+  let id = '';
+  if (item.id != null) id = String(item.id);
+  else if (item._id != null) id = String(item._id);
   const status = item.status || 'pending_take';
   return {
     ...item,
@@ -42,9 +45,20 @@ Page({
 
   onLoad(options = {}) {
     if (redirectIfEntryHidden('task')) return;
+    this._skipNextShowRefresh = true;
     const type = options.type === 'draft' || options.type === 'cancelled' ? options.type : 'published';
-    const pageTitle = type === 'draft' ? '我的草稿' : (type === 'cancelled' ? '我的撤回' : '我的任务');
-    const emptyText = type === 'draft' ? '暂无任务草稿' : (type === 'cancelled' ? '暂无撤回的任务' : '暂无发布的任务');
+    const pageTitleMap = {
+      draft: '我的草稿',
+      cancelled: '我的撤回',
+      published: '我的任务',
+    };
+    const emptyTextMap = {
+      draft: '暂无任务草稿',
+      cancelled: '暂无撤回的任务',
+      published: '暂无发布的任务',
+    };
+    const pageTitle = pageTitleMap[type];
+    const emptyText = emptyTextMap[type];
     this.setData({
       activeTab: type,
       showTabs: type === 'published',
@@ -56,7 +70,12 @@ Page({
   },
 
   onShow() {
-    redirectIfEntryHidden('task');
+    if (redirectIfEntryHidden('task')) return;
+    if (this._skipNextShowRefresh) {
+      this._skipNextShowRefresh = false;
+      return;
+    }
+    if (consumeListRefresh(LIST_REFRESH_KEYS.taskMine)) this.loadTasks();
   },
 
   onPullDownRefresh() {
@@ -65,7 +84,7 @@ Page({
 
   onTabTap(e) {
     if (!this.data.showTabs) return;
-    const tab = e.currentTarget.dataset.tab;
+    const { tab } = e.currentTarget.dataset;
     if (!tab || tab === this.data.activeTab) return;
     this.setData({ activeTab: tab }, () => this.loadTasks());
   },

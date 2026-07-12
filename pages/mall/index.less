@@ -56,9 +56,14 @@ page {
 .mall-search__btn {
   flex-shrink: 0;
   margin-left: 16rpx;
-  padding: 12rpx 24rpx;
-  font-size: 26rpx;
+  height: @button-height-compact;
+  line-height: @button-height-compact;
+  padding: 0 24rpx;
+  font-size: @font-size-body-small;
   color: @color-primary;
+  background: #fff;
+  border: 1rpx solid rgba(60, 60, 67, 0.08);
+  border-radius: @radius-pill;
   font-weight: 500;
 }
 
@@ -70,7 +75,7 @@ page {
   border-bottom: 1rpx solid @gray3;
 
   &__item {
-    font-size: 26rpx;
+    font-size: @font-size-body-small;
     color: @gy2;
 
     &--active {
@@ -87,7 +92,7 @@ page {
 }
 
 .mall-category__label {
-  font-size: 26rpx;
+  font-size: @font-size-meta;
   color: @gy3;
   margin-bottom: 16rpx;
 }
@@ -100,11 +105,13 @@ page {
 }
 
 .mall-category__chip {
-  padding: 14rpx 28rpx;
-  font-size: 26rpx;
+  min-height: @button-height-compact;
+  line-height: @button-height-compact;
+  padding: 0 28rpx;
+  font-size: @font-size-body-small;
   color: @gy2;
   background: @bg-color-section;
-  border-radius: 32rpx;
+  border-radius: @radius-pill;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -183,18 +190,18 @@ page {
 .mall-card {
   display: flex;
   align-items: center;
-  padding: @spacing-card;
-  margin-bottom: 20rpx;
+  padding: @spacing-card-compact;
+  margin-bottom: 16rpx;
   background: @bg-color-white;
   border-radius: @radius-card;
   box-shadow: @shadow-card;
 
   &__thumb {
-    width: 160rpx;
-    height: 160rpx;
+    width: 168rpx;
+    height: 168rpx;
     flex-shrink: 0;
     background: @bg-color-section;
-    border-radius: @radius-sm;
+    border-radius: @image-radius;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -215,9 +222,10 @@ page {
 
   &__title {
     display: block;
-    font-size: 28rpx;
+    font-size: @font-size-card-title;
     color: @gy1;
-    line-height: 1.4;
+    line-height: 1.35;
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -233,13 +241,13 @@ page {
   }
 
   &__price {
-    font-size: 32rpx;
+    font-size: 34rpx;
     font-weight: 600;
     color: @color-price;
   }
 
   &__time {
-    font-size: 22rpx;
+    font-size: @font-size-caption;
     color: @gy3;
   }
 
@@ -255,14 +263,14 @@ page {
   padding: 80rpx;
   text-align: center;
   color: @gy3;
-  font-size: 28rpx;
+  font-size: @font-size-body;
 }
 
 .mall-more-hint {
   grid-column: 1 / -1;
   padding: 24rpx;
   text-align: center;
-  font-size: 24rpx;
+  font-size: @font-size-meta;
   color: @gy3;
 }
 
@@ -270,8 +278,8 @@ page {
   position: fixed;
   right: 32rpx;
   bottom: calc(@tab-bar-height + 48rpx + env(safe-area-inset-bottom));
-  width: 112rpx;
-  height: 112rpx;
+  width: @fab-size;
+  height: @fab-size;
   border-radius: 50%;
   background: @color-price;
   display: flex;

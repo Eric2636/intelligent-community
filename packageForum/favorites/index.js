@@ -1,6 +1,7 @@
 import { forumAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { normalizeForumListPost } from '~/utils/forumPostList';
+import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 
 Page({
   data: {
@@ -10,11 +11,17 @@ Page({
 
   onLoad() {
     if (redirectIfEntryHidden('forum')) return;
+    this._skipNextShowRefresh = true;
     this.loadList();
   },
 
   onShow() {
-    redirectIfEntryHidden('forum');
+    if (redirectIfEntryHidden('forum')) return;
+    if (this._skipNextShowRefresh) {
+      this._skipNextShowRefresh = false;
+      return;
+    }
+    if (consumeListRefresh(LIST_REFRESH_KEYS.forumFavorites)) this.loadList();
   },
 
   onPullDownRefresh() {
@@ -43,7 +50,7 @@ Page({
   },
 
   goPost(e) {
-    const id = e.currentTarget.dataset.id;
+    const { id } = e.currentTarget.dataset;
     wx.navigateTo({ url: `/packageForum/post/index?postId=${id}` });
   },
 });
