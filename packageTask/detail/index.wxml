@@ -3,7 +3,7 @@
   <view wx:if="{{loading}}" class="detail-loading"><t-loading theme="dots" size="48rpx" /></view>
   <block wx:elif="{{task}}">
     <view class="detail-card">
-      <view class="detail-card__reward">佣金 ¥{{task.reward}}</view>
+      <view class="detail-card__reward">感谢金 {{task.reward || '0'}}</view>
       <view class="detail-card__tag detail-card__tag--{{task.status}}">{{STATUS_TEXT[task.status]}}</view>
       <view class="detail-card__title">{{task.title}}</view>
       <view class="detail-card__desc" wx:if="{{task.desc}}">{{task.desc}}</view>
@@ -30,7 +30,7 @@
         </view>
       </view>
       <view class="detail-card__row"><text class="detail-card__label">地点</text>{{task.location}}</view>
-      <view class="detail-card__row">
+      <view class="detail-card__row detail-card__row--publisher">
         <text class="detail-card__label">发布者</text>
         <text>{{task.publisherName}}</text>
         <text wx:if="{{task.contentTagLabel || task.adminLabel || task.publisherIdentityLabel}}" class="identity-tag identity-tag--{{task.contentTagType || (task.adminLabel ? 'admin' : (task.publisherIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{task.contentTagLabel || task.adminLabel || task.publisherIdentityLabel}}</text>
@@ -78,7 +78,7 @@
       </block>
       <block wx:elif="{{task.status === 'pending_confirm' && isPublisher}}">
         <t-button theme="primary" size="large" block bindtap="onConfirmComplete">确认完成</t-button>
-        <view class="detail-actions__hint">提示：确认完成前请先与接单人线下结算赏金。</view>
+        <view class="detail-actions__hint">提示：确认完成前请先与接单人线下结算感谢金。</view>
       </block>
       <block wx:elif="{{task.status === 'pending_take' && isPublisher}}">
         <t-button theme="default" size="large" block bindtap="onCancel">撤销发布</t-button>

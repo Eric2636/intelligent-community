@@ -167,8 +167,8 @@ Page({
       return;
     }
     const r = (reward || '').trim();
-    if (!r || Number.isNaN(Number(r)) || Number(r) <= 0) {
-      wx.showToast({ title: '请输入有效佣金金额', icon: 'none' });
+    if (!r || Number.isNaN(Number(r)) || Number(r) < 0) {
+      wx.showToast({ title: '请输入有效感谢金金额', icon: 'none' });
       return;
     }
     this.setData({ submitting: true });

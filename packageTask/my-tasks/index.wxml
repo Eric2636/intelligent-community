@@ -38,7 +38,7 @@
             bindtap="goDetail"
           >
             <view class="task-card__tag task-card__tag--{{card.status}}">{{card.statusLabel}}</view>
-            <view class="task-card__reward">¥{{card.reward}}</view>
+            <view class="task-card__reward">感谢金 {{card.reward || '0'}}</view>
             <text class="task-card__title">{{card.title}}</text>
             <view class="task-card__thumbs" wx:if="{{card.images.length}}">
               <block wx:for="{{card.images}}" wx:for-item="img" wx:for-index="imgIdx" wx:key="*this">
@@ -59,8 +59,7 @@
             </view>
             <view class="task-card__media-hint" wx:if="{{card.videos.length}}">含视频</view>
             <text class="task-card__desc">{{card.desc}}</text>
-            <view class="task-card__meta" wx:if="{{card.location}}">{{card.location}} · {{card.createdAt}}</view>
-            <view class="task-card__meta" wx:else>{{card.createdAt}}</view>
+            <view class="task-card__meta">{{card.createdAt}}</view>
           </view>
           <t-empty wx:if="{{!loading && publishedList.length === 0}}" description="暂无发布的任务" />
         </view>
@@ -76,7 +75,7 @@
             bindtap="goDetail"
           >
             <view class="task-card__tag task-card__tag--{{card.status}}">{{card.statusLabel}}</view>
-            <view class="task-card__reward">¥{{card.reward}}</view>
+            <view class="task-card__reward">感谢金 {{card.reward || '0'}}</view>
             <text class="task-card__title">{{card.title}}</text>
             <view class="task-card__thumbs" wx:if="{{card.images.length}}">
               <block wx:for="{{card.images}}" wx:for-item="img" wx:for-index="imgIdx" wx:key="*this">
@@ -97,8 +96,7 @@
             </view>
             <view class="task-card__media-hint" wx:if="{{card.videos.length}}">含视频</view>
             <text class="task-card__desc">{{card.desc}}</text>
-            <view class="task-card__meta" wx:if="{{card.location}}">{{card.location}} · {{card.createdAt}}</view>
-            <view class="task-card__meta" wx:else>{{card.createdAt}}</view>
+            <view class="task-card__meta">{{card.createdAt}}</view>
           </view>
           <t-empty wx:if="{{!loading && draftList.length === 0}}" description="{{emptyText}}" />
         </view>
@@ -114,7 +112,7 @@
             bindtap="goDetail"
           >
             <view class="task-card__tag task-card__tag--{{card.status}}">{{card.statusLabel}}</view>
-            <view class="task-card__reward">¥{{card.reward}}</view>
+            <view class="task-card__reward">感谢金 {{card.reward || '0'}}</view>
             <text class="task-card__title">{{card.title}}</text>
             <view class="task-card__thumbs" wx:if="{{card.images.length}}">
               <block wx:for="{{card.images}}" wx:for-item="img" wx:for-index="imgIdx" wx:key="*this">
@@ -135,8 +133,7 @@
             </view>
             <view class="task-card__media-hint" wx:if="{{card.videos.length}}">含视频</view>
             <text class="task-card__desc">{{card.desc}}</text>
-            <view class="task-card__meta" wx:if="{{card.location}}">{{card.location}} · {{card.createdAt}}</view>
-            <view class="task-card__meta" wx:else>{{card.createdAt}}</view>
+            <view class="task-card__meta">{{card.createdAt}}</view>
           </view>
           <t-empty wx:if="{{!loading && cancelledList.length === 0}}" description="{{emptyText}}" />
         </view>
@@ -152,7 +149,7 @@
             bindtap="goDetail"
           >
             <view class="task-card__tag task-card__tag--{{card.status}}">{{card.statusLabel}}</view>
-            <view class="task-card__reward">¥{{card.reward}}</view>
+            <view class="task-card__reward">感谢金 {{card.reward || '0'}}</view>
             <text class="task-card__title">{{card.title}}</text>
             <view class="task-card__thumbs" wx:if="{{card.images.length}}">
               <block wx:for="{{card.images}}" wx:for-item="img" wx:for-index="imgIdx" wx:key="*this">
@@ -173,8 +170,7 @@
             </view>
             <view class="task-card__media-hint" wx:if="{{card.videos.length}}">含视频</view>
             <text class="task-card__desc">{{card.desc}}</text>
-            <view class="task-card__meta" wx:if="{{card.location}}">{{card.location}} · {{card.createdAt}}</view>
-            <view class="task-card__meta" wx:else>{{card.createdAt}}</view>
+            <view class="task-card__meta">{{card.createdAt}}</view>
           </view>
           <t-empty wx:if="{{!loading && takenList.length === 0}}" description="暂无领取的任务" />
         </view>

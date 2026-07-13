@@ -3,6 +3,7 @@ import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureMutationReady } from '~/utils/authIdentity';
+import { formatDateTimeYmdHm } from '~/utils/date';
 
 Page({
   data: {
@@ -107,6 +108,7 @@ Page({
           id: t._id || t.id,
           images: Array.isArray(t.images) ? t.images : [],
           videos: Array.isArray(t.videos) ? t.videos : [],
+          createdAt: formatDateTimeYmdHm(t.createdAt),
         }));
         const list = refresh ? normalized : [...this.data.list, ...normalized];
         if (!refresh && normalized.length === 0) this.showNoMoreTip();

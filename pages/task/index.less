@@ -188,11 +188,13 @@ page {
 
   &__reward {
     flex-shrink: 0;
-    max-width: 168rpx;
-    font-size: 34rpx;
+    max-width: 220rpx;
+    font-size: 28rpx;
     line-height: 1.2;
     font-weight: 700;
-    color: @color-price;
+    background: linear-gradient(135deg, #ff8a00 0%, #ff3d54 55%, #ff2d95 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     text-align: right;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -282,6 +284,30 @@ page {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+}
+
+.admin-tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 200rpx;
+  height: 36rpx;
+  padding: 0 14rpx;
+  border-radius: @radius-pill;
+  background: rgba(0, 122, 255, 0.1);
+  color: @color-primary;
+  font-size: 22rpx;
+  line-height: 36rpx;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.admin-tag--corner {
+  position: absolute;
+  top: 16rpx;
+  right: @spacing-card-compact;
 }
 
 .task-empty {

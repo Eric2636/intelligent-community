@@ -45,7 +45,7 @@
     >
       <view class="task-card__head">
         <text class="task-card__title">{{card.title}}</text>
-        <view class="task-card__reward">¥{{card.reward}}</view>
+        <view class="task-card__reward">感谢金 {{card.reward || '0'}}</view>
       </view>
       <view class="task-card__publisher" wx:if="{{card.publisherName || card.contentTagLabel || card.adminLabel || card.publisherIdentityLabel}}">
         <text wx:if="{{card.publisherName}}">{{card.publisherName}}</text>
@@ -70,8 +70,7 @@
       <view class="task-card__media-hint" wx:if="{{card.videos.length}}">含视频</view>
       <view class="task-card__foot">
         <text class="task-card__desc">{{card.desc}}</text>
-        <view class="task-card__meta" wx:if="{{card.location}}">{{card.location}} · {{card.createdAt}}</view>
-        <view class="task-card__meta" wx:else>{{card.createdAt}}</view>
+        <view class="task-card__meta">{{card.createdAt}}</view>
       </view>
     </view>
     <t-empty wx:if="{{!loading && list.length === 0}}" description="暂无可领取任务" />
