@@ -1,4 +1,4 @@
-<t-navbar left-arrow title="个人信息" />
+<t-navbar left-arrow placeholder title="个人信息" />
 <view class="info-edit">
   <view class="info-edit__avatar-panel">
     <image wx:if="{{personInfo.avatar}}" class="info-edit__avatar-img" src="{{personInfo.avatar}}" mode="aspectFill" />
@@ -23,6 +23,9 @@
       t-class="info-edit__gender"
       value="{{personInfo.gender}}"
     />
+  </t-cell>
+  <t-cell class="info-edit__cell" title="户号">
+    <t-input bind:change="onHouseholdNoChange" borderless placeholder="请输入户号" slot="note" value="{{personInfo.householdNo}}" />
   </t-cell>
   <t-cell arrow bind:click="showPicker" data-mode="birth" note="{{personInfo.birth || ''}}" title="生日" />
   <t-cell arrow bind:click="showPicker" data-mode="address" note="{{addressText || ''}}" title="地址" />

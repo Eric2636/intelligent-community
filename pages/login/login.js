@@ -1,3 +1,5 @@
+import { ensureIdentitySelected } from '~/utils/authIdentity';
+
 Page({
   data: {
     agreed: false,
@@ -60,6 +62,7 @@ Page({
         return;
       }
 
+      await ensureIdentitySelected();
       this.setData({ loginSuccess: true });
       wx.showToast({ title: '登录成功', icon: 'success' });
       setTimeout(() => {

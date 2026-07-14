@@ -19,3 +19,35 @@ scroll-view::-webkit-scrollbar {
   background-color: #fff;
   overflow-x: hidden;
 }
+
+.admin-tag,
+.identity-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 32rpx;
+  line-height: 32rpx;
+  padding: 0 12rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  border: 1rpx solid transparent;
+}
+
+.admin-tag {
+  color: #2d5bff;
+  background: rgba(45, 91, 255, 0.09);
+  border-color: rgba(45, 91, 255, 0.16);
+}
+
+.identity-tag {
+  color: #0a7f63;
+  background: rgba(10, 127, 99, 0.1);
+  border-color: rgba(10, 127, 99, 0.18);
+}
+
+.admin-tag--corner {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+}

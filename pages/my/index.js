@@ -4,6 +4,7 @@ import { isModuleEnabled } from '~/utils/moduleEntryGuard';
 import { decryptText } from '~/utils/textCipher';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
+import { ensureIdentitySelected } from '~/utils/authIdentity';
 
 /**
  * 每个入口带 module：与 `isModuleEnabled` 的 key 一致；null 表示不限模块（始终可显）
@@ -206,6 +207,7 @@ Page({
         return;
       }
 
+      await ensureIdentitySelected();
       this.setData({
         isLoad: true,
         personalInfo: normalizePersonalInfo(app.globalData.userInfo),
@@ -270,7 +272,7 @@ Page({
         app.eventBus.emit('userInfoChange');
         wx.showToast({ title: '已退出登录', icon: 'none' });
         setTimeout(() => {
-          wx.reLaunch({ url: '/pages/login/login' });
+          wx.switchTab({ url: '/pages/my/index' });
         }, 300);
       },
     });

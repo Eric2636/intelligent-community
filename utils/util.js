@@ -9,9 +9,7 @@ const formatTime = (date) => {
   const day = date.getDate();
   const hour = date.getHours();
   const minute = date.getMinutes();
-  const second = date.getSeconds();
-
-  return `${[year, month, day].map(formatNumber).join('/')} ${[hour, minute, second].map(formatNumber).join(':')}`;
+  return `${year}年${formatNumber(month)}月${formatNumber(day)}日 ${formatNumber(hour)}:${formatNumber(minute)}`;
 };
 
 // 复制到本地临时路径，方便预览

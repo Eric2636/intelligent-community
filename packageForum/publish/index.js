@@ -1,5 +1,6 @@
 import { forumAPI } from '~/api/cloud';
 import { chooseAndUploadMedia, MEDIA_LIMITS } from '~/utils/cloudMedia';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 Page({
   data: {
@@ -29,6 +30,7 @@ Page({
   },
 
   async onAddMedia() {
+    if (!(await ensureMutationReady())) return;
     const { mediaImages, mediaVideos } = this.data;
     try {
       const { images, videos } = await chooseAndUploadMedia({
@@ -68,6 +70,7 @@ Page({
   },
 
   async submit() {
+    if (!(await ensureMutationReady())) return;
     const { title, content, mediaImages, mediaVideos } = this.data;
     const t = (title || '').trim();
     const c = (content || '').trim();

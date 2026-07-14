@@ -3,6 +3,7 @@ import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { normalizeForumListPost, forumListPostHasMedia } from '~/utils/forumPostList';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 function getPostIdFromEvent(e) {
   const { id } = e.currentTarget.dataset;
@@ -274,6 +275,7 @@ Page({
   },
 
   async onListLike(e) {
+    if (!(await ensureMutationReady())) return;
     const postId = getPostIdFromEvent(e);
     const post = this.findListPost(postId);
     if (!postId || !post) return;
@@ -334,7 +336,8 @@ Page({
     };
   },
 
-  goPublish() {
+  async goPublish() {
+    if (!(await ensureMutationReady())) return;
     wx.navigateTo({
       url: '/packageForum/publish/index',
     });

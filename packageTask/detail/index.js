@@ -1,6 +1,7 @@
 import { taskAPI } from '~/api/cloud';
 import { config } from '~/config/index';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 const STATUS_TEXT = {
   draft: '草稿',
@@ -121,7 +122,8 @@ Page({
     );
   },
 
-  onClaim() {
+  async onClaim() {
+    if (!(await ensureMutationReady())) return;
     const { id } = this.data;
     wx.showModal({
       title: '确认领取',
@@ -157,7 +159,8 @@ Page({
     });
   },
 
-  onSubmitComplete() {
+  async onSubmitComplete() {
+    if (!(await ensureMutationReady())) return;
     const { id, proofText } = this.data;
     const text = (proofText || '').trim();
     if (!text) {
@@ -173,7 +176,8 @@ Page({
     });
   },
 
-  onConfirmComplete() {
+  async onConfirmComplete() {
+    if (!(await ensureMutationReady())) return;
     const { id, task } = this.data;
     const reward = (task && task.reward) ? String(task.reward) : '0';
     const usePayment = config.enableTaskPayment;
@@ -239,7 +243,8 @@ Page({
     });
   },
 
-  onCancel() {
+  async onCancel() {
+    if (!(await ensureMutationReady())) return;
     const { id } = this.data;
     wx.showModal({
       title: '撤销发布',
@@ -263,7 +268,8 @@ Page({
     });
   },
 
-  onRepublish() {
+  async onRepublish() {
+    if (!(await ensureMutationReady())) return;
     const { id } = this.data;
     wx.showModal({
       title: '重新发布',
@@ -280,7 +286,8 @@ Page({
     });
   },
 
-  onDeleteTask() {
+  async onDeleteTask() {
+    if (!(await ensureMutationReady())) return;
     const { id } = this.data;
     wx.showModal({
       title: '删除任务',
@@ -297,7 +304,8 @@ Page({
     });
   },
 
-  onAbandon() {
+  async onAbandon() {
+    if (!(await ensureMutationReady())) return;
     const { id } = this.data;
     wx.showModal({
       title: '放弃任务',
@@ -314,7 +322,8 @@ Page({
     });
   },
 
-  onPublishDraft() {
+  async onPublishDraft() {
+    if (!(await ensureMutationReady())) return;
     const { id } = this.data;
     wx.showModal({
       title: '发布任务',
@@ -349,6 +358,7 @@ Page({
   },
 
   async onSubmitRating() {
+    if (!(await ensureMutationReady())) return;
     const { id, task, otherPartyId, ratingScore, ratingComment } = this.data;
     if (!otherPartyId) return wx.showToast({ title: '无法评价', icon: 'none' });
     const res = await taskAPI.submitRating({

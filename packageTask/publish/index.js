@@ -1,5 +1,6 @@
 import { taskAPI } from '~/api/cloud';
 import { chooseAndUploadMedia, MEDIA_LIMITS } from '~/utils/cloudMedia';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 Page({
   data: {
@@ -77,6 +78,7 @@ Page({
   },
 
   async onAddMedia() {
+    if (!(await ensureMutationReady())) return;
     const { mediaImages, mediaVideos } = this.data;
     try {
       const { images, videos } = await chooseAndUploadMedia({
@@ -117,6 +119,7 @@ Page({
 
   async saveDraft() {
     if (this.data.savingDraft) return;
+    if (!(await ensureMutationReady())) return;
     const { title, desc, reward, location, mediaImages, mediaVideos, draftId } = this.data;
     const editingDraft = Boolean(draftId);
     this.setData({ savingDraft: true });
@@ -151,6 +154,7 @@ Page({
 
   async submit() {
     if (this.data.submitting) return;
+    if (!(await ensureMutationReady())) return;
     const { title, desc, reward, location, mediaImages, mediaVideos, draftId } = this.data;
     const t = (title || '').trim();
     if (!t) {

@@ -47,6 +47,10 @@
         <text class="task-card__title">{{card.title}}</text>
         <view class="task-card__reward">¥{{card.reward}}</view>
       </view>
+      <view class="task-card__publisher" wx:if="{{card.publisherName || card.publisherIdentityLabel}}">
+        <text wx:if="{{card.publisherName}}">{{card.publisherName}}</text>
+        <text wx:if="{{card.publisherIdentityLabel}}" class="identity-tag">{{card.publisherIdentityLabel}}</text>
+      </view>
       <view class="task-card__thumbs" wx:if="{{card.images.length}}">
         <block wx:for="{{card.images}}" wx:for-item="img" wx:for-index="imgIdx" wx:key="*this">
           <view wx:if="{{imgIdx < 3}}" class="task-card__thumb-wrap">

@@ -2,6 +2,7 @@ import { taskAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 Page({
   data: {
@@ -142,7 +143,8 @@ Page({
     wx.navigateTo({ url: `/packageTask/detail/index?id=${id}` });
   },
 
-  goPublish() {
+  async goPublish() {
+    if (!(await ensureMutationReady())) return;
     wx.navigateTo({ url: '/packageTask/publish/index' });
   },
 });
