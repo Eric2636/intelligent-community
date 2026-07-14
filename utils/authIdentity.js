@@ -49,7 +49,7 @@ export function requireLogin() {
   if (hasLoginToken()) return true;
   wx.showToast({ title: '请先登录', icon: 'none' });
   setTimeout(() => {
-    wx.navigateTo({ url: '/pages/login/login' });
+    wx.navigateTo({ url: '/pages/login/login?authRequired=1' });
   }, 300);
   return false;
 }

@@ -68,7 +68,7 @@ export const taskAPI = {
       method: 'POST',
       path: 'api/tasks/list',
       data: { keyword: keyword || undefined, page, pageSize },
-      auth: true,
+      auth: false,
     })
       .then((res) => {
         if (res && res.code === 200) cacheSet(cacheKey, res, 3600);
@@ -87,7 +87,7 @@ export const taskAPI = {
     return httpRequest({
       method: 'GET',
       path: `api/tasks/${taskId}`,
-      auth: true,
+      auth: false,
     });
   },
 

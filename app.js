@@ -93,7 +93,7 @@ App({
       const res = await httpRequest({
         method: 'GET',
         path: 'api/app-settings/module-entry-tabs',
-        auth: true,
+        auth: false,
       });
       if (res && res.code === 200 && res.data && Array.isArray(res.data.tabs)) {
         this.globalData.moduleEntryTabs = res.data.tabs;
