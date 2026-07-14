@@ -22,7 +22,7 @@ function cachedRequest(path, query, ttlSeconds = 60, options = {}) {
   return httpRequest({ method: 'GET', path, query, auth: true, ...options })
     .then((res) => {
       if (res && res.code === 200) cacheSet(cacheKey, res, ttlSeconds);
-      return res;
+      return formatDateTimeFields(res);
     })
     .catch((err) => {
       if (!shouldUseOfflineCache(err)) throw err;
@@ -72,7 +72,7 @@ export const taskAPI = {
     })
       .then((res) => {
         if (res && res.code === 200) cacheSet(cacheKey, res, 3600);
-        return res;
+        return formatDateTimeFields(res);
       })
       .catch((err) => {
         if (!shouldUseOfflineCache(err)) throw err;
@@ -88,7 +88,7 @@ export const taskAPI = {
       method: 'GET',
       path: `api/tasks/${taskId}`,
       auth: false,
-    });
+    }).then(formatDateTimeFields);
   },
 
   // 发布任务
@@ -211,7 +211,7 @@ export const taskAPI = {
       path: 'api/tasks/my',
       query: { type },
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 
   // 提交评价
@@ -230,7 +230,7 @@ export const taskAPI = {
       method: 'GET',
       path: 'api/tasks/my-ratings',
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 };
 
@@ -264,7 +264,7 @@ export const forumAPI = {
       method: 'GET',
       path: `api/posts/${postId}`,
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 
   // 发布帖子
@@ -371,7 +371,7 @@ export const forumAPI = {
       method: 'GET',
       path: 'api/posts/my',
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 
   // 点赞帖子
@@ -434,7 +434,7 @@ export const forumAPI = {
       method: 'GET',
       path: 'api/posts/my-favorites',
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 };
 
@@ -463,7 +463,7 @@ export const mallAPI = {
       method: 'GET',
       path: `api/items/${itemId}`,
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 
   // 获取商品评论列表
@@ -472,7 +472,7 @@ export const mallAPI = {
       method: 'GET',
       path: `api/items/${itemId}/comments`,
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 
   // 发布商品评论（content 可为空字符串；支持 parentCommentId、images）
@@ -530,7 +530,7 @@ export const mallAPI = {
       method: 'GET',
       path: 'api/items/my',
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 
   // 收藏商品
@@ -557,7 +557,7 @@ export const mallAPI = {
       method: 'GET',
       path: 'api/items/my-favorites',
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 
   // 创建订单（购买）
@@ -579,7 +579,7 @@ export const mallAPI = {
       method: 'GET',
       path: 'api/orders/my',
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 
   // 获取订单详情
@@ -588,7 +588,7 @@ export const mallAPI = {
       method: 'GET',
       path: `api/orders/${orderId}`,
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 
   // 更新订单状态（completed/cancelled）
@@ -630,7 +630,7 @@ export const errandAPI = {
       method: 'GET',
       path: `api/errands/${errandId}`,
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 
   // 发布跑腿
@@ -726,7 +726,7 @@ export const errandAPI = {
       path: 'api/errands/my',
       query: params,
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 };
 
@@ -773,7 +773,7 @@ export const commonAPI = {
       method: 'GET',
       path: 'api/notifications',
       auth: true,
-    });
+    }).then(formatDateTimeFields);
   },
 
   // 提交反馈

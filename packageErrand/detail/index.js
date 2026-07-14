@@ -1,6 +1,7 @@
 import { errandAPI } from '~/api/cloud';
 import { invalidateCloudFunction } from '~/utils/apiCache';
 import { invalidateHttpCachePrefix } from '~/utils/persistCache';
+import { formatDateTimeYmdHm } from '~/utils/date';
 
 function statusTextFrom(s) {
   if (s === 'pending_take') return '待领取';
@@ -14,13 +15,13 @@ function normalizeErrandPost(raw) {
   const replies = (raw.replies || []).map((reply) => ({
     ...reply,
     id: reply.id || reply._id,
-    createTime: reply.createTime || reply.createdAt,
+    createTime: formatDateTimeYmdHm(reply.createTime || reply.createdAt),
   }));
   const status = raw.status || 'pending_take';
   return {
     ...raw,
     id: raw.id || raw._id,
-    createTime: raw.createTime || raw.createdAt,
+    createTime: formatDateTimeYmdHm(raw.createTime || raw.createdAt),
     replyCount: raw.replyCount || replies.length,
     likeCount: raw.likeCount || 0,
     status,
@@ -198,7 +199,7 @@ Page({
         const row = {
           ...res.data,
           id: res.data.id || res.data._id,
-          createTime: res.data.createTime || res.data.createdAt,
+          createTime: formatDateTimeYmdHm(res.data.createTime || res.data.createdAt),
         };
         const replies = [row, ...(errand.replies || [])];
         this.setData({
