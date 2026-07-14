@@ -1,8 +1,8 @@
 /** 自建后端 HTTP 请求配置 */
 // 只需要改这里：本地后端地址（模拟器用 127.0.0.1；真机需改成你电脑的局域网 IP）
 const LOCAL_API_BASE = 'http://127.0.0.1:3000';
-// 线上/测试后端地址
-const PROD_API_BASE = 'https://lllhjh.asia/test-api';
+// 线上后端地址
+const PROD_API_BASE = 'https://lllhjh.asia';
 
 export default {
   /**
@@ -12,11 +12,11 @@ export default {
    * - 正式 / 体验版请替换为已备案、已配置合法域名的 HTTPS 地址。
    */
   apiBaseUrl: '',
-  // 真机预览排查接口问题时打开微信内置 vConsole；正式发布前改为 false。
-  enableVConsole: true,
+  // 生产版本不显示微信内置 vConsole。
+  enableVConsole: false,
 
-  // 本地开发：模拟器连本机后端；真机调试需将 devLanHost 改成电脑局域网 IP
-  useLocalDevApi: true,
+  // 生产分支固定连接线上后端。
+  useLocalDevApi: false,
   productionApiBase: PROD_API_BASE,
   // 兼容旧字段：当 apiBaseUrl 为空且 useLocalDevApi=true 时，会拼成 http://devLanHost:devPort
   devLanHost: '127.0.0.1',
