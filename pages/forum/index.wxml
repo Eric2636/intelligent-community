@@ -99,10 +99,7 @@
               <t-icon name="user" size="32rpx" color="#8e8e93" />
             </view>
             <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
-            <text wx:if="{{item.authorIdentityLabel}}" class="identity-tag">{{item.authorIdentityLabel}}</text>
-          </view>
-          <view class="post-item__top-right">
-            <text wx:if="{{item.adminLabel}}" class="admin-tag">{{item.adminLabel}}</text>
+            <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
           </view>
         </view>
         <text class="post-item__title">{{item.title}}</text>
@@ -142,10 +139,7 @@
                   <t-icon name="user" size="32rpx" color="#8e8e93" />
                 </view>
                 <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
-                <text wx:if="{{item.authorIdentityLabel}}" class="identity-tag">{{item.authorIdentityLabel}}</text>
-              </view>
-              <view class="post-item__top-right">
-                <text wx:if="{{item.adminLabel}}" class="admin-tag">{{item.adminLabel}}</text>
+                <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
               </view>
             </view>
             <text class="post-item__title">{{item.title}}</text>
@@ -183,10 +177,7 @@
                 <t-icon name="user" size="32rpx" color="#8e8e93" />
               </view>
               <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
-              <text wx:if="{{item.authorIdentityLabel}}" class="identity-tag">{{item.authorIdentityLabel}}</text>
-            </view>
-            <view class="post-item__top-right">
-              <text wx:if="{{item.adminLabel}}" class="admin-tag">{{item.adminLabel}}</text>
+              <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
             </view>
           </view>
           <text class="post-item__title">{{item.title}}</text>

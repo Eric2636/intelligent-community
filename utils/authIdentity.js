@@ -58,7 +58,7 @@ export async function ensureIdentitySelected() {
   const app = getApp();
   let userInfo = normalizeUserInfo(app.globalData.userInfo);
 
-  if (!userInfo.identityType) {
+  if (!userInfo.identityType && !userInfo.contentTagLabel && !userInfo.adminLabel) {
     try {
       const res = await userAPI.getUserInfo();
       if (res && res.code === 200 && res.data) {
@@ -70,6 +70,7 @@ export async function ensureIdentitySelected() {
     }
   }
 
+  if (userInfo.contentTagLabel || userInfo.adminLabel) return userInfo.contentTagLabel || userInfo.adminLabel;
   if (userInfo.identityType) return userInfo.identityType;
 
   const identityType = await selectIdentityType();
