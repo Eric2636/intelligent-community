@@ -13,10 +13,10 @@ export default {
    */
   apiBaseUrl: '',
   // 真机预览排查接口问题时打开微信内置 vConsole；正式发布前改为 false。
-  enableVConsole: true,
+  enableVConsole: false,
 
   // 本地开发：模拟器连本机后端；真机调试需将 devLanHost 改成电脑局域网 IP
-  useLocalDevApi: true,
+  useLocalDevApi: false,
   productionApiBase: PROD_API_BASE,
   // 兼容旧字段：当 apiBaseUrl 为空且 useLocalDevApi=true 时，会拼成 http://devLanHost:devPort
   devLanHost: '127.0.0.1',
