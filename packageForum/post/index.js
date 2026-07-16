@@ -1,6 +1,7 @@
 import { forumAPI } from '~/api/cloud';
 import { chooseAndUploadMedia, MEDIA_LIMITS } from '~/utils/cloudMedia';
 import { FORUM_REPLY_EMOJI_LIST } from '~/utils/forumReplyEmoji';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 function firstUrl(list) {
   return Array.isArray(list) && list.length ? String(list[0] || '') : '';
@@ -121,6 +122,7 @@ Page({
   },
 
   async onLike() {
+    if (!(await ensureMutationReady())) return;
     const { postId, post } = this.data;
     if (!postId) return;
     const {isLiked} = post;
@@ -141,7 +143,8 @@ Page({
     } else wx.showToast({ title: res.message || '操作失败', icon: 'none' });
   },
 
-  onDeletePost() {
+  async onDeletePost() {
+    if (!(await ensureMutationReady())) return;
     const { postId, post, deletingPost } = this.data;
     if (!post || !post.isAuthor || deletingPost) return;
     wx.showModal({
@@ -169,7 +172,8 @@ Page({
     });
   },
 
-  onDeleteReply(e) {
+  async onDeleteReply(e) {
+    if (!(await ensureMutationReady())) return;
     const replyId = e.currentTarget.dataset.rid;
     const { postId, post } = this.data;
     if (!replyId || !post) return;
@@ -196,6 +200,7 @@ Page({
   },
 
   async onFavorite() {
+    if (!(await ensureMutationReady())) return;
     const { postId, post } = this.data;
     if (!postId) return;
     const {isFavorited} = post;
@@ -360,6 +365,7 @@ Page({
   },
 
   async onReplyLike(e) {
+    if (!(await ensureMutationReady())) return;
     const {rid} = e.currentTarget.dataset;
     const { postId, post } = this.data;
     if (!rid || !post) return;
@@ -381,6 +387,7 @@ Page({
   },
 
   async onReplyFavorite(e) {
+    if (!(await ensureMutationReady())) return;
     const {rid} = e.currentTarget.dataset;
     const { postId, post } = this.data;
     if (!rid || !post) return;
@@ -403,6 +410,7 @@ Page({
   },
 
   async setReplyReaction(rid, emoji) {
+    if (!(await ensureMutationReady())) return;
     const { post } = this.data;
     if (!rid || !post) return;
     try {
@@ -464,6 +472,7 @@ Page({
   },
 
   async onReplyAddMedia() {
+    if (!(await ensureMutationReady())) return;
     const { replyImages, replyVideos } = this.data;
     try {
       const { images, videos } = await chooseAndUploadMedia({
@@ -522,6 +531,7 @@ Page({
 
   async submitReply() {
     if (this.data.submitting) return;
+    if (!(await ensureMutationReady())) return;
     const { postId, replyContent, replyImages, replyVideos, replyTarget } = this.data;
     const content = (replyContent || '').trim();
     if (!content && replyImages.length === 0 && replyVideos.length === 0) {

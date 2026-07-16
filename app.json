@@ -1,8 +1,8 @@
 {
   "lazyCodeLoading": "requiredComponents",
   "pages": [
-    "pages/login/login",
     "pages/task/index",
+    "pages/login/login",
     "pages/errand/index",
     "pages/forum/index",
     "pages/mall/index",

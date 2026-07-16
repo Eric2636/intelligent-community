@@ -7,6 +7,7 @@ function defaultPersonInfo() {
     name: '',
     avatar: '',
     gender: 0,
+    householdNo: '',
     birth: '',
     address: [],
     introduction: '',
@@ -33,7 +34,8 @@ function buildUserInfoPayload(personInfo) {
   return {
     name: String(personInfo.name || '').trim(),
     avatar: String(personInfo.avatar || personInfo.avatarUrl || personInfo.image || '').trim(),
-    gender: Number.isInteger(gender) && gender >= 0 && gender <= 2 ? gender : 0,
+    gender: Number.isInteger(gender) && gender >= 0 && gender <= 1 ? gender : 0,
+    householdNo: String(personInfo.householdNo || '').trim(),
     birth: String(personInfo.birth || '').trim(),
     address: Array.isArray(personInfo.address) ? personInfo.address : [],
     brief: String(personInfo.introduction || personInfo.brief || '').trim(),
@@ -52,10 +54,6 @@ Page({
       {
         label: '女',
         value: 1,
-      },
-      {
-        label: '保密',
-        value: 2,
       },
     ],
     birthVisible: false,
@@ -192,6 +190,10 @@ Page({
 
   onGenderChange(e) {
     this.personInfoFieldChange('gender', e);
+  },
+
+  onHouseholdNoChange(e) {
+    this.personInfoFieldChange('householdNo', e);
   },
 
   onIntroductionChange(e) {

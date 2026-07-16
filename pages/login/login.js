@@ -1,11 +1,23 @@
+import { ensureIdentitySelected } from '~/utils/authIdentity';
+
 Page({
   data: {
     agreed: false,
+    authRequired: false,
     loggingIn: false,
     loginSuccess: false,
   },
 
+  onLoad(options = {}) {
+    const authRequired = options.authRequired === '1';
+    this.setData({ authRequired });
+    if (!authRequired) {
+      wx.switchTab({ url: '/pages/task/index' });
+    }
+  },
+
   onShow() {
+    if (!this.data.authRequired) return;
     const app = getApp();
     app.refreshLoginCode?.().catch((err) => {
       console.warn('[login] 预取 wx.login code 失败', err);
@@ -60,6 +72,7 @@ Page({
         return;
       }
 
+      await ensureIdentitySelected();
       this.setData({ loginSuccess: true });
       wx.showToast({ title: '登录成功', icon: 'success' });
       setTimeout(() => {

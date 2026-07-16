@@ -1,6 +1,7 @@
 import { taskAPI } from '~/api/cloud';
 import { config } from '~/config/index';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 const STATUS_TEXT = {
   draft: '草稿',
@@ -96,7 +97,7 @@ Page({
   onShareAppMessage() {
     const { id, task } = this.data;
     const title = task
-      ? `${task.title || '业主互助'}${task.reward ? `｜佣金 ¥${task.reward}` : ''}`
+      ? `${task.title || '业主互助'}｜感谢金 ${task.reward || '0'}`
       : '业主互助';
     return withImage(
       {
@@ -110,7 +111,7 @@ Page({
   onShareTimeline() {
     const { id, task } = this.data;
     const title = task
-      ? `${task.title || '业主互助'}${task.reward ? `｜佣金 ¥${task.reward}` : ''}`
+      ? `${task.title || '业主互助'}｜感谢金 ${task.reward || '0'}`
       : '业主互助';
     return withImage(
       {
@@ -121,7 +122,8 @@ Page({
     );
   },
 
-  onClaim() {
+  async onClaim() {
+    if (!(await ensureMutationReady())) return;
     const { id } = this.data;
     wx.showModal({
       title: '确认领取',
@@ -157,7 +159,8 @@ Page({
     });
   },
 
-  onSubmitComplete() {
+  async onSubmitComplete() {
+    if (!(await ensureMutationReady())) return;
     const { id, proofText } = this.data;
     const text = (proofText || '').trim();
     if (!text) {
@@ -173,15 +176,16 @@ Page({
     });
   },
 
-  onConfirmComplete() {
+  async onConfirmComplete() {
+    if (!(await ensureMutationReady())) return;
     const { id, task } = this.data;
     const reward = (task && task.reward) ? String(task.reward) : '0';
     const usePayment = config.enableTaskPayment;
     wx.showModal({
       title: '确认完成',
       content: usePayment
-        ? `需支付赏金 ¥${reward} 元给接单人。将调起微信支付，支付成功后任务自动完成。`
-        : `确认后任务完成，请线下支付赏金 ¥${reward} 元给接单人。`,
+        ? `需支付感谢金 ${reward} 元给接单人。将调起微信支付，支付成功后任务自动完成。`
+        : `确认后任务完成，请线下支付感谢金 ${reward} 元给接单人。`,
       success: async (res) => {
         if (!res.confirm) return;
         if (!usePayment) {
@@ -219,7 +223,7 @@ Page({
         if (payRes.code === 500 && (msg.indexOf('未配置') !== -1 || msg.indexOf('商户') !== -1)) {
           wx.showModal({
             title: '未开通在线支付',
-            content: '当前未配置支付商户号，可先线下支付赏金给接单人，再点击确认完成。是否确认完成？',
+            content: '当前未配置支付商户号，可先线下支付感谢金给接单人，再点击确认完成。是否确认完成？',
             success: (m) => {
               if (!m.confirm) return;
               taskAPI.confirmComplete(id).then((r) => {
@@ -239,7 +243,8 @@ Page({
     });
   },
 
-  onCancel() {
+  async onCancel() {
+    if (!(await ensureMutationReady())) return;
     const { id } = this.data;
     wx.showModal({
       title: '撤销发布',
@@ -263,7 +268,8 @@ Page({
     });
   },
 
-  onRepublish() {
+  async onRepublish() {
+    if (!(await ensureMutationReady())) return;
     const { id } = this.data;
     wx.showModal({
       title: '重新发布',
@@ -280,7 +286,8 @@ Page({
     });
   },
 
-  onDeleteTask() {
+  async onDeleteTask() {
+    if (!(await ensureMutationReady())) return;
     const { id } = this.data;
     wx.showModal({
       title: '删除任务',
@@ -297,7 +304,8 @@ Page({
     });
   },
 
-  onAbandon() {
+  async onAbandon() {
+    if (!(await ensureMutationReady())) return;
     const { id } = this.data;
     wx.showModal({
       title: '放弃任务',
@@ -314,7 +322,8 @@ Page({
     });
   },
 
-  onPublishDraft() {
+  async onPublishDraft() {
+    if (!(await ensureMutationReady())) return;
     const { id } = this.data;
     wx.showModal({
       title: '发布任务',
@@ -349,6 +358,7 @@ Page({
   },
 
   async onSubmitRating() {
+    if (!(await ensureMutationReady())) return;
     const { id, task, otherPartyId, ratingScore, ratingComment } = this.data;
     if (!otherPartyId) return wx.showToast({ title: '无法评价', icon: 'none' });
     const res = await taskAPI.submitRating({

@@ -25,7 +25,7 @@ export function formatDateTimeYmdHm(value) {
   const d = pad2(date.getDate());
   const h = pad2(date.getHours());
   const min = pad2(date.getMinutes());
-  return `${y}-${m}-${d} ${h}:${min}`;
+  return `${y}年${m}月${d}日 ${h}:${min}`;
 }
 
 export function formatDateTimeFields(value) {

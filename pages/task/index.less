@@ -135,20 +135,12 @@ page {
 
 .task-card {
   position: relative;
-  padding: @spacing-card-compact;
+  padding: @spacing-card;
   margin-bottom: 16rpx;
   background: @bg-color-white;
   border-radius: @radius-card;
   border: 1rpx solid rgba(60, 60, 67, 0.08);
   box-shadow: @shadow-card;
-
-  &--with-tag {
-    padding-top: 48rpx;
-  }
-
-  &--admin &__head {
-    padding-top: 40rpx;
-  }
 
   &__tag {
     position: absolute;
@@ -165,17 +157,17 @@ page {
     &--cancelled { background: @bg-color-section; color: @gy2; }
   }
 
-  &__head {
+  &__meta-row {
     display: flex;
-    align-items: flex-start;
-    gap: 18rpx;
-    margin-bottom: 10rpx;
+    align-items: center;
+    gap: 20rpx;
+    min-width: 0;
+    margin-bottom: 14rpx;
   }
 
   &__title {
-    flex: 1;
-    min-width: 0;
     display: -webkit-box;
+    margin-bottom: 10rpx;
     font-size: @font-size-card-title;
     line-height: 1.35;
     font-weight: 600;
@@ -187,13 +179,39 @@ page {
   }
 
   &__reward {
+    margin-left: auto;
     flex-shrink: 0;
-    max-width: 168rpx;
-    font-size: 34rpx;
-    line-height: 1.2;
+    max-width: 220rpx;
+    height: 44rpx;
+    padding: 0 16rpx;
+    border-radius: @radius-pill;
+    font-size: 24rpx;
+    line-height: 44rpx;
     font-weight: 700;
-    color: @color-price;
+    color: #ff4d4f;
+    background: linear-gradient(135deg, rgba(255, 138, 0, 0.14) 0%, rgba(255, 61, 84, 0.12) 52%, rgba(255, 45, 149, 0.12) 100%);
+    border: 1rpx solid rgba(255, 77, 79, 0.16);
     text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+
+  &__publisher {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10rpx;
+    flex: 1;
+    min-width: 0;
+    font-size: @font-size-meta;
+    line-height: 36rpx;
+    color: @gy3;
+  }
+
+  &__publisher-name {
+    max-width: 260rpx;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -240,25 +258,25 @@ page {
   &__media-hint {
     font-size: @font-size-caption;
     color: @color-primary;
-    margin: -2rpx 0 8rpx;
+    margin: -2rpx 0 10rpx;
   }
 
   &__foot {
     display: flex;
-    align-items: center;
-    gap: 18rpx;
+    justify-content: flex-end;
+    margin-top: 10rpx;
   }
 
   &__desc {
-    flex: 1;
-    min-width: 0;
-    display: block;
+    display: -webkit-box;
+    margin-bottom: 12rpx;
     font-size: @font-size-body-small;
-    line-height: 1.45;
+    line-height: 1.5;
     color: @gy2;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 
   &__meta {
@@ -271,6 +289,41 @@ page {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+}
+
+.admin-tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 200rpx;
+  height: 36rpx;
+  padding: 0 14rpx;
+  border-radius: @radius-pill;
+  background: rgba(0, 122, 255, 0.1);
+  color: @color-primary;
+  font-size: 22rpx;
+  line-height: 36rpx;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.task-card .identity-tag {
+  height: 32rpx;
+  padding: 0 10rpx;
+  border-radius: @radius-sm;
+  font-size: @font-size-caption;
+  line-height: 30rpx;
+  font-weight: 500;
+  box-sizing: border-box;
+}
+
+.admin-tag--corner,
+.identity-tag--corner {
+  position: absolute;
+  top: 16rpx;
+  right: @spacing-card-compact;
 }
 
 .task-empty {

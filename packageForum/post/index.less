@@ -182,6 +182,38 @@
   }
 }
 
+.admin-tag {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 1rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #007aff 0%, #7c4dff 52%, #ff4f8b 100%);
+  box-sizing: border-box;
+
+  &__inner {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34rpx;
+    padding: 0 12rpx;
+    border-radius: 999rpx;
+    background: @bg-color-white;
+  }
+
+  &__text {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(90deg, #007aff 0%, #7c4dff 52%, #ff4f8b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 20rpx;
+    line-height: 34rpx;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}
+
 .post-replies {
   padding: 0 28rpx;
   background: @bg-color-white;

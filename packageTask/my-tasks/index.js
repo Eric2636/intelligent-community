@@ -1,6 +1,7 @@
 import { taskAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
+import { formatDateTimeYmdHm } from '~/utils/date';
 
 const STATUS_TEXT = {
   draft: '草稿',
@@ -26,6 +27,7 @@ function normalizeTaskRow(item) {
     videos: Array.isArray(item.videos) ? item.videos : [],
     desc: item.desc || '',
     location: item.location || '',
+    createdAt: formatDateTimeYmdHm(item.createdAt),
   };
 }
 

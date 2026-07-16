@@ -35,7 +35,7 @@
   </view>
   <view wx:else class="task-list {{list.length && !loading ? 'list-fade-in' : ''}}">
     <view
-      class="task-card {{card.adminLabel ? 'task-card--admin' : ''}}"
+      class="task-card"
       wx:for="{{list}}"
       wx:for-item="card"
       wx:for-index="cardIdx"
@@ -43,10 +43,15 @@
       data-id="{{card._id || card.id}}"
       bindtap="goDetail"
     >
-      <view class="task-card__head">
-        <text class="task-card__title">{{card.title}}</text>
-        <view class="task-card__reward">¥{{card.reward}}</view>
+      <view class="task-card__meta-row">
+        <view class="task-card__publisher" wx:if="{{card.publisherName || card.contentTagLabel || card.adminLabel || card.publisherIdentityLabel}}">
+          <text wx:if="{{card.publisherName}}" class="task-card__publisher-name">{{card.publisherName}}</text>
+          <text wx:if="{{card.contentTagLabel || card.adminLabel || card.publisherIdentityLabel}}" class="identity-tag identity-tag--{{card.contentTagType || (card.adminLabel ? 'admin' : (card.publisherIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{card.contentTagLabel || card.adminLabel || card.publisherIdentityLabel}}</text>
+        </view>
+        <view class="task-card__reward">感谢金 {{card.reward || '0'}}</view>
       </view>
+      <text class="task-card__title">{{card.title}}</text>
+      <text class="task-card__desc">{{card.desc}}</text>
       <view class="task-card__thumbs" wx:if="{{card.images.length}}">
         <block wx:for="{{card.images}}" wx:for-item="img" wx:for-index="imgIdx" wx:key="*this">
           <view wx:if="{{imgIdx < 3}}" class="task-card__thumb-wrap">
@@ -65,11 +70,8 @@
       </view>
       <view class="task-card__media-hint" wx:if="{{card.videos.length}}">含视频</view>
       <view class="task-card__foot">
-        <text class="task-card__desc">{{card.desc}}</text>
-        <view class="task-card__meta" wx:if="{{card.location}}">{{card.location}} · {{card.createdAt}}</view>
-        <view class="task-card__meta" wx:else>{{card.createdAt}}</view>
+        <view class="task-card__meta">{{card.createdAt}}</view>
       </view>
-      <text wx:if="{{card.adminLabel}}" class="admin-tag admin-tag--corner">{{card.adminLabel}}</text>
     </view>
     <t-empty wx:if="{{!loading && list.length === 0}}" description="暂无可领取任务" />
     <view wx:if="{{loadingMore}}" class="task-more-hint">加载中...</view>
