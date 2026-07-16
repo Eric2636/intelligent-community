@@ -49,7 +49,6 @@
       </view>
       <view class="task-card__publisher" wx:if="{{card.publisherName || card.contentTagLabel || card.adminLabel || card.publisherIdentityLabel}}">
         <text wx:if="{{card.publisherName}}">{{card.publisherName}}</text>
-        <text wx:if="{{card.contentTagLabel || card.adminLabel || card.publisherIdentityLabel}}" class="identity-tag identity-tag--{{card.contentTagType || (card.adminLabel ? 'admin' : (card.publisherIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{card.contentTagLabel || card.adminLabel || card.publisherIdentityLabel}}</text>
       </view>
       <view class="task-card__thumbs" wx:if="{{card.images.length}}">
         <block wx:for="{{card.images}}" wx:for-item="img" wx:for-index="imgIdx" wx:key="*this">
@@ -72,6 +71,7 @@
         <text class="task-card__desc">{{card.desc}}</text>
         <view class="task-card__meta">{{card.createdAt}}</view>
       </view>
+      <text wx:if="{{card.contentTagLabel || card.adminLabel || card.publisherIdentityLabel}}" class="identity-tag identity-tag--corner identity-tag--{{card.contentTagType || (card.adminLabel ? 'admin' : (card.publisherIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{card.contentTagLabel || card.adminLabel || card.publisherIdentityLabel}}</text>
     </view>
     <t-empty wx:if="{{!loading && list.length === 0}}" description="暂无可领取任务" />
     <view wx:if="{{loadingMore}}" class="task-more-hint">加载中...</view>
