@@ -167,7 +167,7 @@ Page({
       return;
     }
     const r = (reward || '').trim();
-    if (!r || Number.isNaN(Number(r)) || Number(r) < 0) {
+    if (r && (Number.isNaN(Number(r)) || Number(r) < 0)) {
       wx.showToast({ title: '请输入有效感谢金金额', icon: 'none' });
       return;
     }
@@ -179,7 +179,7 @@ Page({
           taskId: draftId,
           title: t,
           desc: d,
-          reward: r,
+          reward: r || undefined,
           location: (location || '').trim() || '线下协商',
           images: mediaImages,
           videos: mediaVideos,
@@ -193,7 +193,7 @@ Page({
         res = await taskAPI.publishTask({
           title: t,
           desc: d,
-          reward: r,
+          reward: r || undefined,
           location: (location || '').trim() || '线下协商',
           images: mediaImages,
           videos: mediaVideos,
