@@ -45,13 +45,24 @@ export function hasLoginToken() {
   return Boolean(getToken());
 }
 
-export function requireLogin() {
+export async function ensureLoggedIn() {
   if (hasLoginToken()) return true;
-  wx.showToast({ title: '请先登录', icon: 'none' });
-  setTimeout(() => {
-    wx.navigateTo({ url: '/pages/login/login?authRequired=1' });
-  }, 300);
+
+  const app = getApp();
+  wx.showLoading({ title: '登录中...' });
+  try {
+    await app.login();
+  } finally {
+    wx.hideLoading();
+  }
+
+  if (hasLoginToken()) return true;
+  wx.showToast({ title: '登录失败，可继续浏览公开内容', icon: 'none' });
   return false;
+}
+
+export function requireLogin() {
+  return ensureLoggedIn();
 }
 
 export async function ensureIdentitySelected() {
@@ -87,7 +98,7 @@ export async function ensureIdentitySelected() {
 }
 
 export async function ensureMutationReady() {
-  if (!requireLogin()) return false;
+  if (!(await ensureLoggedIn())) return false;
   try {
     await ensureIdentitySelected();
     return true;
