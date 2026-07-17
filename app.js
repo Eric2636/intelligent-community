@@ -5,6 +5,7 @@ import { readStoredModuleTabs, STORAGE_KEY } from './utils/moduleEntryGuard';
 import { request as httpRequest } from './api/http';
 import { cacheGet, cacheSet } from './utils/persistCache';
 
+const PHONE_AUTHORIZED_LOGIN_KEY = 'phone_authorized_login_v1';
 const WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login_v2';
 const LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login';
 
@@ -172,6 +173,7 @@ App({
       // 每次启动都用最新登录态覆盖旧 token，避免旧 token 导致后续接口持续 401
       try {
         wx.removeStorageSync('access_token');
+        wx.removeStorageSync(PHONE_AUTHORIZED_LOGIN_KEY);
         wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
         wx.removeStorageSync(LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY);
       } catch (e) {
@@ -200,7 +202,6 @@ App({
       }
 
       wx.setStorageSync('access_token', res.token);
-      if (hasWechatProfile(profile)) wx.setStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY, true);
 
       this.globalData.userInfo = normalizeUserInfo(res.user);
       this.globalData.openid = (res.user && res.user.openid) || '';
@@ -213,6 +214,7 @@ App({
       // 登录失败时清理 token，避免携带无效 token 继续请求导致 token_invalid
       try {
         wx.removeStorageSync('access_token');
+        wx.removeStorageSync(PHONE_AUTHORIZED_LOGIN_KEY);
         wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
         wx.removeStorageSync(LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY);
       } catch (e) {
@@ -231,6 +233,7 @@ App({
 
     try {
       wx.removeStorageSync('access_token');
+      wx.removeStorageSync(PHONE_AUTHORIZED_LOGIN_KEY);
       wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
       wx.removeStorageSync(LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY);
     } catch (e) {
@@ -259,6 +262,7 @@ App({
     }
 
     wx.setStorageSync('access_token', res.token);
+    wx.setStorageSync(PHONE_AUTHORIZED_LOGIN_KEY, true);
     this.globalData.userInfo = normalizeUserInfo(res.user);
     this.globalData.openid = (res.user && res.user.openid) || '';
     this.globalData.offlineMode = false;
