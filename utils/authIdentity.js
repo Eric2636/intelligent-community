@@ -1,5 +1,6 @@
 import { userAPI } from '~/api/cloud';
 
+const PHONE_AUTHORIZED_LOGIN_KEY = 'phone_authorized_login_v1';
 const WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login_v2';
 const LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login';
 
@@ -16,9 +17,9 @@ function getToken() {
   }
 }
 
-function hasAuthorizedLogin() {
+function hasPhoneAuthorizedLogin() {
   try {
-    return wx.getStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY) === true;
+    return wx.getStorageSync(PHONE_AUTHORIZED_LOGIN_KEY) === true;
   } catch (e) {
     return false;
   }
@@ -27,6 +28,7 @@ function hasAuthorizedLogin() {
 function clearStaleLogin() {
   try {
     wx.removeStorageSync('access_token');
+    wx.removeStorageSync(PHONE_AUTHORIZED_LOGIN_KEY);
     wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
     wx.removeStorageSync(LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY);
   } catch (e) {
@@ -39,24 +41,14 @@ async function ensureServerUser() {
   try {
     const res = await userAPI.getUserInfo();
     if (res && res.code === 200 && res.data) {
-      app.globalData.userInfo = normalizeUserInfo(res.data);
-      return true;
+      const userInfo = normalizeUserInfo(res.data);
+      app.globalData.userInfo = userInfo;
+      return Boolean(String(userInfo.phoneNumber || userInfo.phone || '').trim());
     }
   } catch (e) {
     /* stale tokens are handled by falling through */
   }
   return false;
-}
-
-async function ensureWechatProfileBeforeIdentity() {
-  const app = getApp();
-  let profile = null;
-  try {
-    profile = await app.getWechatProfile();
-  } catch (err) {
-    throw new Error('授权登录后可继续选择身份');
-  }
-  await app.syncWechatProfile(profile);
 }
 
 function normalizeUserInfo(user) {
@@ -92,34 +84,15 @@ export function hasLoginToken() {
 }
 
 export async function ensureLoggedIn() {
-  if (hasLoginToken() && hasAuthorizedLogin()) {
+  if (hasLoginToken() && hasPhoneAuthorizedLogin()) {
     if (await ensureServerUser()) return true;
     clearStaleLogin();
   } else if (hasLoginToken()) {
     clearStaleLogin();
   }
 
-  const app = getApp();
-  let profile = null;
-  try {
-    profile = await app.getWechatProfile();
-  } catch (err) {
-    wx.showToast({ title: '授权登录后可继续操作', icon: 'none' });
-    return false;
-  }
-
-  wx.showLoading({ title: '登录中...' });
-  try {
-    await app.login(profile);
-  } catch (err) {
-    wx.showToast({ title: '登录失败，可继续浏览公开内容', icon: 'none' });
-    return false;
-  } finally {
-    wx.hideLoading();
-  }
-
-  if (hasLoginToken() && hasAuthorizedLogin()) return true;
-  wx.showToast({ title: '登录失败，可继续浏览公开内容', icon: 'none' });
+  wx.showToast({ title: '请先完成手机号验证登录', icon: 'none' });
+  wx.switchTab({ url: '/pages/my/index' });
   return false;
 }
 
@@ -146,7 +119,6 @@ export async function ensureIdentitySelected() {
   if (userInfo.contentTagLabel || userInfo.adminLabel) return userInfo.contentTagLabel || userInfo.adminLabel;
   if (userInfo.identityType) return userInfo.identityType;
 
-  await ensureWechatProfileBeforeIdentity();
   const identityType = await selectIdentityType();
   wx.showLoading({ title: '保存中...' });
   try {
