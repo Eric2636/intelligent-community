@@ -5,7 +5,6 @@ import { decryptText } from '~/utils/textCipher';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureIdentitySelected } from '~/utils/authIdentity';
-import { buildProfileDisplay } from '~/utils/profileDisplay';
 
 /**
  * 每个入口带 module：与 `isModuleEnabled` 的 key 一致；null 表示不限模块（始终可显）
@@ -63,15 +62,24 @@ function buildSection(id, title, rawItems) {
   return { id, title, items };
 }
 
+function defaultPhoneUserName(user) {
+  const phone = String(user.phoneNumber || user.phone || '').trim();
+  return phone.length >= 4 ? `用户${phone.slice(-4)}` : '用户';
+}
+
 function normalizePersonalInfo(user) {
   if (!user) return {};
   const avatar = user.avatar || user.avatarUrl || user.image || '';
+  const name = String(user.name || '').trim();
+  const brief = String(user.brief || user.introduction || '').trim();
   return {
     ...user,
     avatar,
     avatarUrl: user.avatarUrl || avatar,
     image: user.image || avatar,
-    ...buildProfileDisplay(user),
+    displayName: name && name !== '微信用户' ? name : defaultPhoneUserName(user),
+    displayBrief: brief || '这个人很懒, 什么都没有写',
+    displayAvatar: avatar,
   };
 }
 

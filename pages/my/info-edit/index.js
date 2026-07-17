@@ -1,7 +1,6 @@
 import { areaList } from './areaData.js';
 import { userAPI } from '~/api/cloud';
 import { uploadLocalFilesToCloud } from '~/utils/cloudMedia';
-import { resolveProfileName } from '~/utils/profileDisplay';
 
 function defaultPersonInfo() {
   return {
@@ -28,6 +27,13 @@ function normalizePhotoUrls(rawPhotos) {
     })
     .map((url) => String(url || '').trim())
     .filter((url) => /^https?:\/\//i.test(url));
+}
+
+function resolveProfileName(user = {}) {
+  const name = String(user.name || '').trim();
+  if (name && name !== '微信用户') return name;
+  const phone = String(user.phoneNumber || user.phone || '').trim();
+  return phone.length >= 4 ? `用户${phone.slice(-4)}` : '用户';
 }
 
 function normalizePersonInfo(raw, fallback = {}) {
