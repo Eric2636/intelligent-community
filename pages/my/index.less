@@ -61,6 +61,17 @@
   &__avatar {
     flex-shrink: 0;
     margin-right: 24rpx;
+    --td-avatar-large-width: 112rpx;
+  }
+
+  &__avatar-img {
+    flex-shrink: 0;
+    width: 112rpx;
+    height: 112rpx;
+    margin-right: 24rpx;
+    border-radius: 50%;
+    background: var(--td-avatar-bg-color, #d9e1ff);
+    display: block;
   }
 
   &__info {
@@ -73,17 +84,19 @@
     font-weight: 600;
     color: @gy1;
     margin-bottom: 6rpx;
+    line-height: 44rpx;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__desc {
     font-size: 24rpx;
     color: @gy3;
-  }
-
-  &__tags {
-    display: flex;
-    gap: 12rpx;
-    margin-top: 8rpx;
+    line-height: 36rpx;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
