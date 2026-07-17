@@ -48,6 +48,17 @@ async function ensureServerUser() {
   return false;
 }
 
+async function ensureWechatProfileBeforeIdentity() {
+  const app = getApp();
+  let profile = null;
+  try {
+    profile = await app.getWechatProfile();
+  } catch (err) {
+    throw new Error('授权登录后可继续选择身份');
+  }
+  await app.syncWechatProfile(profile);
+}
+
 function normalizeUserInfo(user) {
   if (!user) return {};
   const avatar = user.avatar || user.avatarUrl || user.image || '';
@@ -135,6 +146,7 @@ export async function ensureIdentitySelected() {
   if (userInfo.contentTagLabel || userInfo.adminLabel) return userInfo.contentTagLabel || userInfo.adminLabel;
   if (userInfo.identityType) return userInfo.identityType;
 
+  await ensureWechatProfileBeforeIdentity();
   const identityType = await selectIdentityType();
   wx.showLoading({ title: '保存中...' });
   try {
