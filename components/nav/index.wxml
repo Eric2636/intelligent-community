@@ -5,24 +5,3 @@
     </view>
   </t-navbar>
 </view>
-<view wx:if="{{phoneLoginVisible}}" class="phone-login-modal">
-  <view class="phone-login-modal__mask" catchtap="onPhoneLoginCancel"></view>
-  <view class="phone-login-modal__panel">
-    <view class="phone-login-modal__icon">
-      <t-icon name="user" size="48rpx" color="#0052d9" />
-    </view>
-    <view class="phone-login-modal__title">手机号验证登录</view>
-    <view class="phone-login-modal__desc">验证手机号后使用完整社区功能</view>
-    <button
-      class="phone-login-modal__button"
-      loading="{{phoneLoginLoading}}"
-      disabled="{{phoneLoginLoading}}"
-      open-type="getPhoneNumber"
-      bindtap="onPhoneLoginTap"
-      bindgetphonenumber="onGetPhoneNumber"
-    >
-      手机号验证登录
-    </button>
-    <view class="phone-login-modal__cancel" catchtap="onPhoneLoginCancel">暂不登录</view>
-  </view>
-</view>

@@ -25,8 +25,8 @@
     >
       <t-avatar icon="user" size="large" class="my-head__avatar" />
       <view class="my-head__info">
-        <view class="my-head__name">手机号验证登录</view>
-        <view class="my-head__desc">验证手机号后使用完整社区功能</view>
+        <view class="my-head__name">授权登录</view>
+        <view class="my-head__desc">登录后使用完整社区功能</view>
       </view>
       <t-icon name="chevron-right" size="40rpx" color="#999" />
     </button>

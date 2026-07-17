@@ -227,20 +227,6 @@ App({
     }
   },
 
-  requestPhoneLogin() {
-    return new Promise((resolve, reject) => {
-      const request = {
-        handled: false,
-        resolve,
-        reject,
-      };
-      this.eventBus.emit('phoneLoginRequest', request);
-      if (!request.handled) {
-        reject(new Error('当前页面暂不支持手机号验证登录'));
-      }
-    });
-  },
-
   async phoneLogin(phoneCode, profile = {}) {
     const code = String(phoneCode || '').trim();
     if (!code) throw new Error('未获取到手机号授权凭证');
