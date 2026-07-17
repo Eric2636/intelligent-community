@@ -49,9 +49,20 @@ export async function ensureLoggedIn() {
   if (hasLoginToken()) return true;
 
   const app = getApp();
+  let profile = null;
+  try {
+    profile = await app.getWechatProfile();
+  } catch (err) {
+    wx.showToast({ title: '授权登录后可继续操作', icon: 'none' });
+    return false;
+  }
+
   wx.showLoading({ title: '登录中...' });
   try {
-    await app.login();
+    await app.login(profile);
+  } catch (err) {
+    wx.showToast({ title: '登录失败，可继续浏览公开内容', icon: 'none' });
+    return false;
   } finally {
     wx.hideLoading();
   }

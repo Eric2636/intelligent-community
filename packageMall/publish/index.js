@@ -1,5 +1,6 @@
 import { mallAPI } from '~/api/cloud';
 import { chooseAndUploadMedia } from '~/utils/cloudMedia';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 Page({
   data: {
@@ -69,6 +70,7 @@ Page({
   },
 
   async onAddMainImages() {
+    if (!(await ensureMutationReady())) return;
     const { mainImages, subImages } = this.data;
     if (mainImages.length >= 1) {
       wx.showToast({ title: '主图只能 1 张', icon: 'none' });
@@ -91,6 +93,7 @@ Page({
   },
 
   async onAddSubImages() {
+    if (!(await ensureMutationReady())) return;
     const { mainImages, subImages } = this.data;
     const remain = Math.max(0, 6 - (mainImages.length + subImages.length));
     if (remain <= 0) {
@@ -109,6 +112,7 @@ Page({
   },
 
   async onAddVideos() {
+    if (!(await ensureMutationReady())) return;
     const { videos } = this.data;
     const remain = Math.max(0, 2 - videos.length);
     if (remain <= 0) {
@@ -145,6 +149,7 @@ Page({
   },
 
   async submit() {
+    if (!(await ensureMutationReady())) return;
     const { categoryId, title, price, desc, contact, location, mainImages, subImages, videos } = this.data;
     const t = (title || '').trim();
     if (!t) {
