@@ -5,7 +5,8 @@
     "pages/errand/index",
     "pages/forum/index",
     "pages/mall/index",
-    "pages/my/index"
+    "pages/my/index",
+    "pages/login/login"
   ],
   "subpackages": [
     { "root": "pages/my/info-edit", "name": "edit", "pages": ["index"] },
