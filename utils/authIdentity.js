@@ -36,6 +36,17 @@ function clearStaleLogin() {
   }
 }
 
+function normalizeUserInfo(user) {
+  if (!user) return {};
+  const avatar = user.avatar || user.avatarUrl || user.image || '';
+  return {
+    ...user,
+    avatar,
+    avatarUrl: user.avatarUrl || avatar,
+    image: user.image || avatar,
+  };
+}
+
 async function ensureServerUser() {
   const app = getApp();
   try {
@@ -49,17 +60,6 @@ async function ensureServerUser() {
     /* stale tokens are handled by falling through */
   }
   return false;
-}
-
-function normalizeUserInfo(user) {
-  if (!user) return {};
-  const avatar = user.avatar || user.avatarUrl || user.image || '';
-  return {
-    ...user,
-    avatar,
-    avatarUrl: user.avatarUrl || avatar,
-    image: user.image || avatar,
-  };
 }
 
 function selectIdentityType() {
@@ -92,7 +92,6 @@ export async function ensureLoggedIn() {
   }
 
   wx.showToast({ title: '请先完成手机号验证登录', icon: 'none' });
-  wx.switchTab({ url: '/pages/my/index' });
   return false;
 }
 
