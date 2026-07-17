@@ -91,8 +91,16 @@ export async function ensureLoggedIn() {
     clearStaleLogin();
   }
 
-  wx.showToast({ title: '请先完成手机号验证登录', icon: 'none' });
-  return false;
+  const app = getApp();
+  try {
+    await app.requestPhoneLogin();
+  } catch (err) {
+    wx.showToast({ title: (err && err.message) || '请先完成手机号验证登录', icon: 'none' });
+    return false;
+  }
+
+  if (!hasLoginToken() || !hasPhoneAuthorizedLogin()) return false;
+  return ensureServerUser();
 }
 
 export function requireLogin() {

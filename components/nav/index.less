@@ -31,3 +31,83 @@
     }
   }
 }
+
+.phone-login-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+}
+
+.phone-login-modal__mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.phone-login-modal__panel {
+  position: absolute;
+  left: 32rpx;
+  right: 32rpx;
+  bottom: calc(48rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  padding: 48rpx 40rpx 36rpx;
+  border-radius: 24rpx;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.16);
+}
+
+.phone-login-modal__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96rpx;
+  height: 96rpx;
+  margin: 0 auto 24rpx;
+  border-radius: 50%;
+  background: #eef4ff;
+}
+
+.phone-login-modal__title {
+  color: #1f2937;
+  font-size: 34rpx;
+  font-weight: 600;
+  line-height: 48rpx;
+}
+
+.phone-login-modal__desc {
+  margin-top: 12rpx;
+  color: #6b7280;
+  font-size: 26rpx;
+  line-height: 38rpx;
+}
+
+.phone-login-modal__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 88rpx;
+  margin-top: 36rpx;
+  border: 0;
+  border-radius: 8rpx;
+  background: #0052d9;
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 88rpx;
+}
+
+.phone-login-modal__button::after {
+  border: 0;
+}
+
+.phone-login-modal__button[disabled] {
+  opacity: 0.72;
+}
+
+.phone-login-modal__cancel {
+  margin-top: 28rpx;
+  color: #6b7280;
+  font-size: 28rpx;
+  line-height: 40rpx;
+}

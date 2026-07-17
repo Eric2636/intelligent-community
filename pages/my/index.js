@@ -79,6 +79,7 @@ Page({
     isLoggingIn: false,
     personalInfo: {},
     menuSections: [],
+    phoneLoginProfile: null,
   },
 
   onShow() {
@@ -183,6 +184,17 @@ Page({
     }
   },
 
+  async onPhoneLoginTap() {
+    const app = getApp();
+    if (!app.getWechatProfile) return;
+    try {
+      const profile = await app.getWechatProfile();
+      this.setData({ phoneLoginProfile: profile || null });
+    } catch (e) {
+      this.setData({ phoneLoginProfile: null });
+    }
+  },
+
   async onGetPhoneNumber(e) {
     if (this.data.isLoggingIn) return;
     const detail = e.detail || {};
@@ -199,7 +211,7 @@ Page({
     try {
       const app = getApp();
       wx.showLoading({ title: '验证中...' });
-      await app.phoneLogin(detail.code);
+      await app.phoneLogin(detail.code, this.data.phoneLoginProfile || {});
       wx.hideLoading();
 
       if (app.globalData.offlineMode) {
@@ -218,7 +230,7 @@ Page({
       wx.showToast({ title: (err && err.message) || '手机号验证失败', icon: 'none' });
       console.error('手机号验证登录失败', err);
     } finally {
-      this.setData({ isLoggingIn: false });
+      this.setData({ isLoggingIn: false, phoneLoginProfile: null });
     }
   },
 

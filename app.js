@@ -227,7 +227,21 @@ App({
     }
   },
 
-  async phoneLogin(phoneCode) {
+  requestPhoneLogin() {
+    return new Promise((resolve, reject) => {
+      const request = {
+        handled: false,
+        resolve,
+        reject,
+      };
+      this.eventBus.emit('phoneLoginRequest', request);
+      if (!request.handled) {
+        reject(new Error('当前页面暂不支持手机号验证登录'));
+      }
+    });
+  },
+
+  async phoneLogin(phoneCode, profile = {}) {
     const code = String(phoneCode || '').trim();
     if (!code) throw new Error('未获取到手机号授权凭证');
 
@@ -267,6 +281,7 @@ App({
     this.globalData.openid = (res.user && res.user.openid) || '';
     this.globalData.offlineMode = false;
     if (this.globalData.userInfo) cacheSet('offline_cache_user_me', this.globalData.userInfo, 7 * 24 * 3600);
+    if (hasWechatProfile(profile)) await this.syncWechatProfile(profile);
     await this.syncModuleEntryTabsFromApi();
     this.eventBus.emit('userInfoChange');
     return res;
