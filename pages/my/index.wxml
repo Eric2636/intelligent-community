@@ -20,6 +20,7 @@
       loading="{{isLoggingIn}}"
       disabled="{{isLoggingIn}}"
       open-type="getPhoneNumber"
+      bindtap="onPhoneLoginTap"
       bindgetphonenumber="onGetPhoneNumber"
     >
       <t-avatar icon="user" size="large" class="my-head__avatar" />
