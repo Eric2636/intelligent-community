@@ -1,5 +1,9 @@
 import { userAPI } from '~/api/cloud';
 
+const PHONE_AUTHORIZED_LOGIN_KEY = 'phone_authorized_login_v1';
+const WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login_v2';
+const LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login';
+
 const IDENTITY_OPTIONS = [
   { type: 'OWNER', label: '业主' },
   { type: 'OUTSIDER', label: '小区外人员' },
@@ -13,6 +17,25 @@ function getToken() {
   }
 }
 
+function hasPhoneAuthorizedLogin() {
+  try {
+    return wx.getStorageSync(PHONE_AUTHORIZED_LOGIN_KEY) === true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function clearStaleLogin() {
+  try {
+    wx.removeStorageSync('access_token');
+    wx.removeStorageSync(PHONE_AUTHORIZED_LOGIN_KEY);
+    wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
+    wx.removeStorageSync(LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY);
+  } catch (e) {
+    /* ignore */
+  }
+}
+
 function normalizeUserInfo(user) {
   if (!user) return {};
   const avatar = user.avatar || user.avatarUrl || user.image || '';
@@ -22,6 +45,21 @@ function normalizeUserInfo(user) {
     avatarUrl: user.avatarUrl || avatar,
     image: user.image || avatar,
   };
+}
+
+async function ensureServerUser() {
+  const app = getApp();
+  try {
+    const res = await userAPI.getUserInfo();
+    if (res && res.code === 200 && res.data) {
+      const userInfo = normalizeUserInfo(res.data);
+      app.globalData.userInfo = userInfo;
+      return Boolean(String(userInfo.phoneNumber || userInfo.phone || '').trim());
+    }
+  } catch (e) {
+    /* stale tokens are handled by falling through */
+  }
+  return false;
 }
 
 function selectIdentityType() {
@@ -45,13 +83,21 @@ export function hasLoginToken() {
   return Boolean(getToken());
 }
 
-export function requireLogin() {
-  if (hasLoginToken()) return true;
-  wx.showToast({ title: '请先登录', icon: 'none' });
-  setTimeout(() => {
-    wx.navigateTo({ url: '/pages/login/login?authRequired=1' });
-  }, 300);
+export async function ensureLoggedIn() {
+  if (hasLoginToken() && hasPhoneAuthorizedLogin()) {
+    if (await ensureServerUser()) return true;
+    clearStaleLogin();
+  } else if (hasLoginToken()) {
+    clearStaleLogin();
+  }
+
+  wx.showToast({ title: '请先完成授权登录', icon: 'none' });
+  wx.switchTab({ url: '/pages/my/index' });
   return false;
+}
+
+export function requireLogin() {
+  return ensureLoggedIn();
 }
 
 export async function ensureIdentitySelected() {
@@ -87,7 +133,7 @@ export async function ensureIdentitySelected() {
 }
 
 export async function ensureMutationReady() {
-  if (!requireLogin()) return false;
+  if (!(await ensureLoggedIn())) return false;
   try {
     await ensureIdentitySelected();
     return true;

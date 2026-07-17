@@ -1,6 +1,7 @@
 import { areaList } from './areaData.js';
 import { userAPI } from '~/api/cloud';
 import { uploadLocalFilesToCloud } from '~/utils/cloudMedia';
+import { resolveProfileName } from '~/utils/profileDisplay';
 
 function defaultPersonInfo() {
   return {
@@ -27,6 +28,21 @@ function normalizePhotoUrls(rawPhotos) {
     })
     .map((url) => String(url || '').trim())
     .filter((url) => /^https?:\/\//i.test(url));
+}
+
+function normalizePersonInfo(raw, fallback = {}) {
+  const source = {
+    ...fallback,
+    ...(raw || {}),
+  };
+  return {
+    ...defaultPersonInfo(),
+    ...source,
+    name: resolveProfileName(source),
+    avatar: String(source.avatar || source.avatarUrl || source.image || '').trim(),
+    introduction: String(source.brief || source.introduction || '').trim(),
+    photos: normalizePhotoUrls(source.photos),
+  };
 }
 
 function buildUserInfoPayload(personInfo) {
@@ -87,13 +103,7 @@ Page({
         const data = res && res.code === 200 && res.data ? res.data : app.globalData.userInfo;
         this.setData(
           {
-            personInfo: {
-              ...defaultPersonInfo(),
-              ...(data || {}),
-              avatar: (data && (data.avatar || data.avatarUrl || data.image)) || '',
-              introduction: (data && (data.brief || data.introduction)) || '',
-              photos: normalizePhotoUrls(data && data.photos),
-            },
+            personInfo: normalizePersonInfo(data, app.globalData.userInfo),
           },
           () => {
             const { personInfo } = this.data;

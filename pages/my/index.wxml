@@ -3,14 +3,11 @@
   <nav title-text="我的" />
   <view class="my-head">
     <view wx:if="{{isLoad}}" class="my-head__user" bindtap="onNavigateTo">
-      <t-avatar wx:if="{{personalInfo.avatar || personalInfo.avatarUrl || personalInfo.image}}" image="{{personalInfo.avatar || personalInfo.avatarUrl || personalInfo.image}}" size="large" class="my-head__avatar" />
+      <image wx:if="{{personalInfo.displayAvatar}}" class="my-head__avatar-img" src="{{personalInfo.displayAvatar}}" mode="aspectFill" binderror="onAvatarLoadError" />
       <t-avatar wx:else icon="user" size="large" class="my-head__avatar" />
       <view class="my-head__info">
-        <view class="my-head__name">{{personalInfo.name || '业主'}}</view>
-        <view class="my-head__tags" wx:if="{{personalInfo.star || personalInfo.city}}">
-          <t-tag wx:if="{{personalInfo.star}}" variant="light" size="small">{{personalInfo.star}}</t-tag>
-          <t-tag wx:if="{{personalInfo.city}}" variant="light" size="small">{{personalInfo.city}}</t-tag>
-        </view>
+        <view class="my-head__name">{{personalInfo.displayName}}</view>
+        <view class="my-head__desc">{{personalInfo.displayBrief}}</view>
       </view>
       <t-icon name="chevron-right" size="40rpx" color="#999" />
     </view>
@@ -24,8 +21,8 @@
     >
       <t-avatar icon="user" size="large" class="my-head__avatar" />
       <view class="my-head__info">
-        <view class="my-head__name">手机号验证登录</view>
-        <view class="my-head__desc">验证手机号后使用完整社区功能</view>
+        <view class="my-head__name">授权登录</view>
+        <view class="my-head__desc">登录后使用完整社区功能</view>
       </view>
       <t-icon name="chevron-right" size="40rpx" color="#999" />
     </button>
@@ -53,7 +50,7 @@
     </view>
   </view>
 
-  <view class="my-logout">
+  <view wx:if="{{isLoad}}" class="my-logout">
     <button class="my-logout__button" bindtap="onLogout">退出登录</button>
   </view>
 </view>

@@ -5,6 +5,7 @@ import { decryptText } from '~/utils/textCipher';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureIdentitySelected } from '~/utils/authIdentity';
+import { buildProfileDisplay } from '~/utils/profileDisplay';
 
 /**
  * 每个入口带 module：与 `isModuleEnabled` 的 key 一致；null 表示不限模块（始终可显）
@@ -70,6 +71,7 @@ function normalizePersonalInfo(user) {
     avatar,
     avatarUrl: user.avatarUrl || avatar,
     image: user.image || avatar,
+    ...buildProfileDisplay(user),
   };
 }
 
@@ -226,6 +228,12 @@ Page({
     wx.navigateTo({ url: '/pages/my/info-edit/index' });
   },
 
+  onAvatarLoadError() {
+    this.setData({
+      'personalInfo.displayAvatar': '',
+    });
+  },
+
   onMenuTap(e) {
     const { url, name } = e.currentTarget.dataset;
     const routes = {
@@ -262,6 +270,9 @@ Page({
         const app = getApp();
         try {
           wx.removeStorageSync('access_token');
+          wx.removeStorageSync('phone_authorized_login_v1');
+          wx.removeStorageSync('wechat_authorized_login_v2');
+          wx.removeStorageSync('wechat_authorized_login');
         } catch (e) {
           /* ignore */
         }
