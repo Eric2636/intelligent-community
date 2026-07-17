@@ -5,7 +5,8 @@ import { readStoredModuleTabs, STORAGE_KEY } from './utils/moduleEntryGuard';
 import { request as httpRequest } from './api/http';
 import { cacheGet, cacheSet } from './utils/persistCache';
 
-const WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login';
+const WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login_v2';
+const LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login';
 
 function normalizeUserInfo(user) {
   if (!user) return null;
@@ -172,6 +173,7 @@ App({
       try {
         wx.removeStorageSync('access_token');
         wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
+        wx.removeStorageSync(LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY);
       } catch (e) {
         /* ignore */
       }
@@ -212,6 +214,7 @@ App({
       try {
         wx.removeStorageSync('access_token');
         wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
+        wx.removeStorageSync(LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY);
       } catch (e) {
         /* ignore */
       }
@@ -229,6 +232,7 @@ App({
     try {
       wx.removeStorageSync('access_token');
       wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
+      wx.removeStorageSync(LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY);
     } catch (e) {
       /* ignore */
     }

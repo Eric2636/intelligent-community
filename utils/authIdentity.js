@@ -1,6 +1,7 @@
 import { userAPI } from '~/api/cloud';
 
-const WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login';
+const WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login_v2';
+const LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login';
 
 const IDENTITY_OPTIONS = [
   { type: 'OWNER', label: '业主' },
@@ -27,6 +28,7 @@ function clearStaleLogin() {
   try {
     wx.removeStorageSync('access_token');
     wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
+    wx.removeStorageSync(LEGACY_WECHAT_AUTHORIZED_LOGIN_KEY);
   } catch (e) {
     /* ignore */
   }
