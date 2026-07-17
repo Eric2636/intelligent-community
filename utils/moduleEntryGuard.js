@@ -6,6 +6,13 @@ const STORAGE_KEY = 'module_entry_tabs';
 const TAB_ORDER = ['task', 'errand', 'forum', 'mall', 'my'];
 /** 可配置模块（含非底部 Tab 模块） */
 const MODULE_ORDER = ['task', 'errand', 'forum', 'mall', 'my'];
+const DEFAULT_TAB_LIST = [
+  { key: 'task', label: '业主互助', icon: 'root-list', enabled: true },
+  { key: 'errand', label: '小区跑腿', icon: 'service', enabled: true },
+  { key: 'forum', label: '小区留言', icon: 'chat', enabled: true },
+  { key: 'mall', label: '小区市场', icon: 'shop', enabled: true },
+  { key: 'my', label: '我的', icon: 'user', enabled: true, always: true },
+];
 
 function normalizeTabs(rawTabs) {
   const base = Array.isArray(rawTabs) ? rawTabs : [];
@@ -36,8 +43,8 @@ export function getModuleEntryTabs() {
   const app = getApp();
   const tabs = app.globalData.moduleEntryTabs;
   if (Array.isArray(tabs)) return normalizeTabs(tabs);
-  // 未加载到配置（也没有缓存）时：不展示任何入口
-  return [];
+  // 未加载到配置（也没有缓存）时仍保留应用内置入口，避免底栏空白。
+  return normalizeTabs(DEFAULT_TAB_LIST);
 }
 
 export function buildVisibleTabBarList() {

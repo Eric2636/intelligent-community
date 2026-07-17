@@ -30,11 +30,13 @@ App({
     const storedTabs = readStoredModuleTabs();
     this.globalData.moduleEntryTabs = storedTabs && Array.isArray(storedTabs.tabs) ? storedTabs.tabs : null;
 
-    // 真机预览排查时打开微信内置 vConsole，正式发布前在 config.js 关闭。
-    try {
-      wx.setEnableDebug({ enableDebug: Boolean(config.enableVConsole) });
-    } catch (e) {
-      /* ignore */
+    // 仅本地/测试环境主动开启微信内置调试面板，正式版不触发该 API。
+    if (config.enableVConsole) {
+      try {
+        wx.setEnableDebug({ enableDebug: true });
+      } catch (e) {
+        /* ignore */
+      }
     }
 
     const apiBase = String(
