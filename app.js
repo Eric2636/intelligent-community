@@ -5,6 +5,8 @@ import { readStoredModuleTabs, STORAGE_KEY } from './utils/moduleEntryGuard';
 import { request as httpRequest } from './api/http';
 import { cacheGet, cacheSet } from './utils/persistCache';
 
+const WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login';
+
 function normalizeUserInfo(user) {
   if (!user) return null;
   const avatar = user.avatar || user.avatarUrl || user.image || '';
@@ -169,6 +171,7 @@ App({
       // 每次启动都用最新登录态覆盖旧 token，避免旧 token 导致后续接口持续 401
       try {
         wx.removeStorageSync('access_token');
+        wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
       } catch (e) {
         /* ignore */
       }
@@ -195,6 +198,7 @@ App({
       }
 
       wx.setStorageSync('access_token', res.token);
+      if (hasWechatProfile(profile)) wx.setStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY, true);
 
       this.globalData.userInfo = normalizeUserInfo(res.user);
       this.globalData.openid = (res.user && res.user.openid) || '';
@@ -207,6 +211,7 @@ App({
       // 登录失败时清理 token，避免携带无效 token 继续请求导致 token_invalid
       try {
         wx.removeStorageSync('access_token');
+        wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
       } catch (e) {
         /* ignore */
       }
@@ -223,6 +228,7 @@ App({
 
     try {
       wx.removeStorageSync('access_token');
+      wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
     } catch (e) {
       /* ignore */
     }
@@ -231,7 +237,8 @@ App({
     if (!jsCode) throw new Error('wx.login 未返回 code');
     try {
       const account = wx.getAccountInfoSync ? wx.getAccountInfoSync() : {};
-      console.info('[phoneLogin] miniProgram appId:', account?.miniProgram?.appId || '');
+      const miniProgram = account && account.miniProgram ? account.miniProgram : {};
+      console.info('[phoneLogin] miniProgram appId:', miniProgram.appId || '');
     } catch (e) {
       /* ignore */
     }

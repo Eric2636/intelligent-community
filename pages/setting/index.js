@@ -151,6 +151,7 @@ Page({
         if (!res.confirm) return;
         const app = getApp();
         wx.removeStorageSync('access_token');
+        wx.removeStorageSync('wechat_authorized_login');
         app.globalData.openid = '';
         app.globalData.userInfo = null;
         wx.showToast({ title: '已退出', icon: 'none' });

@@ -262,6 +262,7 @@ Page({
         const app = getApp();
         try {
           wx.removeStorageSync('access_token');
+          wx.removeStorageSync('wechat_authorized_login');
         } catch (e) {
           /* ignore */
         }

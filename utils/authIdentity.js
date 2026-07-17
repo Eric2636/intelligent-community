@@ -1,5 +1,7 @@
 import { userAPI } from '~/api/cloud';
 
+const WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login';
+
 const IDENTITY_OPTIONS = [
   { type: 'OWNER', label: '业主' },
   { type: 'OUTSIDER', label: '小区外人员' },
@@ -10,6 +12,23 @@ function getToken() {
     return wx.getStorageSync('access_token') || '';
   } catch (e) {
     return '';
+  }
+}
+
+function hasAuthorizedLogin() {
+  try {
+    return wx.getStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY) === true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function clearStaleLogin() {
+  try {
+    wx.removeStorageSync('access_token');
+    wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
+  } catch (e) {
+    /* ignore */
   }
 }
 
@@ -46,7 +65,8 @@ export function hasLoginToken() {
 }
 
 export async function ensureLoggedIn() {
-  if (hasLoginToken()) return true;
+  if (hasLoginToken() && hasAuthorizedLogin()) return true;
+  if (hasLoginToken()) clearStaleLogin();
 
   const app = getApp();
   let profile = null;
@@ -67,7 +87,7 @@ export async function ensureLoggedIn() {
     wx.hideLoading();
   }
 
-  if (hasLoginToken()) return true;
+  if (hasLoginToken() && hasAuthorizedLogin()) return true;
   wx.showToast({ title: '登录失败，可继续浏览公开内容', icon: 'none' });
   return false;
 }
