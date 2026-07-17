@@ -32,6 +32,20 @@ function clearStaleLogin() {
   }
 }
 
+async function ensureServerUser() {
+  const app = getApp();
+  try {
+    const res = await userAPI.getUserInfo();
+    if (res && res.code === 200 && res.data) {
+      app.globalData.userInfo = normalizeUserInfo(res.data);
+      return true;
+    }
+  } catch (e) {
+    /* stale tokens are handled by falling through */
+  }
+  return false;
+}
+
 function normalizeUserInfo(user) {
   if (!user) return {};
   const avatar = user.avatar || user.avatarUrl || user.image || '';
@@ -65,8 +79,12 @@ export function hasLoginToken() {
 }
 
 export async function ensureLoggedIn() {
-  if (hasLoginToken() && hasAuthorizedLogin()) return true;
-  if (hasLoginToken()) clearStaleLogin();
+  if (hasLoginToken() && hasAuthorizedLogin()) {
+    if (await ensureServerUser()) return true;
+    clearStaleLogin();
+  } else if (hasLoginToken()) {
+    clearStaleLogin();
+  }
 
   const app = getApp();
   let profile = null;
