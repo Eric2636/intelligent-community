@@ -11,9 +11,7 @@
       clearable
       bindchange="onSearchInput"
       bindclear="onSearchClear"
-      bindconfirm="onSearchConfirm"
     />
-    <view class="mall-search__btn" bindtap="onSearchConfirm">搜索</view>
   </view>
 </view>
 <view class="mall-order">
@@ -92,3 +90,4 @@
 <view class="mall-fab" bindtap="goPublish">
   <t-icon name="add" size="48rpx" color="#fff" />
 </view>
+<auth-login-dialog id="auth-login-dialog" />

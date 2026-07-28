@@ -1,6 +1,7 @@
 import { areaList } from './areaData.js';
 import { userAPI } from '~/api/cloud';
 import { uploadLocalFilesToCloud } from '~/utils/cloudMedia';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 function defaultPersonInfo() {
   return {
@@ -217,6 +218,7 @@ Page({
   },
 
   async uploadAvatar(tempFilePath) {
+    if (!(await ensureMutationReady(this))) return;
     const path = String(tempFilePath || '').trim();
     if (!path) return;
     try {
@@ -284,53 +286,50 @@ Page({
   },
 
   async onSaveInfo() {
+    if (!(await ensureMutationReady(this))) return;
     const { personInfo } = this.data;
     const app = getApp();
-    const token = wx.getStorageSync('access_token');
     const payload = buildUserInfoPayload(personInfo);
 
-    if (token) {
-      try {
-        wx.showLoading({ title: '保存中...' });
-        const res = await userAPI.updateUserInfo(payload);
-        wx.hideLoading();
+    try {
+      wx.showLoading({ title: '保存中...' });
+      const res = await userAPI.updateUserInfo(payload);
+      wx.hideLoading();
 
-        if (res.code === 200) {
-          const saved = res.data || payload;
-          app.globalData.userInfo = {
-            ...(app.globalData.userInfo || {}),
-            ...saved,
-            nickName: (saved && saved.name) || payload.name || '',
-            avatar: (saved && (saved.avatar || saved.avatarUrl || saved.image)) || payload.avatar || '',
-            avatarUrl: (saved && (saved.avatarUrl || saved.avatar || saved.image)) || payload.avatar || '',
-          };
-          app.eventBus.emit('userInfoChange');
-          wx.showToast({
-            title: '保存成功',
-            icon: 'success',
-          });
-          setTimeout(() => {
-            wx.navigateBack();
-          }, 1000);
-        } else {
-          wx.showToast({
-            title: res.message || '保存失败',
-            icon: 'none',
-          });
-        }
-      } catch (err) {
-        wx.hideLoading();
+      if (res.code === 200) {
+        const saved = res.data || payload;
+        app.globalData.userInfo = {
+          ...(app.globalData.userInfo || {}),
+          ...saved,
+          nickName: (saved && saved.name) || payload.name || '',
+          avatar: (saved && (saved.avatar || saved.avatarUrl || saved.image)) || payload.avatar || '',
+          avatarUrl: (saved && (saved.avatarUrl || saved.avatar || saved.image)) || payload.avatar || '',
+        };
+        app.eventBus.emit('userInfoChange');
         wx.showToast({
-          title: '保存失败',
+          title: '保存成功',
+          icon: 'success',
+        });
+        setTimeout(() => {
+          wx.navigateBack();
+        }, 1000);
+      } else {
+        wx.showToast({
+          title: res.message || '保存失败',
           icon: 'none',
         });
-        console.error('保存用户信息失败', err);
       }
-    } else {
+    } catch (err) {
+      wx.hideLoading();
       wx.showToast({
-        title: '请先登录',
+        title: '保存失败',
         icon: 'none',
       });
+      console.error('保存用户信息失败', err);
     }
+  },
+
+  onUnload() {
+    this._authPageAlive = false;
   },
 });

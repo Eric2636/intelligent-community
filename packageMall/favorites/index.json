@@ -5,6 +5,7 @@
     "nav": "/components/nav",
     "t-loading": "tdesign-miniprogram/loading/loading",
     "t-icon": "tdesign-miniprogram/icon/icon",
-    "t-empty": "tdesign-miniprogram/empty/empty"
+    "t-empty": "tdesign-miniprogram/empty/empty",
+    "t-button": "tdesign-miniprogram/button/button"
   }
 }

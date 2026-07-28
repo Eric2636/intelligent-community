@@ -2,11 +2,14 @@ import { forumAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { normalizeForumListPost } from '~/utils/forumPostList';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 Page({
   data: {
     list: [],
     loading: true,
+    authReady: false,
+    showManualLoad: false,
   },
 
   onLoad() {
@@ -28,8 +31,21 @@ Page({
     this.loadList().then(() => wx.stopPullDownRefresh());
   },
 
+  onAuthorized() {
+    this.setData({ authReady: true, showManualLoad: true });
+  },
+
+  onManualLoad() {
+    this.setData({ showManualLoad: false });
+    return this.loadList();
+  },
+
   async loadList() {
     if (redirectIfEntryHidden('forum')) return;
+    if (!(await ensureMutationReady(this))) {
+      this.setData({ loading: false });
+      return;
+    }
     this.setData({ loading: true });
     const res = await forumAPI.getMyFavoritePosts();
     if (res.code === 200) {
@@ -52,5 +68,9 @@ Page({
   goPost(e) {
     const { id } = e.currentTarget.dataset;
     wx.navigateTo({ url: `/packageForum/post/index?postId=${id}` });
+  },
+
+  onUnload() {
+    this._authPageAlive = false;
   },
 });

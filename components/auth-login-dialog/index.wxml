@@ -1,0 +1,22 @@
+<t-popup visible="{{visible}}" placement="center" close-on-overlay-click="{{false}}">
+  <view
+    class="auth-dialog"
+    aria-role="dialog"
+    aria-label="授权登录对话框"
+    aria-labelledby="auth-login-dialog-title"
+  >
+    <view id="auth-login-dialog-title" class="auth-dialog__title">授权登录</view>
+    <view class="auth-dialog__desc">授权手机号后即可使用完整社区功能</view>
+    <button
+      class="auth-dialog__authorize"
+      open-type="getPhoneNumber"
+      bindgetphonenumber="onGetPhoneNumber"
+      loading="{{submitting}}"
+      disabled="{{submitting}}"
+      aria-label="授权手机号并登录"
+    >
+      授权登录
+    </button>
+    <button class="auth-dialog__cancel" bindtap="onCancel" disabled="{{submitting}}" aria-label="取消授权登录">取消</button>
+  </view>
+</t-popup>

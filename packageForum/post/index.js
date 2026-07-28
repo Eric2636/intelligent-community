@@ -122,7 +122,7 @@ Page({
   },
 
   async onLike() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { postId, post } = this.data;
     if (!postId) return;
     const {isLiked} = post;
@@ -144,7 +144,7 @@ Page({
   },
 
   async onDeletePost() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { postId, post, deletingPost } = this.data;
     if (!post || !post.isAuthor || deletingPost) return;
     wx.showModal({
@@ -173,7 +173,7 @@ Page({
   },
 
   async onDeleteReply(e) {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const replyId = e.currentTarget.dataset.rid;
     const { postId, post } = this.data;
     if (!replyId || !post) return;
@@ -200,7 +200,7 @@ Page({
   },
 
   async onFavorite() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { postId, post } = this.data;
     if (!postId) return;
     const {isFavorited} = post;
@@ -365,7 +365,7 @@ Page({
   },
 
   async onReplyLike(e) {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const {rid} = e.currentTarget.dataset;
     const { postId, post } = this.data;
     if (!rid || !post) return;
@@ -387,7 +387,7 @@ Page({
   },
 
   async onReplyFavorite(e) {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const {rid} = e.currentTarget.dataset;
     const { postId, post } = this.data;
     if (!rid || !post) return;
@@ -410,7 +410,7 @@ Page({
   },
 
   async setReplyReaction(rid, emoji) {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { post } = this.data;
     if (!rid || !post) return;
     try {
@@ -472,7 +472,7 @@ Page({
   },
 
   async onReplyAddMedia() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { replyImages, replyVideos } = this.data;
     try {
       const { images, videos } = await chooseAndUploadMedia({
@@ -531,7 +531,7 @@ Page({
 
   async submitReply() {
     if (this.data.submitting) return;
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { postId, replyContent, replyImages, replyVideos, replyTarget } = this.data;
     const content = (replyContent || '').trim();
     if (!content && replyImages.length === 0 && replyVideos.length === 0) {
@@ -577,5 +577,9 @@ Page({
         icon: 'none',
       });
     }
+  },
+
+  onUnload() {
+    this._authPageAlive = false;
   },
 });

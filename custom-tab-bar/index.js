@@ -1,19 +1,30 @@
 import { buildVisibleTabBarList } from '~/utils/moduleEntryGuard';
+import { NOTIFICATION_UNREAD_EVENT } from '~/utils/notificationUnread';
 
 Component({
   data: {
     value: '',
     visibleList: [],
+    unreadCount: 0,
   },
   lifetimes: {
     attached() {
       const app = getApp();
       this._onVisibilityChange = () => this.refreshTabBar();
+      this._onNotificationUnreadCountChange = (count) => {
+        this.setData({
+          unreadCount: Number.isSafeInteger(count) && count > 0 ? count : 0,
+        });
+        this.refreshTabBar();
+      };
       app.eventBus.on('moduleEntryVisibilityChange', this._onVisibilityChange);
+      app.eventBus.on(NOTIFICATION_UNREAD_EVENT, this._onNotificationUnreadCountChange);
+      this.setData({ unreadCount: app.globalData.notificationUnreadCount || 0 });
       this.refreshTabBar();
     },
     detached() {
       getApp().eventBus.off('moduleEntryVisibilityChange', this._onVisibilityChange);
+      getApp().eventBus.off(NOTIFICATION_UNREAD_EVENT, this._onNotificationUnreadCountChange);
     },
   },
   pageLifetimes: {
@@ -28,13 +39,20 @@ Component({
     },
     refreshTabBar() {
       const app = getApp();
-      const visibleList = buildVisibleTabBarList();
+      const visibleList = buildVisibleTabBarList().map((item) => ({
+        ...item,
+        badgeProps:
+          item.value === 'my' && this.data.unreadCount > 0
+            ? { count: this.data.unreadCount, maxCount: 99, visible: true }
+            : { count: 0, visible: false },
+      }));
       const pages = getCurrentPages();
-      const curPage = pages[pages.length - 1];
+      const [curPage] = pages.slice(-1);
       let value = '';
       if (curPage && curPage.route) {
         const nameRe = /pages\/(\w+)\/index/.exec(curPage.route);
-        if (nameRe && nameRe[1]) value = nameRe[1];
+        const [, routeName] = nameRe || [];
+        if (routeName) value = routeName;
       }
       let allowed = visibleList.some((item) => item.value === value);
       if (!allowed && app.globalData.tabBarSelectedKey) {

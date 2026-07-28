@@ -48,12 +48,14 @@ export function request({ method = 'GET', path, query, data, auth = true, timeou
     if (token) header.Authorization = `Bearer ${token}`;
   }
   const url = buildUrl(path, query);
+  const logPath = String(path || '').replace(/[?#].*$/, '');
 
-  // 让“是否真正发出请求”在控制台可见（开发调试用）
+  // 仅记录请求元数据；不记录 URL 查询串、请求体、Authorization 或 token。
   try {
+    // eslint-disable-next-line no-console
     console.log('[http.request]', {
       method,
-      url,
+      path: logPath,
       auth,
       hasToken: Boolean(header.Authorization),
       timeout,
@@ -71,7 +73,8 @@ export function request({ method = 'GET', path, query, data, auth = true, timeou
       header,
       success: (res) => {
         try {
-          console.log('[http.response]', { url, statusCode: res.statusCode, data: res.data });
+          // eslint-disable-next-line no-console
+          console.log('[http.response]', { method, path: logPath, statusCode: res.statusCode });
         } catch (e) {
           /* ignore */
         }
@@ -90,7 +93,7 @@ export function request({ method = 'GET', path, query, data, auth = true, timeou
       },
       fail: (err) => {
         try {
-          console.warn('[http.fail]', { url, err });
+          console.warn('[http.fail]', { method, path: logPath });
         } catch (e) {
           /* ignore */
         }
@@ -99,4 +102,3 @@ export function request({ method = 'GET', path, query, data, auth = true, timeou
     });
   });
 }
-

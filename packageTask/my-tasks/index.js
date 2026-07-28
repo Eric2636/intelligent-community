@@ -2,6 +2,8 @@ import { taskAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { formatDateTimeYmdHm } from '~/utils/date';
+import { withDefaultAvatar } from '~/utils/defaultAvatar';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 const STATUS_TEXT = {
   draft: '草稿',
@@ -23,6 +25,7 @@ function normalizeTaskRow(item) {
     id,
     status,
     statusLabel: STATUS_TEXT[status] || status,
+    publisherAvatar: withDefaultAvatar(item.publisherAvatar),
     images: Array.isArray(item.images) ? item.images : [],
     videos: Array.isArray(item.videos) ? item.videos : [],
     desc: item.desc || '',
@@ -42,11 +45,14 @@ Page({
     pageTitle: '我的任务',
     emptyText: '暂无发布的任务',
     loading: true,
+    showManualLoad: false,
     loadingProps: { size: '40rpx' },
   },
 
   onLoad(options = {}) {
     if (redirectIfEntryHidden('task')) return;
+    this._taskPageAlive = true;
+    this._taskLoadRequestId = 0;
     this._skipNextShowRefresh = true;
     const type = options.type === 'draft' || options.type === 'cancelled' ? options.type : 'published';
     const pageTitleMap = {
@@ -84,6 +90,15 @@ Page({
     this.loadTasks().then(() => wx.stopPullDownRefresh());
   },
 
+  onAuthorized() {
+    this.setData({ showManualLoad: true });
+  },
+
+  onManualLoad() {
+    this.setData({ showManualLoad: false });
+    return this.loadTasks();
+  },
+
   onTabTap(e) {
     if (!this.data.showTabs) return;
     const { tab } = e.currentTarget.dataset;
@@ -94,10 +109,19 @@ Page({
   async loadTasks() {
     if (redirectIfEntryHidden('task')) return;
     const { activeTab } = this.data;
+    const requestId = (this._taskLoadRequestId || 0) + 1;
+    this._taskLoadRequestId = requestId;
+    const isCurrentRequest = () => this._taskPageAlive && requestId === this._taskLoadRequestId;
     this.setData({ loading: true });
     try {
+      if (!(await ensureMutationReady(this))) {
+        if (isCurrentRequest()) this.setData({ loading: false });
+        return;
+      }
+      if (!isCurrentRequest()) return;
       const type = ['taken', 'draft', 'cancelled'].includes(activeTab) ? activeTab : 'published';
       const res = await taskAPI.getMyTasks(type);
+      if (!isCurrentRequest()) return;
       if (res.code === 200) {
         const raw = res.data || [];
         const list = raw.map(normalizeTaskRow);
@@ -112,6 +136,7 @@ Page({
         this.setData({ loading: false });
       }
     } catch (err) {
+      if (!isCurrentRequest()) return;
       console.error('加载我的任务失败', err);
       wx.showToast({ title: (err && (err.message || err.errMsg)) || '网络错误，请重试', icon: 'none' });
       this.setData({ loading: false });
@@ -143,5 +168,11 @@ Page({
       return;
     }
     wx.navigateTo({ url: `/packageTask/detail/index?id=${id}` });
+  },
+
+  onUnload() {
+    this._authPageAlive = false;
+    this._taskPageAlive = false;
+    this._taskLoadRequestId = (this._taskLoadRequestId || 0) + 1;
   },
 });

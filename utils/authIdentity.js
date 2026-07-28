@@ -9,6 +9,8 @@ const IDENTITY_OPTIONS = [
   { type: 'OUTSIDER', label: '小区外人员' },
 ];
 
+let identitySelectionPromise = null;
+
 function getToken() {
   try {
     return wx.getStorageSync('access_token') || '';
@@ -47,10 +49,36 @@ function normalizeUserInfo(user) {
   };
 }
 
-async function ensureServerUser() {
+function trackPage(page) {
+  if (page && page._authPageAlive == null) page._authPageAlive = true;
+  return page;
+}
+
+export function markAuthPageUnloaded(page) {
+  if (page) page._authPageAlive = false;
+}
+
+export function isPageActive(page) {
+  if (!page || page._authPageAlive === false || typeof getCurrentPages !== 'function') return false;
+  const pages = getCurrentPages();
+  return Boolean(pages && pages.length && pages[pages.length - 1] === page);
+}
+
+function inactivePageError() {
+  const err = new Error('页面已切换');
+  err.code = 'AUTH_PAGE_INACTIVE';
+  return err;
+}
+
+function assertPageActive(page) {
+  if (!isPageActive(page)) throw inactivePageError();
+}
+
+async function ensureServerUser(page) {
   const app = getApp();
   try {
     const res = await userAPI.getUserInfo();
+    if (!isPageActive(page)) return false;
     if (res && res.code === 200 && res.data) {
       const userInfo = normalizeUserInfo(res.data);
       app.globalData.userInfo = userInfo;
@@ -83,28 +111,45 @@ export function hasLoginToken() {
   return Boolean(getToken());
 }
 
-export async function ensureLoggedIn() {
+export function requestAuthorizedLogin(page) {
+  trackPage(page);
+  if (!isPageActive(page)) return false;
+  const dialog =
+    typeof page.selectComponent === 'function'
+      ? page.selectComponent('#auth-login-dialog')
+      : null;
+  if (dialog && typeof dialog.open === 'function') {
+    dialog.open(page);
+  } else {
+    wx.showToast({ title: '请先完成授权登录', icon: 'none' });
+  }
+  return false;
+}
+
+export async function ensureLoggedIn(page) {
+  trackPage(page);
+  if (!isPageActive(page)) return false;
   if (hasLoginToken() && hasPhoneAuthorizedLogin()) {
-    if (await ensureServerUser()) return true;
+    if (await ensureServerUser(page)) return isPageActive(page);
+    if (!isPageActive(page)) return false;
     clearStaleLogin();
   } else if (hasLoginToken()) {
     clearStaleLogin();
   }
 
-  wx.showToast({ title: '请先完成授权登录', icon: 'none' });
-  wx.switchTab({ url: '/pages/my/index' });
-  return false;
+  return requestAuthorizedLogin(page);
 }
 
-export function requireLogin() {
-  return ensureLoggedIn();
+export function requireLogin(page) {
+  return ensureLoggedIn(page);
 }
 
-export async function ensureIdentitySelected() {
+async function selectAndSaveIdentity(page) {
+  assertPageActive(page);
   const app = getApp();
   let userInfo = normalizeUserInfo(app.globalData.userInfo);
 
-  if (!userInfo.identityType && !userInfo.contentTagLabel && !userInfo.adminLabel) {
+  if (!userInfo.identityType) {
     try {
       const res = await userAPI.getUserInfo();
       if (res && res.code === 200 && res.data) {
@@ -114,15 +159,17 @@ export async function ensureIdentitySelected() {
     } catch (e) {
       /* ignore: the next write will still surface network/auth errors */
     }
+    assertPageActive(page);
   }
 
-  if (userInfo.contentTagLabel || userInfo.adminLabel) return userInfo.contentTagLabel || userInfo.adminLabel;
   if (userInfo.identityType) return userInfo.identityType;
 
   const identityType = await selectIdentityType();
+  assertPageActive(page);
   wx.showLoading({ title: '保存中...' });
   try {
     const res = await userAPI.updateUserInfo({ identityType });
+    assertPageActive(page);
     const saved = res && res.data ? normalizeUserInfo(res.data) : { ...userInfo, identityType };
     app.globalData.userInfo = saved;
     app.eventBus.emit('userInfoChange');
@@ -132,12 +179,35 @@ export async function ensureIdentitySelected() {
   }
 }
 
-export async function ensureMutationReady() {
-  if (!(await ensureLoggedIn())) return false;
+export function ensureIdentitySelected(page) {
+  trackPage(page);
+  if (!isPageActive(page)) return Promise.reject(inactivePageError());
+  if (identitySelectionPromise) return identitySelectionPromise;
+  identitySelectionPromise = selectAndSaveIdentity(page).finally(() => {
+    identitySelectionPromise = null;
+  });
+  return identitySelectionPromise;
+}
+
+export async function completeAuthorizedLogin(phoneCode, page) {
+  trackPage(page);
+  if (!isPageActive(page)) return false;
+  const app = getApp();
+  await app.phoneLogin(phoneCode);
+  if (!isPageActive(page)) return false;
+  if (app.globalData.offlineMode) throw new Error('网络不可用，请稍后重试');
+  await ensureIdentitySelected(page);
+  return isPageActive(page);
+}
+
+export async function ensureMutationReady(page) {
+  trackPage(page);
+  if (!(await ensureLoggedIn(page)) || !isPageActive(page)) return false;
   try {
-    await ensureIdentitySelected();
-    return true;
+    await ensureIdentitySelected(page);
+    return isPageActive(page);
   } catch (err) {
+    if ((err && err.code === 'AUTH_PAGE_INACTIVE') || !isPageActive(page)) return false;
     wx.showToast({ title: (err && (err.message || err.errMsg)) || '请先选择身份', icon: 'none' });
     return false;
   }

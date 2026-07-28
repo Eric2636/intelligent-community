@@ -2,6 +2,7 @@ import { mallAPI } from '~/api/cloud';
 import { mallOrderDetailUrl } from '~/utils/mallPaths';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 Page({
   data: {
@@ -9,6 +10,8 @@ Page({
     buyList: [],
     sellList: [],
     loading: true,
+    authReady: false,
+    showManualLoad: false,
   },
 
   onLoad() {
@@ -31,8 +34,21 @@ Page({
     this.setData({ tab });
   },
 
+  onAuthorized() {
+    this.setData({ authReady: true, showManualLoad: true });
+  },
+
+  onManualLoad() {
+    this.setData({ showManualLoad: false });
+    return this.loadOrders();
+  },
+
   async loadOrders() {
     if (redirectIfEntryHidden('mall')) return;
+    if (!(await ensureMutationReady(this))) {
+      this.setData({ loading: false });
+      return;
+    }
     this.setData({ loading: true });
     const res = await mallAPI.getMyOrders();
     if (res.code === 200 && res.data) {
@@ -49,5 +65,9 @@ Page({
   goDetail(e) {
     const { id } = e.currentTarget.dataset;
     wx.navigateTo({ url: mallOrderDetailUrl(id) });
+  },
+
+  onUnload() {
+    this._authPageAlive = false;
   },
 });

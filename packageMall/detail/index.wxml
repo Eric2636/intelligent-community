@@ -218,3 +218,4 @@
   </block>
   <view wx:else class="detail-loading">信息不存在</view>
 </view>
+<auth-login-dialog id="auth-login-dialog" />

@@ -42,7 +42,15 @@
             data-name="{{card.name}}"
             bindtap="onMenuTap"
           >
-            <t-icon name="{{card.icon}}" size="32rpx" class="my-section__item-icon" />
+            <t-badge
+              wx:if="{{card.url === 'notice'}}"
+              count="{{unreadCount}}"
+              max-count="99"
+              visible="{{unreadCount > 0}}"
+            >
+              <t-icon name="{{card.icon}}" size="32rpx" class="my-section__item-icon" />
+            </t-badge>
+            <t-icon wx:else name="{{card.icon}}" size="32rpx" class="my-section__item-icon" />
             <text class="my-section__item-title">{{card.name}}</text>
           </view>
         </view>
@@ -54,3 +62,4 @@
     <button class="my-logout__button" bindtap="onLogout">退出登录</button>
   </view>
 </view>
+<auth-login-dialog id="auth-login-dialog" bindauthorized="onAuthorized" />

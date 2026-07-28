@@ -12,9 +12,7 @@
       clearable
       bindchange="onSearchInput"
       bindclear="onSearchClear"
-      bindconfirm="onSearchConfirm"
     />
-    <view class="forum-search-bar__btn" bindtap="onSearchConfirm">搜索</view>
   </view>
   <view class="forum-order">
     <view class="forum-order__item {{orderBy === 'time' ? 'forum-order__item--active' : ''}}" data-order="time" bindtap="onOrderChange">最新</view>
@@ -106,16 +104,16 @@
         <template is="forumListMedia" data="{{item: item}}" />
         <view class="post-item__actions">
           <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
-            <t-icon name="share" size="30rpx" color="#8e8e93" />
-            <text>{{item.shareCount || item.forwardCount || 0}}</text>
+            <t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" />
+            <text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text>
           </button>
           <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
-            <t-icon name="chat-bubble" size="30rpx" color="#8e8e93" />
-            <text>{{item.replyCount || 0}}</text>
+            <t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" />
+            <text class="post-item__action-count">{{item.replyCount || 0}}</text>
           </view>
           <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike">
-            <t-icon name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
-            <text>{{item.likeCount || 0}}</text>
+            <t-icon class="post-item__action-icon" name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
+            <text class="post-item__action-count">{{item.likeCount || 0}}</text>
           </view>
         </view>
       </view>
@@ -146,16 +144,16 @@
             <template is="forumListMedia" data="{{item: item}}" />
             <view class="post-item__actions">
               <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
-                <t-icon name="share" size="30rpx" color="#8e8e93" />
-                <text>{{item.shareCount || item.forwardCount || 0}}</text>
+                <t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" />
+                <text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text>
               </button>
               <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
-                <t-icon name="chat-bubble" size="30rpx" color="#8e8e93" />
-                <text>{{item.replyCount || 0}}</text>
+                <t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" />
+                <text class="post-item__action-count">{{item.replyCount || 0}}</text>
               </view>
               <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike">
-                <t-icon name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
-                <text>{{item.likeCount || 0}}</text>
+                <t-icon class="post-item__action-icon" name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
+                <text class="post-item__action-count">{{item.likeCount || 0}}</text>
               </view>
             </view>
           </view>
@@ -184,16 +182,16 @@
           <template is="forumListMedia" data="{{item: item}}" />
           <view class="post-item__actions">
             <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
-              <t-icon name="share" size="30rpx" color="#8e8e93" />
-              <text>{{item.shareCount || item.forwardCount || 0}}</text>
+              <t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" />
+              <text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text>
             </button>
             <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
-              <t-icon name="chat-bubble" size="30rpx" color="#8e8e93" />
-              <text>{{item.replyCount || 0}}</text>
+              <t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" />
+              <text class="post-item__action-count">{{item.replyCount || 0}}</text>
             </view>
             <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike">
-              <t-icon name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
-              <text>{{item.likeCount || 0}}</text>
+              <t-icon class="post-item__action-icon" name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
+              <text class="post-item__action-count">{{item.likeCount || 0}}</text>
             </view>
           </view>
         </view>
@@ -206,3 +204,4 @@
 <view class="forum-fab" bindtap="goPublish">
   <t-icon name="add" size="48rpx" color="#fff" />
 </view>
+<auth-login-dialog id="auth-login-dialog" />
