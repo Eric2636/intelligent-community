@@ -74,11 +74,12 @@ export default 'production';
 
 发布前确认：
 
-- 本地开发：`config.env.js` 使用 `local`。
-- 体验版：`config.env.js` 使用 `test`。
-- 审核版/正式版：`config.env.js` 使用 `production`。
+- 本地开发：`config.env.js` 使用 `local`，自动开启 vConsole。
+- 体验版：`config.env.js` 使用 `test`，自动关闭 vConsole。
+- 审核版/正式版：`config.env.js` 使用 `production`，自动关闭 vConsole。
 
-由于 `config.env.js` 不进 Git，`dev`、`test`、`master` 之间的合并不会覆盖本机或发布机器的真实环境选择。
+vConsole 只由 `config.env.js` 选择的环境决定，不在各环境详情配置中重复维护开关。由于
+`config.env.js` 不进 Git，`dev`、`test`、`master` 之间的合并不会覆盖本机或发布机器的真实环境选择。
 
 ### 基础库版本
 

@@ -43,13 +43,11 @@ App({
     const storedTabs = readStoredModuleTabs();
     this.globalData.moduleEntryTabs = storedTabs && Array.isArray(storedTabs.tabs) ? storedTabs.tabs : null;
 
-    // 仅本地/测试环境主动开启微信内置调试面板，正式版不触发该 API。
-    if (config.enableVConsole) {
-      try {
-        wx.setEnableDebug({ enableDebug: true });
-      } catch (e) {
-        /* ignore */
-      }
+    // 每次启动都同步调试开关，避免从 local 切到 test/production 后仍残留 vConsole。
+    try {
+      wx.setEnableDebug({ enableDebug: Boolean(config.enableVConsole) });
+    } catch (e) {
+      /* ignore */
     }
 
     let apiBase;

@@ -47,6 +47,10 @@ function methodSource(pageSource, methodName) {
 
 Promise.all([
   source('app.js'),
+  source('config.js'),
+  source('config.local.js'),
+  source('config.test.js'),
+  source('config.production.js'),
   source('pages/my/index.js'),
   source('pages/my/info-edit/index.js'),
   source('utils/moduleEntryGuard.js'),
@@ -70,6 +74,10 @@ Promise.all([
   stat(path.join(root, 'static/avatar1.png')),
 ]).then(([
   app,
+  configEntry,
+  localConfig,
+  testConfig,
+  productionConfig,
   myPage,
   infoEdit,
   moduleEntryGuard,
@@ -96,9 +104,22 @@ Promise.all([
   assert.doesNotMatch(infoEdit, /profileDisplay/, '资料编辑页不应依赖可能被遗漏打包的新工具模块');
   assert.match(
     app,
-    /if \(config\.enableVConsole\)\s*\{[\s\S]*?wx\.setEnableDebug\(\{ enableDebug: true \}\)/,
-    '仅允许测试/本地配置开启微信调试面板',
+    /wx\.setEnableDebug\(\{\s*enableDebug:\s*Boolean\(config\.enableVConsole\),?\s*\}\)/,
+    '每次启动都必须显式同步微信调试面板开关，避免关闭配置后仍残留',
   );
+  assert.doesNotMatch(
+    app,
+    /if\s*\(config\.enableVConsole\)/,
+    '关闭调试时不能跳过 setEnableDebug(false)',
+  );
+  assert.match(
+    configEntry,
+    /enableVConsole:\s*appEnv\s*===\s*'local'/,
+    'vConsole 必须只由 config.env.js 选择的环境决定',
+  );
+  [localConfig, testConfig, productionConfig].forEach((profileConfig) => {
+    assert.doesNotMatch(profileConfig, /enableVConsole/, '各环境详情配置不得重复维护 vConsole 开关');
+  });
   assert.match(
     moduleEntryGuard,
     /DEFAULT_TAB_LIST[\s\S]*?key: 'my'[\s\S]*?always: true/,
