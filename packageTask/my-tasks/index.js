@@ -2,7 +2,7 @@ import { taskAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { formatDateTimeYmdHm } from '~/utils/date';
-import { withDefaultAvatar } from '~/utils/defaultAvatar';
+import { normalizeAvatar } from '~/utils/defaultAvatar';
 import { ensureMutationReady } from '~/utils/authIdentity';
 
 const STATUS_TEXT = {
@@ -25,7 +25,7 @@ function normalizeTaskRow(item) {
     id,
     status,
     statusLabel: STATUS_TEXT[status] || status,
-    publisherAvatar: withDefaultAvatar(item.publisherAvatar),
+    publisherAvatar: normalizeAvatar(item.publisherAvatar),
     images: Array.isArray(item.images) ? item.images : [],
     videos: Array.isArray(item.videos) ? item.videos : [],
     desc: item.desc || '',

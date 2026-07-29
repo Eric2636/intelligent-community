@@ -43,7 +43,7 @@
     >
       <view class="task-card__meta-row">
         <view class="task-card__publisher">
-          <t-avatar class="task-card__publisher-avatar" image="{{card.publisherAvatar}}" size="48rpx" alt="{{card.publisherName || '发布者头像'}}" />
+          <t-avatar class="task-card__publisher-avatar" image="{{card.publisherAvatar}}" icon="{{card.publisherAvatar ? '' : 'user'}}" size="48rpx" alt="{{card.publisherName || '发布者头像'}}" />
           <text class="task-card__publisher-name">{{card.publisherName || '发布者'}}</text>
           <text wx:if="{{card.contentTagLabel || card.adminLabel || card.publisherIdentityLabel}}" class="identity-tag identity-tag--{{card.contentTagType || (card.adminLabel ? 'admin' : (card.publisherIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{card.contentTagLabel || card.adminLabel || card.publisherIdentityLabel}}</text>
         </view>

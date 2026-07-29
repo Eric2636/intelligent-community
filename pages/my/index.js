@@ -100,9 +100,8 @@ Page({
     }
     syncCustomTabBar(this, 'my');
     if (app.refreshNotificationUnreadCount) app.refreshNotificationUnreadCount();
-    if (consumeListRefresh(LIST_REFRESH_KEYS.user)) {
-      this.refreshPersonalInfo();
-    }
+    consumeListRefresh(LIST_REFRESH_KEYS.user);
+    this.refreshPersonalInfo();
   },
 
   onLoad() {
@@ -123,13 +122,13 @@ Page({
     app.eventBus.on(NOTIFICATION_UNREAD_EVENT, this._onNotificationUnreadCountChange);
     this._onNotificationUnreadCountChange(app.globalData.notificationUnreadCount);
     this.refreshMenuList();
-    this.refreshPersonalInfo();
   },
 
   onUnload() {
     this._authPageAlive = false;
     this._servicePageAlive = false;
     this._openingService = false;
+    this._personalInfoRequestId = (this._personalInfoRequestId || 0) + 1;
     if (this._openingServiceTimer) {
       clearTimeout(this._openingServiceTimer);
       this._openingServiceTimer = null;
@@ -149,20 +148,37 @@ Page({
   async refreshPersonalInfo() {
     const app = getApp();
     const token = wx.getStorageSync('access_token');
-    const userInfo = app.globalData.userInfo || {};
-    const hasPhone = Boolean(String(userInfo.phoneNumber || userInfo.phone || '').trim());
-    if (app.globalData.useCloudBase && token) {
-      const personalInfo = await this.getPersonalInfo();
+    if (!token) {
       this.setData({
-        isLoad: Boolean(personalInfo && (personalInfo.phoneNumber || personalInfo.phone)),
-        personalInfo: normalizePersonalInfo(personalInfo),
+        isLoad: false,
+        personalInfo: {},
       });
-    } else {
-      this.setData({
-        isLoad: !!token && hasPhone,
-        personalInfo: token && hasPhone ? normalizePersonalInfo(userInfo) : {},
-      });
+      return;
     }
+
+    const requestId = (this._personalInfoRequestId || 0) + 1;
+    this._personalInfoRequestId = requestId;
+    const cachedUserInfo = app.globalData.userInfo || {};
+    const latestUserInfo = await this.getPersonalInfo();
+    if (!this._servicePageAlive || requestId !== this._personalInfoRequestId) return;
+
+    if (latestUserInfo) {
+      const avatar = latestUserInfo.avatar || latestUserInfo.avatarUrl || latestUserInfo.image || '';
+      app.globalData.userInfo = {
+        ...cachedUserInfo,
+        ...latestUserInfo,
+        nickName: latestUserInfo.nickName || latestUserInfo.name || cachedUserInfo.nickName || '',
+        avatar,
+        avatarUrl: latestUserInfo.avatarUrl || avatar,
+      };
+    }
+
+    const personalInfo = app.globalData.userInfo || cachedUserInfo;
+    const hasPhone = Boolean(String(personalInfo.phoneNumber || personalInfo.phone || '').trim());
+    this.setData({
+      isLoad: hasPhone,
+      personalInfo: hasPhone ? normalizePersonalInfo(personalInfo) : {},
+    });
   },
 
   refreshMenuList() {
@@ -185,27 +201,11 @@ Page({
 
   async getPersonalInfo() {
     try {
-      const app = getApp();
-      if (app.globalData.useCloudBase) {
-        try {
-          const res = await userAPI.getUserInfo();
-          if (res.code === 200 && res.data) {
-            return res.data;
-          }
-        } catch (err) {
-          console.error('获取用户信息失败', err);
-        }
-        const { openid } = app.globalData;
-        return {
-          name: '用户',
-          avatar: '',
-          avatarUrl: '',
-          openid: openid || '',
-        };
-      }
-      return {};
-    } catch (e) {
-      return {};
+      const res = await userAPI.getUserInfo();
+      return res && res.code === 200 && res.data ? res.data : null;
+    } catch (err) {
+      console.warn('获取用户信息失败，继续使用本地资料', err);
+      return null;
     }
   },
 

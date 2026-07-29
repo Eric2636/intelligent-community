@@ -84,7 +84,7 @@ function loadPageDefinition(pageSource, dependencies) {
     redirectIfEntryHidden: () => false,
     normalizeForumListPost: (item) => item,
     formatDateTimeYmdHm: (value) => value,
-    withDefaultAvatar: (value) => value,
+    normalizeAvatar: (value) => value,
     mallDetailUrl: (id) => String(id),
     mallOrderDetailUrl: (id) => String(id),
     NOTIFICATION_UNREAD_EVENT: 'notificationUnreadCountChange',

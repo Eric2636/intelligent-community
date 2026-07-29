@@ -25,8 +25,8 @@ function loadPage(pageSource, dependencies) {
       return false;
     },
     taskAPI: dependencies.taskAPI,
-    withDefaultAvatar(value) {
-      return value || '/default-avatar.png';
+    normalizeAvatar(value) {
+      return value || '';
     },
     withImage(payload) {
       return payload;
@@ -298,4 +298,32 @@ test('failed proof upload preserves existing images and text-or-image validation
   await harness.page.onSubmitComplete();
   assert.equal(harness.calls.submit.length, 0);
   assert.match(harness.calls.toasts.at(-1).title, /说明或上传图片/);
+});
+
+test('task metadata uses aligned label-value columns and proof actions have stable spacing', async () => {
+  const [template, styles] = await Promise.all([
+    source('packageTask/detail/index.wxml'),
+    source('packageTask/detail/index.less'),
+  ]);
+
+  assert.match(template, /detail-card__value">\{\{task\.location\}\}<\/text>/);
+  assert.match(template, /detail-card__value detail-card__person/);
+  assert.match(template, /detail-card__value">\{\{task\.createdAt\}\}<\/text>/);
+  assert.match(template, /detail-card__value">\{\{task\.claimedAt\}\}<\/text>/);
+  assert.match(styles, /&__label\s*\{[^}]*width:\s*112rpx;/s);
+  assert.match(styles, /&__value\s*\{[^}]*flex:\s*1;[^}]*min-width:\s*0;/s);
+
+  assert.match(
+    template,
+    /class="detail-proof__action"[\s\S]*bindtap="onAddProofImages"[\s\S]*<\/view>/,
+  );
+  assert.match(
+    template,
+    /class="detail-proof__action detail-proof__action--spaced"[\s\S]*bindtap="onSubmitComplete"[\s\S]*<\/view>/,
+  );
+  assert.match(
+    template,
+    /class="detail-proof__action detail-proof__action--spaced"[\s\S]*bindtap="onAbandon"[\s\S]*<\/view>/,
+  );
+  assert.match(styles, /&__action--spaced\s*\{[^}]*margin-top:\s*16rpx;/s);
 });
