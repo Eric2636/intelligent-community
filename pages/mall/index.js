@@ -1,8 +1,12 @@
+import { Subject } from 'rxjs';
+
 import { mallAPI } from '~/api/cloud';
 import { mallDetailUrl, mallPublishUrl } from '~/utils/mallPaths';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
+import { ensureMutationReady } from '~/utils/authIdentity';
+import { createHotSearch } from '~/utils/hotSearch';
 
 Page({
   data: {
@@ -19,14 +23,40 @@ Page({
     page: 1,
     pageSize: 10,
     keyword: '',
+    queryKeyword: '',
     orderBy: 'time', // time | price_asc | price_desc
   },
 
   onLoad() {
     if (redirectIfEntryHidden('mall')) return;
+    this._pageAlive = true;
+    this._keyword$ = new Subject();
+    this._searchRequestId = 0;
+    this._committedRequestInvalidated = false;
+    this._activeSearchKeyword = '';
+    this._categoryRequestId = 0;
+    this._mallRefreshId = 0;
+    this._categoryReady = false;
+    this._stopHotSearch = createHotSearch(this._keyword$, (keyword) => {
+      if (!this._pageAlive) return;
+      if (keyword === this._activeSearchKeyword) {
+        if (
+          this._committedRequestInvalidated &&
+          this._categoryReady &&
+          !this._categoryRefreshInFlight
+        ) {
+          this.setData({ page: 1, hasMore: true });
+          this.loadList(true);
+        }
+        return;
+      }
+      this._activeSearchKeyword = keyword;
+      this._committedRequestInvalidated = false;
+      this.setData({ queryKeyword: keyword, page: 1, hasMore: true });
+      if (this._categoryReady && !this._categoryRefreshInFlight) this.loadList(true);
+    });
     this._skipNextShowRefresh = true;
-    this.loadCategories();
-    this.loadList();
+    this.refreshMall();
   },
 
   onShow() {
@@ -37,17 +67,12 @@ Page({
       return;
     }
     if (consumeListRefresh(LIST_REFRESH_KEYS.mall)) {
-      Promise.all([this.loadCategories(), this.loadList(true)]);
+      this.refreshMall();
     }
   },
 
   async onRefresh() {
-    this.setData({ refreshing: true });
-    try {
-      await Promise.all([this.loadCategories(), this.loadList(true)]);
-    } finally {
-      this.setData({ refreshing: false });
-    }
+    await this.refreshMall({ showRefreshing: true });
   },
 
   async onLoadMore() {
@@ -55,18 +80,87 @@ Page({
   },
 
   async loadCategories() {
-    const res = await mallAPI.getCategories();
-    if (res.code === 200) {
+    this._categoryRequestId = (this._categoryRequestId || 0) + 1;
+    const requestId = this._categoryRequestId;
+    try {
+      const res = await mallAPI.getCategories();
+      if (!this._pageAlive || requestId !== this._categoryRequestId) return null;
+      if (res.code !== 200) {
+        wx.showToast({ title: res.message || '获取分类失败，请重试', icon: 'none' });
+        return { ok: false };
+      }
       const categories = res.data || [];
       const currentCategory = categories.some((item) => item.id === this.data.currentCategory)
         ? this.data.currentCategory
-        : (categories[0] && categories[0].id) || 'flea';
-      this.setData({ categories, currentCategory });
+        : (categories[0] && categories[0].id) || '';
+      const categoryChanged = currentCategory !== this.data.currentCategory;
+      this._categoryReady = Boolean(currentCategory);
+      if (categoryChanged) {
+        this._searchRequestId = (this._searchRequestId || 0) + 1;
+        this._activeListRequestId = 0;
+      }
+      this.setData({
+        categories,
+        currentCategory,
+        ...(categoryChanged
+          ? {
+              fullList: [],
+              list: [],
+              listTotal: 0,
+              hasMore: false,
+            }
+          : {}),
+      });
+      return { categories, currentCategory, ok: true };
+    } catch (err) {
+      if (!this._pageAlive || requestId !== this._categoryRequestId) return null;
+      console.error('加载商品分类失败', err);
+      wx.showToast({ title: '获取分类失败，请重试', icon: 'none' });
+      return { ok: false };
     }
   },
 
-  async loadList(refresh = true) {
-    const { currentCategory, keyword, orderBy, pageSize } = this.data;
+  async refreshMall({ showRefreshing = false } = {}) {
+    this._mallRefreshId = (this._mallRefreshId || 0) + 1;
+    const refreshId = this._mallRefreshId;
+    this._categoryRefreshInFlight = true;
+    this.setData({
+      loading: true,
+      refreshing: showRefreshing ? true : this.data.refreshing,
+    });
+    try {
+      const categoryResult = await this.loadCategories();
+      if (!this._pageAlive || refreshId !== this._mallRefreshId || !categoryResult) return;
+      if (!categoryResult.ok) return;
+      if (!categoryResult.currentCategory) {
+        this.setData({
+          fullList: [],
+          list: [],
+          listTotal: 0,
+          hasMore: false,
+          loading: false,
+          loadingMore: false,
+        });
+        return;
+      }
+      await this.loadList(true, categoryResult.currentCategory);
+    } finally {
+      if (this._pageAlive && refreshId === this._mallRefreshId) {
+        this._categoryRefreshInFlight = false;
+        this.setData({ loading: false, refreshing: false });
+      }
+    }
+  },
+
+  async loadList(refresh = true, confirmedCategoryId = '') {
+    const categoryId = confirmedCategoryId || this.data.currentCategory;
+    if (!this._categoryReady || !categoryId) return;
+    this._searchRequestId += 1;
+    const requestId = this._searchRequestId;
+    this._activeListRequestId = requestId;
+    this._committedRequestInvalidated = false;
+    const { queryKeyword, orderBy, pageSize } = this.data;
+    const normalizedKeyword = String(queryKeyword || '').trim();
     this.setData({
       page: refresh ? 1 : this.data.page,
       hasMore: refresh ? true : this.data.hasMore,
@@ -75,8 +169,16 @@ Page({
       loadingMore: !refresh,
     });
     try {
-      const res = await mallAPI.getItems({ categoryId: currentCategory, keyword: (keyword || '').trim() || undefined, orderBy });
+      const res = await mallAPI.getItems({
+        categoryId,
+        keyword: normalizedKeyword || undefined,
+        orderBy,
+      });
+      if (!this._pageAlive || requestId !== this._searchRequestId) return;
       if (res.code === 200) {
+        if (res.__fromOfflineCache) {
+          wx.showToast({ title: '网络不可用，当前展示缓存数据', icon: 'none' });
+        }
         const raw = res.data || [];
         const list = raw.slice(0, pageSize);
         this.setData({
@@ -89,15 +191,19 @@ Page({
         wx.showToast({ title: res.message || '获取商品失败', icon: 'none' });
       }
     } catch (err) {
+      if (!this._pageAlive || requestId !== this._searchRequestId) return;
       console.error('加载商品列表失败', err);
-      wx.showToast({ title: err.errMsg || '网络错误，请重试', icon: 'none' });
+      wx.showToast({ title: err.message || err.errMsg || '网络错误，请重试', icon: 'none' });
     } finally {
-      this.setData({ loading: false, loadingMore: false });
+      if (this._pageAlive && requestId === this._searchRequestId) {
+        this._activeListRequestId = 0;
+        this.setData({ loading: false, loadingMore: false, refreshing: false });
+      }
     }
   },
 
   loadMore() {
-    if (this.data.loading || this.data.loadingMore) return;
+    if (this.data.loading || this.data.loadingMore || this.data.refreshing) return;
     if (!this.data.hasMore) {
       this.showNoMoreTip();
       return;
@@ -127,32 +233,54 @@ Page({
   },
 
   onSearchInput(e) {
+    if (!this._pageAlive) return;
     const nextKeyword = e.detail.value || '';
-    const wasSearching = Boolean((this.data.keyword || '').trim());
-    this.setData({ keyword: nextKeyword });
-    if (wasSearching && !String(nextKeyword).trim()) {
-      this.loadList(true);
+    const normalizedKeyword = String(nextKeyword).trim();
+    if (normalizedKeyword !== this._activeSearchKeyword) {
+      const hasInFlightRequest = this._activeListRequestId === this._searchRequestId;
+      this._searchRequestId += 1;
+      this._committedRequestInvalidated =
+        this._committedRequestInvalidated || hasInFlightRequest;
     }
+    this.setData({ keyword: nextKeyword });
+    this._keyword$.next(nextKeyword);
   },
 
   onSearchClear() {
-    this.setData({ keyword: '' });
-    this.loadList(true);
-  },
-
-  onSearchConfirm() {
-    this.loadList(true);
+    if (!this._pageAlive) return;
+    this.onSearchInput({ detail: { value: '' } });
   },
 
   onOrderChange(e) {
     const orderBy = e.currentTarget.dataset.order;
     this.setData({ orderBy });
+    if (this._categoryRefreshInFlight) return;
     this.loadList(true);
   },
 
   onCategoryTap(e) {
     const { id } = e.currentTarget.dataset;
-    this.setData({ currentCategory: id });
+    if (!this.data.categories.some((item) => item.id === id)) return;
+    this._mallRefreshId += 1;
+    this._categoryRequestId = (this._categoryRequestId || 0) + 1;
+    this._categoryRefreshInFlight = false;
+    this._categoryReady = true;
+    const categoryChanged = id !== this.data.currentCategory;
+    if (categoryChanged) {
+      this._searchRequestId = (this._searchRequestId || 0) + 1;
+      this._activeListRequestId = 0;
+    }
+    this.setData({
+      currentCategory: id,
+      ...(categoryChanged
+        ? {
+            fullList: [],
+            list: [],
+            listTotal: 0,
+            hasMore: false,
+          }
+        : {}),
+    });
     this.loadList(true);
   },
 
@@ -161,7 +289,19 @@ Page({
     wx.navigateTo({ url: mallDetailUrl(id) });
   },
 
-  goPublish() {
+  async goPublish() {
+    if (!(await ensureMutationReady(this))) return;
     wx.navigateTo({ url: mallPublishUrl() });
+  },
+
+  onUnload() {
+    this._pageAlive = false;
+    this._authPageAlive = false;
+    this._categoryRefreshInFlight = false;
+    this._mallRefreshId = (this._mallRefreshId || 0) + 1;
+    this._categoryRequestId = (this._categoryRequestId || 0) + 1;
+    if (this._stopHotSearch) this._stopHotSearch();
+    if (this._keyword$) this._keyword$.complete();
+    if (this._noMoreTimer) clearTimeout(this._noMoreTimer);
   },
 });

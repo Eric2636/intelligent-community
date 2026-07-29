@@ -1,22 +1,62 @@
 <view class="notice-page">
-  <view class="notice-list">
-    <view
-      class="notice-card"
-      wx:for="{{noticeList}}"
-      wx:key="id"
-      bind:tap="onNoticeTap"
-      data-id="{{item.id}}"
-    >
-      <view class="notice-header">
-        <view class="notice-type {{item.type}}">
-          <text wx:if="{{item.type === 'system'}}">系统</text>
-          <text wx:if="{{item.type === 'task'}}">任务</text>
-          <text wx:if="{{item.type === 'mall'}}">商城</text>
-        </view>
-        <text class="notice-time">{{item.time}}</text>
-      </view>
-      <view class="notice-title">{{item.title}}</view>
-      <view class="notice-content">{{item.content}}</view>
-    </view>
+  <view wx:if="{{showManualLoad}}" class="auth-manual-load" aria-role="region" aria-label="登录成功，请手动加载内容">
+    <view class="auth-manual-load__text">登录成功，请点击加载内容</view>
+    <t-button theme="primary" size="medium" bindtap="onManualLoad">加载内容</t-button>
   </view>
+
+  <block wx:if="{{!showManualLoad}}">
+    <view class="notice-toolbar">
+      <view class="notice-toolbar__heading">
+        <text class="notice-toolbar__title">全部消息</text>
+        <text wx:if="{{unreadCount > 0}}" class="notice-toolbar__unread">未读 {{unreadCount}}</text>
+      </view>
+      <t-button
+        wx:if="{{noticeList.length}}"
+        theme="primary"
+        variant="text"
+        size="small"
+        bindtap="markAllRead"
+      >全部已读</t-button>
+    </view>
+
+    <view wx:if="{{loading}}" class="notice-state">消息加载中...</view>
+    <view wx:elif="{{!noticeList.length}}" class="notice-state">暂无消息通知</view>
+    <view wx:else class="notice-list">
+      <view
+        class="notice-card {{item.readAt ? 'notice-card--read' : 'notice-card--unread'}}"
+        wx:for="{{noticeList}}"
+        wx:key="id"
+      >
+        <t-swipe-cell
+          right="{{item.rightActions}}"
+          bind:click="deleteNotification"
+        >
+          <view
+            class="notice-card__body"
+            bindtap="onNoticeTap"
+            data-id="{{item.id}}"
+            aria-role="button"
+            aria-label="{{item.readAt ? item.title : '未读消息，' + item.title}}"
+          >
+            <view class="notice-header">
+              <view class="notice-type {{item.bizType}}">
+                <text wx:if="{{item.bizType === 'system'}}">系统</text>
+                <text wx:elif="{{item.bizType === 'forum'}}">留言</text>
+                <text wx:elif="{{item.bizType === 'task'}}">任务</text>
+                <text wx:elif="{{item.bizType === 'mall'}}">商城</text>
+                <text wx:else>消息</text>
+              </view>
+              <view wx:if="{{!item.readAt}}" class="notice-unread-dot" aria-label="未读"></view>
+              <text class="notice-time">{{item.createdAt}}</text>
+            </view>
+            <view class="notice-title">{{item.title}}</view>
+            <view class="notice-content">{{item.content}}</view>
+          </view>
+        </t-swipe-cell>
+      </view>
+      <view wx:if="{{loadingMore}}" class="notice-load-more">加载中...</view>
+      <view wx:elif="{{!hasMore}}" class="notice-load-more">没有更多消息了</view>
+    </view>
+  </block>
 </view>
+<auth-login-dialog id="auth-login-dialog" bindauthorized="onAuthorized" />

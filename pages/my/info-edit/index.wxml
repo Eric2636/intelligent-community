@@ -82,3 +82,4 @@
   <t-picker-item options="{{provinces}}" />
   <t-picker-item options="{{cities}}" />
 </t-picker>
+<auth-login-dialog id="auth-login-dialog" />

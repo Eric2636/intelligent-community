@@ -1,6 +1,11 @@
 <wxs src="../mallOrderStatus.wxs" module="ord" />
 <nav title-text="我的订单" show-back="{{true}}" />
 <view class="order-list-page">
+  <view wx:if="{{showManualLoad}}" class="auth-manual-load" aria-role="region" aria-label="登录成功，请手动加载内容">
+    <view class="auth-manual-load__text">登录成功，请点击加载内容</view>
+    <t-button theme="primary" size="medium" bindtap="onManualLoad">加载内容</t-button>
+  </view>
+  <block wx:if="{{!showManualLoad}}">
   <view class="tabs">
     <view
       class="tabs__item {{tab === 'buy' ? 'tabs__item--active' : ''}}"
@@ -49,4 +54,6 @@
     </view>
     <t-empty wx:if="{{sellList.length === 0}}" description="暂无卖出的订单" />
   </view>
+  </block>
 </view>
+<auth-login-dialog id="auth-login-dialog" bindauthorized="onAuthorized" />

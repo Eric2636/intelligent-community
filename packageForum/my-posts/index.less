@@ -34,11 +34,6 @@
   color: @gy2;
   line-height: 1.6;
   margin-bottom: 24rpx;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
 }
 
 .post-meta {
@@ -49,10 +44,28 @@
   color: @gy3;
 }
 
-.time {
-  color: @gy3;
+.post-title {
+  .list-title-clamp();
 }
 
-.reply-count {
+.post-content {
+  .list-description-clamp();
+}
+
+.post-card,
+.post-meta {
+  .list-width-safe();
+}
+
+.post-meta__time {
+  color: @gy3;
+  .list-flexible-text();
+}
+
+.post-meta__reply-count {
   color: @color-primary;
+  .list-fixed-region();
+  .list-single-line-ellipsis();
+  max-width: 180rpx;
+  margin-left: 16rpx;
 }

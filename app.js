@@ -4,6 +4,7 @@ import createBus from './utils/eventBus';
 import { readStoredModuleTabs, STORAGE_KEY } from './utils/moduleEntryGuard';
 import { request as httpRequest } from './api/http';
 import { cacheGet, cacheSet } from './utils/persistCache';
+import * as notificationUnread from './utils/notificationUnread';
 
 const PHONE_AUTHORIZED_LOGIN_KEY = 'phone_authorized_login_v1';
 const WECHAT_AUTHORIZED_LOGIN_KEY = 'wechat_authorized_login_v2';
@@ -20,24 +21,29 @@ function normalizeUserInfo(user) {
   };
 }
 
-function hasWechatProfile(user) {
-  if (!user) return false;
-  const name = String(user.nickName || user.name || '').trim();
-  const avatar = String(user.avatarUrl || user.avatar || '').trim();
-  return Boolean(avatar || (name && !/^用户\d+$/.test(name)));
-}
-
 function isFreshLoginCode(ticket) {
   return Boolean(ticket && ticket.code && Date.now() - ticket.createdAt < 4 * 60 * 1000);
 }
 
+function isRetiredErrandPath(rawPath) {
+  const pagePath = String(rawPath || '')
+    .trim()
+    .replace(/^\/+/, '')
+    .split(/[?#]/)[0];
+  return (
+    pagePath === 'pages/errand' ||
+    pagePath.startsWith('pages/errand/') ||
+    pagePath === 'packageErrand' ||
+    pagePath.startsWith('packageErrand/')
+  );
+}
+
 App({
   async onLaunch() {
-    console.log('>>> onLaunch 开始执行');
     const storedTabs = readStoredModuleTabs();
     this.globalData.moduleEntryTabs = storedTabs && Array.isArray(storedTabs.tabs) ? storedTabs.tabs : null;
 
-    // 真机预览排查时打开微信内置 vConsole，正式发布前在 config.js 关闭。
+    // 每次启动都同步调试开关，避免从 local 切到 test/production 后仍残留 vConsole。
     try {
       wx.setEnableDebug({ enableDebug: Boolean(config.enableVConsole) });
     } catch (e) {
@@ -87,12 +93,32 @@ App({
   },
 
   onShow() {
-    // 自建后端：后续可在此同步配置
+    this.refreshNotificationUnreadCount();
+  },
+
+  onPageNotFound(res) {
+    if (!isRetiredErrandPath(res && res.path)) return;
+    if (this._retiredPageFallbackPending) return;
+    this._retiredPageFallbackPending = true;
+    try {
+      wx.showToast({ title: '功能已下线', icon: 'none' });
+    } catch (e) {
+      /* 提示失败不应阻止安全回首页 */
+    }
+    try {
+      wx.reLaunch({
+        url: '/pages/task/index',
+        complete: () => {
+          this._retiredPageFallbackPending = false;
+        },
+      });
+    } catch (e) {
+      this._retiredPageFallbackPending = false;
+    }
   },
 
   /** 自建后端：拉取 Tab 入口配置并覆盖本地缓存 */
   async syncModuleEntryTabsFromApi() {
-    console.log('>>> syncModuleEntryTabsFromApi 开始执行');
     try {
       const res = await httpRequest({
         method: 'GET',
@@ -124,53 +150,10 @@ App({
     this.eventBus.emit('moduleEntryVisibilityChange');
   },
 
-  async getWechatProfile() {
-    return new Promise((resolve, reject) => {
-      if (!wx.getUserProfile) {
-        reject(new Error('当前微信版本不支持获取用户信息'));
-        return;
-      }
-      wx.getUserProfile({
-        desc: '用于展示社区身份信息',
-        success: (res) => resolve(res.userInfo || {}),
-        fail: reject,
-      });
-    });
-  },
-
-  async syncWechatProfile(profile = {}) {
-    const profileUpdate = {
-      name: profile.nickName || undefined,
-      avatar: profile.avatarUrl || undefined,
-      gender: profile.gender,
-    };
-    if (!profileUpdate.name && !profileUpdate.avatar && profileUpdate.gender === undefined) return;
-
-    let user = this.globalData.userInfo || {};
-    try {
-      user = await httpRequest({
-        method: 'PATCH',
-        path: 'api/user/me',
-        data: profileUpdate,
-        auth: true,
-      });
-    } catch (e) {
-      console.warn('同步微信资料失败，仅使用本地展示资料', e);
-    }
-
-    this.globalData.userInfo = normalizeUserInfo({
-      ...(user || {}),
-      ...(profile.nickName ? { name: profile.nickName, nickName: profile.nickName } : {}),
-      ...(profile.avatarUrl ? { avatar: profile.avatarUrl, avatarUrl: profile.avatarUrl } : {}),
-      ...(profile.gender !== undefined ? { gender: profile.gender } : {}),
-    });
-    cacheSet('offline_cache_user_me', this.globalData.userInfo, 7 * 24 * 3600);
-    this.eventBus.emit('userInfoChange');
-  },
-
-  async login(profile = {}) {
+  async login() {
     try {
       // 每次启动都用最新登录态覆盖旧 token，避免旧 token 导致后续接口持续 401
+      this.resetNotificationUnreadCount();
       try {
         wx.removeStorageSync('access_token');
         wx.removeStorageSync(PHONE_AUTHORIZED_LOGIN_KEY);
@@ -207,8 +190,6 @@ App({
       this.globalData.openid = (res.user && res.user.openid) || '';
       this.globalData.offlineMode = false;
       if (this.globalData.userInfo) cacheSet('offline_cache_user_me', this.globalData.userInfo, 7 * 24 * 3600);
-      if (hasWechatProfile(profile)) await this.syncWechatProfile(profile);
-      console.log('>>> login 成功, token:', res.token ? '已设置' : '无');
     } catch (err) {
       console.warn('>>> 自建后端登录失败，进入离线模式', err);
       // 登录失败时清理 token，避免携带无效 token 继续请求导致 token_invalid
@@ -227,11 +208,12 @@ App({
     }
   },
 
-  async phoneLogin(phoneCode, profile = {}) {
+  async phoneLogin(phoneCode) {
     const code = String(phoneCode || '').trim();
     if (!code) throw new Error('未获取到手机号授权凭证');
 
     try {
+      this.resetNotificationUnreadCount();
       wx.removeStorageSync('access_token');
       wx.removeStorageSync(PHONE_AUTHORIZED_LOGIN_KEY);
       wx.removeStorageSync(WECHAT_AUTHORIZED_LOGIN_KEY);
@@ -242,13 +224,6 @@ App({
 
     const jsCode = await this.getLoginCode();
     if (!jsCode) throw new Error('wx.login 未返回 code');
-    try {
-      const account = wx.getAccountInfoSync ? wx.getAccountInfoSync() : {};
-      const miniProgram = account && account.miniProgram ? account.miniProgram : {};
-      console.info('[phoneLogin] miniProgram appId:', miniProgram.appId || '');
-    } catch (e) {
-      /* ignore */
-    }
 
     const res = await httpRequest({
       method: 'POST',
@@ -267,10 +242,24 @@ App({
     this.globalData.openid = (res.user && res.user.openid) || '';
     this.globalData.offlineMode = false;
     if (this.globalData.userInfo) cacheSet('offline_cache_user_me', this.globalData.userInfo, 7 * 24 * 3600);
-    if (hasWechatProfile(profile)) await this.syncWechatProfile(profile);
     await this.syncModuleEntryTabsFromApi();
     this.eventBus.emit('userInfoChange');
+    this.refreshNotificationUnreadCount();
     return res;
+  },
+
+  refreshNotificationUnreadCount() {
+    return notificationUnread.refreshNotificationUnreadCount(this, () =>
+      httpRequest({
+        method: 'GET',
+        path: 'api/notifications/unread-count',
+        auth: true,
+      }),
+    );
+  },
+
+  resetNotificationUnreadCount() {
+    return notificationUnread.resetNotificationUnreadCount(this);
   },
 
   async refreshLoginCode() {
@@ -305,6 +294,8 @@ App({
     apiBaseUrl: '',
     loginCodeTicket: null,
     moduleEntryTabs: null,
+    notificationUnreadCount: 0,
+    notificationUnreadAccountKey: '',
     /** 底部自定义 TabBar 当前选中 key，与 tab 页路由同步（跨页面组件实例共享） */
     tabBarSelectedKey: '',
   },

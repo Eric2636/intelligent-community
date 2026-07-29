@@ -28,3 +28,4 @@
   </block>
   <view wx:else class="detail-loading">订单不存在</view>
 </view>
+<auth-login-dialog id="auth-login-dialog" />

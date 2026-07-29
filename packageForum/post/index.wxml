@@ -208,3 +208,4 @@
   </block>
   <view wx:else class="post-loading">帖子不存在</view>
 </view>
+<auth-login-dialog id="auth-login-dialog" />

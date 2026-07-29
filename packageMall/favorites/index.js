@@ -2,11 +2,14 @@ import { mallAPI } from '~/api/cloud';
 import { mallDetailUrl } from '~/utils/mallPaths';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 Page({
   data: {
     list: [],
     loading: true,
+    authReady: false,
+    showManualLoad: false,
   },
 
   onLoad() {
@@ -28,8 +31,21 @@ Page({
     this.loadList().then(() => wx.stopPullDownRefresh());
   },
 
+  onAuthorized() {
+    this.setData({ authReady: true, showManualLoad: true });
+  },
+
+  onManualLoad() {
+    this.setData({ showManualLoad: false });
+    return this.loadList();
+  },
+
   async loadList() {
     if (redirectIfEntryHidden('mall')) return;
+    if (!(await ensureMutationReady(this))) {
+      this.setData({ loading: false });
+      return;
+    }
     this.setData({ loading: true });
     const res = await mallAPI.getMyFavoriteItems();
     if (res.code === 200) this.setData({ list: res.data || [], loading: false });
@@ -39,5 +55,9 @@ Page({
   goDetail(e) {
     const { id } = e.currentTarget.dataset;
     wx.navigateTo({ url: mallDetailUrl(id) });
+  },
+
+  onUnload() {
+    this._authPageAlive = false;
   },
 });

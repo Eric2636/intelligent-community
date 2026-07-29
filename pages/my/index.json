@@ -2,6 +2,7 @@
   "navigationStyle": "custom",
   "usingComponents": {
     "t-avatar": "tdesign-miniprogram/avatar/avatar",
+    "t-badge": "tdesign-miniprogram/badge/badge",
     "t-icon": "tdesign-miniprogram/icon/icon",
     "t-tag": "tdesign-miniprogram/tag/tag",
     "nav": "/components/nav"

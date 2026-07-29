@@ -1,6 +1,7 @@
 import { mallAPI } from '~/api/cloud';
 import { getCurrentUserId } from '~/utils/getOpenid';
 import { chooseAndUploadMedia } from '~/utils/cloudMedia';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 function firstUrl(list) {
   return Array.isArray(list) && list.length ? String(list[0] || '') : '';
@@ -144,6 +145,7 @@ Page({
   },
 
   async onAddCommentImages() {
+    if (!(await ensureMutationReady(this))) return;
     const { commentImages } = this.data;
     const remain = Math.max(0, 3 - commentImages.length);
     if (remain <= 0) {
@@ -196,11 +198,7 @@ Page({
   },
 
   async submitComment() {
-    const uid = getCurrentUserId();
-    if (!uid) {
-      wx.showToast({ title: '请先登录', icon: 'none' });
-      return;
-    }
+    if (!(await ensureMutationReady(this))) return;
     const itemId = this.data.id;
     const content = (this.data.commentInput || '').trim();
     const commentImages = this.data.commentImages || [];
@@ -236,11 +234,7 @@ Page({
   },
 
   async onToggleLike(e) {
-    const uid = getCurrentUserId();
-    if (!uid) {
-      wx.showToast({ title: '请先登录', icon: 'none' });
-      return;
-    }
+    if (!(await ensureMutationReady(this))) return;
     const { id, liked } = e.currentTarget.dataset;
     const itemId = this.data.id;
     if (!id || !itemId) return;
@@ -252,6 +246,7 @@ Page({
   },
 
   async onDeleteComment(e) {
+    if (!(await ensureMutationReady(this))) return;
     const { id } = e.currentTarget.dataset;
     const itemId = this.data.id;
     if (!id || !itemId) return;
@@ -315,12 +310,9 @@ Page({
   },
 
   async onFavorite() {
+    if (!(await ensureMutationReady(this))) return;
     const { item } = this.data;
     if (!item || !item._id) return;
-    if (!getCurrentUserId()) {
-      wx.showToast({ title: '请先登录', icon: 'none' });
-      return;
-    }
     const { isFavorited } = item;
     const api = isFavorited ? mallAPI.unfavoriteItem : mallAPI.favoriteItem;
     const res = await api(item._id);
@@ -330,4 +322,7 @@ Page({
     } else wx.showToast({ title: res.message || '操作失败', icon: 'none' });
   },
 
+  onUnload() {
+    this._authPageAlive = false;
+  },
 });

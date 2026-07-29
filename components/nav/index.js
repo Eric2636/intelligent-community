@@ -1,6 +1,5 @@
 const TAB_URLS = [
   '/pages/task/index',
-  '/pages/errand/index',
   '/pages/forum/index',
   '/pages/mall/index',
   '/pages/my/index',

@@ -34,19 +34,18 @@
   }
 
   &__main {
-    flex: 1;
-    min-width: 0;
   }
 
   &__title {
     font-size: 28rpx;
     font-weight: 500;
     color: @gy1;
-    display: block;
     margin-bottom: 8rpx;
   }
 
   &__meta {
+    display: flex;
+    align-items: center;
     font-size: 24rpx;
     color: @gy3;
   }
@@ -59,4 +58,32 @@
   &__arrow {
     color: @gy3;
   }
+}
+
+.fav-item__title {
+  .list-title-clamp();
+}
+
+.fav-item,
+.fav-item__meta {
+  .list-width-safe();
+}
+
+.fav-item__thumb,
+.fav-item__arrow {
+  .list-fixed-region();
+}
+
+.fav-item__main {
+  .list-flexible-region();
+}
+
+.fav-item__price {
+  .list-flexible-text();
+}
+
+.fav-item__time {
+  .list-fixed-region();
+  .list-single-line-ellipsis();
+  max-width: 220rpx;
 }

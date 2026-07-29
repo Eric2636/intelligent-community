@@ -1,33 +1,68 @@
 // 自建后端 HTTP API 调用工具
-import { request as httpRequest } from '~/api/http';
+import { getToken, request as httpRequest } from '~/api/http';
 import { cacheGet, cacheSet, invalidateHttpCachePrefix } from '~/utils/persistCache';
 import { formatDateTimeFields } from '~/utils/date';
+import { getCurrentUserId } from '~/utils/getOpenid';
+import { createMallOrderWithIdempotency } from '~/utils/mallOrderIntent';
 import {
   LIST_REFRESH_KEYS,
-  markErrandLists,
   markForumLists,
   markListRefresh,
   markMallLists,
   markTaskLists,
 } from '~/utils/listRefresh';
 
-/** 401 不应回退到离线缓存，否则界面仍像「已登录可用」，只有上传等接口会暴露失败 */
+/** HTTP 响应错误必须原样暴露；只有 wx.request 的断网、超时等传输失败才允许回退缓存。 */
 function shouldUseOfflineCache(err) {
-  return !(err && err.statusCode === 401);
+  if (!err || err.statusCode == null || err.statusCode === '') return true;
+  const statusCode = Number(err.statusCode);
+  return !Number.isFinite(statusCode) || statusCode <= 0;
+}
+
+function getBackendCacheScope() {
+  try {
+    const app = getApp();
+    const apiBaseUrl = String((app && app.globalData && app.globalData.apiBaseUrl) || '')
+      .trim()
+      .replace(/\/+$/, '');
+    return encodeURIComponent(apiBaseUrl || 'unknown');
+  } catch (e) {
+    return 'unknown';
+  }
+}
+
+function markOfflineCacheResponse(value) {
+  const formatted = formatDateTimeFields(value);
+  if (!formatted || typeof formatted !== 'object' || Array.isArray(formatted)) return formatted;
+  return { ...formatted, __fromOfflineCache: true };
 }
 
 /** 带离线兜底的 HTTP 请求：正常始终请求后端，失败时才读本地缓存 */
 function cachedRequest(path, query, ttlSeconds = 60, options = {}) {
-  const cacheKey = `http_cache:${path}:${JSON.stringify(query || {})}`;
-  return httpRequest({ method: 'GET', path, query, auth: true, ...options })
+  const { cacheScope, cacheKeyPrefix = 'http_cache', ...requestOptions } = options;
+  let scope = '';
+  if (cacheScope === 'identity') {
+    const token = getToken();
+    const userId = String(getCurrentUserId() || '').trim();
+    if (!token) scope = 'guest';
+    else if (userId) scope = `user:${encodeURIComponent(userId)}`;
+    else scope = null;
+  }
+  const cacheKey =
+    scope === null
+      ? ''
+      : `${cacheKeyPrefix}:${path}:backend:${getBackendCacheScope()}:${
+          scope ? `scope:${scope}:` : ''
+        }${JSON.stringify(query || {})}`;
+  return httpRequest({ method: 'GET', path, query, auth: true, ...requestOptions })
     .then((res) => {
-      if (res && res.code === 200) cacheSet(cacheKey, res, ttlSeconds);
+      if (cacheKey && res && res.code === 200) cacheSet(cacheKey, res, ttlSeconds);
       return formatDateTimeFields(res);
     })
     .catch((err) => {
       if (!shouldUseOfflineCache(err)) throw err;
-      const cached = cacheGet(cacheKey);
-      if (cached) return formatDateTimeFields(cached);
+      const cached = cacheKey ? cacheGet(cacheKey) : null;
+      if (cached) return markOfflineCacheResponse(cached);
       throw err;
     });
 }
@@ -44,10 +79,6 @@ function clearItemListCache() {
   invalidateHttpCachePrefix('http_cache:api/items:');
 }
 
-function clearErrandListCache() {
-  invalidateHttpCachePrefix('http_cache:api/errands:');
-}
-
 function refreshAfterSuccess(res, refresh) {
   if (res && res.code === 200) refresh();
   return res;
@@ -62,31 +93,21 @@ export const taskAPI = {
     const keyword = params && params.keyword ? String(params.keyword).trim() : '';
     const page = params && params.page ? Number(params.page) : 1;
     const pageSize = params && params.pageSize ? Number(params.pageSize) : 50;
-    const cacheKey = `offline_cache_task_list:${keyword || '_'}:${page}:${pageSize}`;
-
-    return httpRequest({
+    const data = { keyword: keyword || undefined, page, pageSize };
+    return cachedRequest('api/tasks/list', data, 3600, {
       method: 'POST',
-      path: 'api/tasks/list',
-      data: { keyword: keyword || undefined, page, pageSize },
+      query: undefined,
+      data,
       auth: false,
-    })
-      .then((res) => {
-        if (res && res.code === 200) cacheSet(cacheKey, res, 3600);
-        return formatDateTimeFields(res);
-      })
-      .catch((err) => {
-        if (!shouldUseOfflineCache(err)) throw err;
-        const cached = cacheGet(cacheKey);
-        if (cached) return formatDateTimeFields(cached);
-        throw err;
-      });
+      cacheKeyPrefix: 'offline_cache_task_list',
+    });
   },
 
   // 获取任务详情
   getTaskDetail(taskId) {
     return httpRequest({
       method: 'GET',
-      path: `api/tasks/${taskId}`,
+      path: `api/tasks/${encodeURIComponent(taskId)}`,
       auth: false,
     }).then(formatDateTimeFields);
   },
@@ -161,6 +182,15 @@ export const taskAPI = {
     return httpRequest({
       method: 'POST',
       path: `api/tasks/${taskId}/confirm-complete`,
+      auth: true,
+    }).then((res) => refreshAfterSuccess(res, markTaskLists));
+  },
+
+  // 发布者驳回完成提交（保留上次凭证，任务退回进行中）
+  rejectComplete(taskId) {
+    return httpRequest({
+      method: 'POST',
+      path: `api/tasks/${taskId}/reject-complete`,
       auth: true,
     }).then((res) => refreshAfterSuccess(res, markTaskLists));
   },
@@ -262,7 +292,7 @@ export const forumAPI = {
     }
     return httpRequest({
       method: 'GET',
-      path: `api/posts/${postId}`,
+      path: `api/posts/${encodeURIComponent(postId)}`,
       auth: true,
     }).then(formatDateTimeFields);
   },
@@ -445,11 +475,16 @@ export const mallAPI = {
   // 获取商品列表（可传 categoryId 或 { categoryId, keyword, orderBy }，60s 缓存）
   getItems(categoryIdOrParams = {}) {
     const params = typeof categoryIdOrParams === 'string' ? { categoryId: categoryIdOrParams } : categoryIdOrParams;
-    return cachedRequest('api/items', {
-      categoryId: params.categoryId,
-      keyword: params.keyword,
-      orderBy: params.orderBy,
-    }, 60);
+    return cachedRequest(
+      'api/items',
+      {
+        categoryId: params.categoryId,
+        keyword: params.keyword,
+        orderBy: params.orderBy,
+      },
+      60,
+      { auth: 'optional', cacheScope: 'identity' },
+    );
   },
 
   // 获取商品列表（别名，保持兼容性）
@@ -462,7 +497,7 @@ export const mallAPI = {
     return httpRequest({
       method: 'GET',
       path: `api/items/${itemId}`,
-      auth: true,
+      auth: 'optional',
     }).then(formatDateTimeFields);
   },
 
@@ -471,7 +506,7 @@ export const mallAPI = {
     return httpRequest({
       method: 'GET',
       path: `api/items/${itemId}/comments`,
-      auth: true,
+      auth: 'optional',
     }).then(formatDateTimeFields);
   },
 
@@ -539,7 +574,10 @@ export const mallAPI = {
       method: 'POST',
       path: `api/items/${itemId}/favorite`,
       auth: true,
-    }).then((res) => refreshAfterSuccess(res, markMallLists));
+    }).then((res) => {
+      if (res && res.code === 200) clearItemListCache();
+      return refreshAfterSuccess(res, markMallLists);
+    });
   },
 
   // 取消收藏商品
@@ -548,7 +586,10 @@ export const mallAPI = {
       method: 'DELETE',
       path: `api/items/${itemId}/favorite`,
       auth: true,
-    }).then((res) => refreshAfterSuccess(res, markMallLists));
+    }).then((res) => {
+      if (res && res.code === 200) clearItemListCache();
+      return refreshAfterSuccess(res, markMallLists);
+    });
   },
 
   // 获取我的收藏商品
@@ -562,15 +603,19 @@ export const mallAPI = {
 
   // 创建订单（购买）
   createOrder(data) {
-    return httpRequest({
-      method: 'POST',
-      path: 'api/orders',
-      data,
-      auth: true,
-    }).then((res) => refreshAfterSuccess(res, () => {
-      markMallLists();
-      markListRefresh(LIST_REFRESH_KEYS.mallOrders);
-    }));
+    return createMallOrderWithIdempotency(data, (payload) =>
+      httpRequest({
+        method: 'POST',
+        path: 'api/orders',
+        data: payload,
+        auth: true,
+      }),
+    ).then((res) =>
+      refreshAfterSuccess(res, () => {
+        markMallLists();
+        markListRefresh(LIST_REFRESH_KEYS.mallOrders);
+      }),
+    );
   },
 
   // 获取我的订单
@@ -586,7 +631,7 @@ export const mallAPI = {
   getOrderDetail(orderId) {
     return httpRequest({
       method: 'GET',
-      path: `api/orders/${orderId}`,
+      path: `api/orders/${encodeURIComponent(orderId)}`,
       auth: true,
     }).then(formatDateTimeFields);
   },
@@ -609,124 +654,8 @@ export const mallAPI = {
     return httpRequest({
       method: 'GET',
       path: 'api/categories',
-      auth: true,
+      auth: 'optional',
     });
-  },
-};
-
-/**
- * 跑腿相关 API（独立模块，不复用 forum/task）
- */
-export const errandAPI = {
-  // 获取跑腿列表（keyword, orderBy: time|hot, page, pageSize，30s 缓存）
-  getErrandList(params = {}) {
-    const { page = 1, pageSize = 10, keyword, orderBy } = params;
-    return cachedRequest('api/errands', { page, pageSize, keyword, orderBy }, 30);
-  },
-
-  // 获取跑腿详情
-  getErrandDetail(errandId) {
-    return httpRequest({
-      method: 'GET',
-      path: `api/errands/${errandId}`,
-      auth: true,
-    }).then(formatDateTimeFields);
-  },
-
-  // 发布跑腿
-  publishErrand(data) {
-    const app = getApp();
-    const authorName = (app.globalData.userInfo && app.globalData.userInfo.nickName) || '匿名用户';
-
-    return httpRequest({
-      method: 'POST',
-      path: 'api/errands',
-      data: { authorName, ...data },
-      auth: true,
-    }).then((res) => {
-      if (res && res.code === 200) clearErrandListCache();
-      return refreshAfterSuccess(res, markErrandLists);
-    });
-  },
-
-  // 领取跑腿（不可领取自己发布的）
-  claimErrand(errandId) {
-    const app = getApp();
-    const claimerName = (app.globalData.userInfo && app.globalData.userInfo.nickName) || '邻居';
-    return httpRequest({
-      method: 'POST',
-      path: `api/errands/${errandId}/claim`,
-      data: { claimerName },
-      auth: true,
-    }).then((res) => refreshAfterSuccess(res, markErrandLists));
-  },
-
-  // 发布者确认跑腿已完成（线下佣金自行结算）
-  completeErrand(errandId) {
-    return httpRequest({
-      method: 'POST',
-      path: `api/errands/${errandId}/complete`,
-      auth: true,
-    }).then((res) => refreshAfterSuccess(res, markErrandLists));
-  },
-
-  // 发布跑腿回复
-  publishErrandReply(errandId, data) {
-    const app = getApp();
-    const authorName = (app.globalData.userInfo && app.globalData.userInfo.nickName) || '匿名用户';
-
-    return httpRequest({
-      method: 'POST',
-      path: `api/errands/${errandId}/replies`,
-      data: { authorName, ...data },
-      auth: true,
-    }).then((res) => refreshAfterSuccess(res, markErrandLists));
-  },
-
-  // 点赞跑腿
-  likeErrand(errandId) {
-    return httpRequest({
-      method: 'POST',
-      path: `api/errands/${errandId}/like`,
-      auth: true,
-    }).then((res) => refreshAfterSuccess(res, markErrandLists));
-  },
-
-  // 取消点赞跑腿
-  unlikeErrand(errandId) {
-    return httpRequest({
-      method: 'DELETE',
-      path: `api/errands/${errandId}/like`,
-      auth: true,
-    }).then((res) => refreshAfterSuccess(res, markErrandLists));
-  },
-
-  // 收藏跑腿
-  favoriteErrand(errandId) {
-    return httpRequest({
-      method: 'POST',
-      path: `api/errands/${errandId}/favorite`,
-      auth: true,
-    }).then((res) => refreshAfterSuccess(res, markErrandLists));
-  },
-
-  // 取消收藏跑腿
-  unfavoriteErrand(errandId) {
-    return httpRequest({
-      method: 'DELETE',
-      path: `api/errands/${errandId}/favorite`,
-      auth: true,
-    }).then((res) => refreshAfterSuccess(res, markErrandLists));
-  },
-
-  // 获取我的跑腿（role: published | claimed）
-  getMyErrands(params = {}) {
-    return httpRequest({
-      method: 'GET',
-      path: 'api/errands/my',
-      query: params,
-      auth: true,
-    }).then(formatDateTimeFields);
   },
 };
 
@@ -767,13 +696,48 @@ export const commonAPI = {
     });
   },
 
-  // 获取通知列表
-  getNotifications() {
+  // 获取通知列表（服务端按创建时间倒序分页）
+  getNotifications(params = {}) {
+    const page = params && params.page ? Number(params.page) : 1;
+    const pageSize = params && params.pageSize ? Number(params.pageSize) : 20;
     return httpRequest({
       method: 'GET',
       path: 'api/notifications',
+      query: { page, pageSize },
       auth: true,
     }).then(formatDateTimeFields);
+  },
+
+  getNotificationUnreadCount() {
+    return httpRequest({
+      method: 'GET',
+      path: 'api/notifications/unread-count',
+      auth: true,
+    });
+  },
+
+  markNotificationRead(id) {
+    return httpRequest({
+      method: 'PATCH',
+      path: `api/notifications/${encodeURIComponent(id)}/read`,
+      auth: true,
+    });
+  },
+
+  markAllNotificationsRead() {
+    return httpRequest({
+      method: 'PATCH',
+      path: 'api/notifications/read-all',
+      auth: true,
+    });
+  },
+
+  deleteNotification(id) {
+    return httpRequest({
+      method: 'DELETE',
+      path: `api/notifications/${encodeURIComponent(id)}`,
+      auth: true,
+    });
   },
 
   // 提交反馈
@@ -799,7 +763,6 @@ export const commonAPI = {
 
 export default {
   task: taskAPI,
-  errand: errandAPI,
   forum: forumAPI,
   mall: mallAPI,
   user: userAPI,

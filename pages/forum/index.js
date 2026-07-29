@@ -1,9 +1,12 @@
+import { Subject } from 'rxjs';
+
 import { forumAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { normalizeForumListPost, forumListPostHasMedia } from '~/utils/forumPostList';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureMutationReady } from '~/utils/authIdentity';
+import { createHotSearch } from '~/utils/hotSearch';
 
 function getPostIdFromEvent(e) {
   const { id } = e.currentTarget.dataset;
@@ -23,6 +26,7 @@ Page({
     page: 1,
     pageSize: 10,
     keyword: '',
+    queryKeyword: '',
     orderBy: 'time', // time | hot
     // 虚拟列表：仅渲染可见窗口，减少长列表卡顿
     virtualStart: 0,
@@ -35,6 +39,26 @@ Page({
 
   onLoad() {
     if (redirectIfEntryHidden('forum')) return;
+    this._pageAlive = true;
+    this._keyword$ = new Subject();
+    this._searchRequestId = 0;
+    this._committedRequestInvalidated = false;
+    this._activeSearchKeyword = '';
+    this._announcementRequestId = 0;
+    this._stopHotSearch = createHotSearch(this._keyword$, (keyword) => {
+      if (!this._pageAlive) return;
+      if (keyword === this._activeSearchKeyword) {
+        if (this._committedRequestInvalidated) {
+          this.setData({ page: 1, hasMore: true });
+          this.loadPosts(true);
+        }
+        return;
+      }
+      this._activeSearchKeyword = keyword;
+      this._committedRequestInvalidated = false;
+      this.setData({ queryKeyword: keyword, page: 1, hasMore: true });
+      this.loadPosts(true);
+    });
     this._skipNextShowRefresh = true;
     this.loadAnnouncements();
     this.loadPosts();
@@ -61,9 +85,6 @@ Page({
       hasMore: true
     });
     await Promise.all([this.loadAnnouncements(), this.loadPosts()]);
-    this.setData({
-      refreshing: false
-    });
   },
 
   // 上拉加载更多
@@ -80,23 +101,22 @@ Page({
   },
 
   onSearchInput(e) {
+    if (!this._pageAlive) return;
     const nextKeyword = e.detail.value || '';
-    const wasSearching = Boolean((this.data.keyword || '').trim());
-    this.setData({ keyword: nextKeyword });
-    if (wasSearching && !String(nextKeyword).trim()) {
-      this.setData({ page: 1, hasMore: true });
-      this.loadPosts(true);
+    const normalizedKeyword = String(nextKeyword).trim();
+    if (normalizedKeyword !== this._activeSearchKeyword) {
+      const hasInFlightRequest = this._activeListRequestId === this._searchRequestId;
+      this._searchRequestId += 1;
+      this._committedRequestInvalidated =
+        this._committedRequestInvalidated || hasInFlightRequest;
     }
+    this.setData({ keyword: nextKeyword });
+    this._keyword$.next(nextKeyword);
   },
 
   onSearchClear() {
-    this.setData({ keyword: '', page: 1, hasMore: true });
-    this.loadPosts(true);
-  },
-
-  onSearchConfirm() {
-    this.setData({ page: 1, hasMore: true });
-    this.loadPosts(true);
+    if (!this._pageAlive) return;
+    this.onSearchInput({ detail: { value: '' } });
   },
 
   onOrderChange(e) {
@@ -115,20 +135,32 @@ Page({
   },
 
   async loadPosts(refresh = true) {
+    this._searchRequestId += 1;
+    const requestId = this._searchRequestId;
+    this._activeListRequestId = requestId;
+    this._committedRequestInvalidated = false;
+    const { queryKeyword, orderBy } = this.data;
+    const page = refresh ? 1 : this.data.page;
+    const keyword = String(queryKeyword || '').trim();
     this.setData({
+      page,
       loading: true,
       showNoMore: refresh ? false : this.data.showNoMore,
     });
 
     try {
       const res = await forumAPI.getPostList({
-        page: this.data.page,
+        page,
         pageSize: this.data.pageSize,
-        keyword: (this.data.keyword && String(this.data.keyword).trim()) || undefined,
-        orderBy: this.data.orderBy
+        keyword: keyword || undefined,
+        orderBy
       });
+      if (!this._pageAlive || requestId !== this._searchRequestId) return;
 
       if (res.code === 200 && res.data) {
+        if (res.__fromOfflineCache) {
+          wx.showToast({ title: '网络不可用，当前展示缓存数据', icon: 'none' });
+        }
         const { pinned, list } = res.data;
         const pinnedNorm = (pinned || []).map(normalizeForumListPost);
         const chunk = (list || []).map(normalizeForumListPost);
@@ -168,35 +200,34 @@ Page({
           });
         }
       } else {
-        this.setData({
-          pinned: [],
-          list: [],
-          loading: false,
-        });
+        const message = String(res.message || '获取帖子失败');
         wx.showToast({
-          title: res.message || '获取帖子失败',
+          title: message.includes('重试') ? message : `${message}，请重试`,
           icon: 'none'
         });
       }
     } catch (err) {
+      if (!this._pageAlive || requestId !== this._searchRequestId) return;
       console.error('加载帖子失败:', err);
-      this.setData({
-        pinned: [],
-        list: [],
-        loading: false,
-      });
+      const message = String(err.errMsg || err.message || '网络错误');
       wx.showToast({
-        title: err.errMsg || '网络错误，请重试',
+        title: message.includes('重试') ? message : `${message}，请重试`,
         icon: 'none'
       });
     } finally {
-      this.setData({ loading: false });
+      if (this._pageAlive && requestId === this._searchRequestId) {
+        this._activeListRequestId = 0;
+        this.setData({ loading: false, refreshing: false });
+      }
     }
   },
 
   async loadAnnouncements() {
+    this._announcementRequestId = (this._announcementRequestId || 0) + 1;
+    const requestId = this._announcementRequestId;
     try {
       const res = await forumAPI.getAnnouncements({ limit: 5 });
+      if (!this._pageAlive || requestId !== this._announcementRequestId) return;
       if (res.code === 200 && Array.isArray(res.data)) {
         const announcements = res.data.map((item) => {
           const normalized = normalizeForumListPost(item);
@@ -212,8 +243,8 @@ Page({
         });
       }
     } catch (err) {
+      if (!this._pageAlive || requestId !== this._announcementRequestId) return;
       console.error('加载公告失败:', err);
-      this.setData({ announcements: [] });
     }
   },
 
@@ -275,7 +306,7 @@ Page({
   },
 
   async onListLike(e) {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const postId = getPostIdFromEvent(e);
     const post = this.findListPost(postId);
     if (!postId || !post) return;
@@ -337,7 +368,7 @@ Page({
   },
 
   async goPublish() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     wx.navigateTo({
       url: '/packageForum/publish/index',
     });
@@ -356,5 +387,14 @@ Page({
     if (newStart === this.data.virtualStart) return;
     const displayList = this.data.list.slice(newStart, newStart + this.data.VIRTUAL_WINDOW);
     this.setData({ virtualStart: newStart, displayList });
+  },
+
+  onUnload() {
+    this._pageAlive = false;
+    this._authPageAlive = false;
+    this._announcementRequestId = (this._announcementRequestId || 0) + 1;
+    if (this._stopHotSearch) this._stopHotSearch();
+    if (this._keyword$) this._keyword$.complete();
+    if (this._noMoreTimer) clearTimeout(this._noMoreTimer);
   },
 });
