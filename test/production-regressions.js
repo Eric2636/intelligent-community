@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict');
-const { readFile, stat } = require('node:fs/promises');
+const { readFile } = require('node:fs/promises');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
@@ -71,7 +71,6 @@ Promise.all([
   source('packageTask/my-tasks/index.wxml'),
   source('packageTask/my-tasks/index.json'),
   source('utils/defaultAvatar.js'),
-  stat(path.join(root, 'static/avatar1.png')),
 ]).then(([
   app,
   configEntry,
@@ -98,7 +97,6 @@ Promise.all([
   myTasksTemplate,
   myTasksConfig,
   defaultAvatar,
-  defaultAvatarStat,
 ]) => {
   assert.doesNotMatch(myPage, /profileDisplay/, '“我的”页不应依赖可能被遗漏打包的新工具模块');
   assert.doesNotMatch(infoEdit, /profileDisplay/, '资料编辑页不应依赖可能被遗漏打包的新工具模块');
@@ -132,21 +130,14 @@ Promise.all([
   );
   assert.match(
     defaultAvatar,
-    /export const DEFAULT_AVATAR = '\/static\/avatar1\.png';/,
-    '默认头像路径必须由唯一工具模块集中维护',
-  );
-  assert.equal(
-    (defaultAvatar.match(/\/static\/avatar1\.png/g) || []).length,
-    1,
-    '默认头像工具内只允许声明一次默认图片路径',
+    /export const DEFAULT_AVATAR_ICON = 'user';/,
+    '默认头像必须统一使用 TDesign user 图标',
   );
   assert.match(
     defaultAvatar,
-    /return \(typeof value === 'string' && value\.trim\(\)\) \|\| DEFAULT_AVATAR;/,
-    'withDefaultAvatar 必须在空值或空白字符串时返回默认头像',
+    /return typeof value === 'string' \? value\.trim\(\) : '';/,
+    'normalizeAvatar 必须保留有效头像地址并让空值交给 TDesign 图标兜底',
   );
-  assert.equal(defaultAvatarStat.isFile(), true, '默认头像资源必须是文件');
-  assert.ok(defaultAvatarStat.size > 0, '默认头像资源不能为空');
   [
     ['业主互助公开列表', taskListPage],
     ['业主互助详情', taskDetailPage],
@@ -154,13 +145,13 @@ Promise.all([
   ].forEach(([pageName, pageSource]) => {
     assert.match(
       pageSource,
-      /import \{ withDefaultAvatar \} from '~\/utils\/defaultAvatar';/,
-      `${pageName}必须复用统一默认头像工具`,
+      /import \{ normalizeAvatar \} from '~\/utils\/defaultAvatar';/,
+      `${pageName}必须复用统一头像归一化工具`,
     );
     assert.match(
       pageSource,
-      /publisherAvatar:\s*withDefaultAvatar\([^)]*publisherAvatar\)/,
-      `${pageName}必须在数据归一化阶段兜底发布者头像`,
+      /publisherAvatar:\s*normalizeAvatar\([^)]*publisherAvatar\)/,
+      `${pageName}必须在数据归一化阶段规范发布者头像`,
     );
   });
   assert.doesNotMatch(
@@ -170,8 +161,8 @@ Promise.all([
   );
   assert.match(
     taskDetailPage,
-    /takerAvatar:\s*withDefaultAvatar\([^)]*takerAvatar\)/,
-    '业主互助详情展示接单人时也必须兜底头像',
+    /takerAvatar:\s*normalizeAvatar\([^)]*takerAvatar\)/,
+    '业主互助详情展示接单人时也必须规范头像',
   );
   [
     ['业主互助公开列表', taskListTemplate, taskListConfig],
@@ -179,10 +170,10 @@ Promise.all([
     ['我的任务列表', myTasksTemplate, myTasksConfig],
   ].forEach(([pageName, template, config]) => {
     assert.match(config, /"t-avatar":\s*"tdesign-miniprogram\/avatar\/avatar"/, `${pageName}必须注册 TDesign 头像组件`);
-    assert.doesNotMatch(
+    assert.match(
       template,
-      /wx:if="\{\{[^}]*publisherAvatar[^}]*\}\}"[^>]*>\s*<t-avatar/,
-      `${pageName}不能用条件渲染留下头像空白`,
+      /<t-avatar\b[^>]*image="\{\{(?:card|task)\.publisherAvatar\}\}"[^>]*icon="\{\{(?:card|task)\.publisherAvatar \? '' : 'user'\}\}"/,
+      `${pageName}发布者头像为空时必须显示统一的 TDesign user 图标`,
     );
   });
   assertCardPublisherAvatar(taskListTemplate, '业主互助公开列表');

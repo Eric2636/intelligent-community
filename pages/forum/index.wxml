@@ -92,10 +92,7 @@
       >
         <view class="post-item__author-row">
           <view class="post-item__author-main">
-            <image wx:if="{{item.authorAvatar}}" class="post-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
-            <view wx:else class="post-item__avatar post-item__avatar--placeholder">
-              <t-icon name="user" size="32rpx" color="#8e8e93" />
-            </view>
+            <t-avatar class="post-item__avatar" image="{{item.authorAvatar}}" icon="{{item.authorAvatar ? '' : 'user'}}" size="48rpx" alt="{{item.authorName || '用户头像'}}" />
             <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
             <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
           </view>
@@ -132,10 +129,7 @@
           >
             <view class="post-item__author-row">
               <view class="post-item__author-main">
-                <image wx:if="{{item.authorAvatar}}" class="post-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
-                <view wx:else class="post-item__avatar post-item__avatar--placeholder">
-                  <t-icon name="user" size="32rpx" color="#8e8e93" />
-                </view>
+                <t-avatar class="post-item__avatar" image="{{item.authorAvatar}}" icon="{{item.authorAvatar ? '' : 'user'}}" size="48rpx" alt="{{item.authorName || '用户头像'}}" />
                 <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
                 <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
               </view>
@@ -170,10 +164,7 @@
         >
           <view class="post-item__author-row">
             <view class="post-item__author-main">
-              <image wx:if="{{item.authorAvatar}}" class="post-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
-              <view wx:else class="post-item__avatar post-item__avatar--placeholder">
-                <t-icon name="user" size="32rpx" color="#8e8e93" />
-              </view>
+              <t-avatar class="post-item__avatar" image="{{item.authorAvatar}}" icon="{{item.authorAvatar ? '' : 'user'}}" size="48rpx" alt="{{item.authorName || '用户头像'}}" />
               <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
               <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
             </view>

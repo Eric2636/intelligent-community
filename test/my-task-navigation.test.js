@@ -135,7 +135,7 @@ function createMyTasksPage(pageSource, options = {}) {
     formatDateTimeYmdHm: (value) => value,
     redirectIfEntryHidden: () => false,
     taskAPI,
-    withDefaultAvatar: (value) => value || '/static/avatar1.png',
+    normalizeAvatar: (value) => value || '',
     wx: {
       navigateTo(config) {
         navigationCalls.push(config);

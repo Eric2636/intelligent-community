@@ -2,7 +2,7 @@ import { taskAPI } from '~/api/cloud';
 import { config } from '~/config/index';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { ensureMutationReady } from '~/utils/authIdentity';
-import { withDefaultAvatar } from '~/utils/defaultAvatar';
+import { normalizeAvatar } from '~/utils/defaultAvatar';
 import { chooseAndUploadMedia } from '~/utils/cloudMedia';
 
 const STATUS_TEXT = {
@@ -80,8 +80,8 @@ Page({
       const raw = res.data;
       const task = {
         ...raw,
-        publisherAvatar: withDefaultAvatar(raw.publisherAvatar),
-        takerAvatar: withDefaultAvatar(raw.takerAvatar),
+        publisherAvatar: normalizeAvatar(raw.publisherAvatar),
+        takerAvatar: normalizeAvatar(raw.takerAvatar),
         images: Array.isArray(raw.images) ? raw.images : [],
         videos: Array.isArray(raw.videos) ? raw.videos : [],
         proofImages: Array.isArray(raw.proofImages) ? raw.proofImages : [],

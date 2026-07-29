@@ -71,8 +71,7 @@
         <block wx:for="{{comments}}" wx:key="id">
           <view class="comment-thread">
             <view class="comment-item">
-              <image wx:if="{{item.userAvatar}}" class="comment-item__avatar" src="{{item.userAvatar}}" mode="aspectFill" />
-              <view wx:else class="comment-item__avatar comment-item__avatar--placeholder"></view>
+              <t-avatar class="comment-item__avatar" image="{{item.userAvatar}}" icon="{{item.userAvatar ? '' : 'user'}}" size="56rpx" alt="{{item.userName || '用户头像'}}" />
               <view class="comment-item__main">
                 <view class="comment-item__top">
                   <text class="comment-item__name">{{item.userName || '用户'}}</text>
@@ -111,8 +110,7 @@
 
             <block wx:for="{{item.replies}}" wx:for-item="sub" wx:key="id">
               <view class="comment-item comment-item--sub">
-                <image wx:if="{{sub.userAvatar}}" class="comment-item__avatar" src="{{sub.userAvatar}}" mode="aspectFill" />
-                <view wx:else class="comment-item__avatar comment-item__avatar--placeholder"></view>
+                <t-avatar class="comment-item__avatar" image="{{sub.userAvatar}}" icon="{{sub.userAvatar ? '' : 'user'}}" size="56rpx" alt="{{sub.userName || '用户头像'}}" />
                 <view class="comment-item__main">
                   <view class="comment-item__replyto" wx:if="{{sub.replyToAuthorName}}">回复 @{{sub.replyToAuthorName}}</view>
                   <view class="comment-item__top">

@@ -1,10 +1,7 @@
 <t-navbar left-arrow placeholder title="个人信息" />
 <view class="info-edit">
   <view class="info-edit__avatar-panel">
-    <image wx:if="{{personInfo.avatar}}" class="info-edit__avatar-img" src="{{personInfo.avatar}}" mode="aspectFill" />
-    <view wx:else class="info-edit__avatar-placeholder">
-      <t-icon name="user" size="64rpx" color="#8e8e93" />
-    </view>
+    <t-avatar class="info-edit__avatar" image="{{personInfo.avatar}}" icon="{{personInfo.avatar ? '' : 'user'}}" size="128rpx" alt="{{personInfo.name || '用户头像'}}" />
     <view class="info-edit__avatar-actions">
       <button class="info-edit__avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseWechatAvatar">微信头像</button>
       <button class="info-edit__avatar-btn info-edit__avatar-btn--plain" bindtap="onChooseCustomAvatar">自定义</button>

@@ -29,24 +29,33 @@
           </block>
         </view>
       </view>
-      <view class="detail-card__row"><text class="detail-card__label">地点</text>{{task.location}}</view>
-      <view class="detail-card__row detail-card__row--publisher">
+      <view class="detail-card__row">
+        <text class="detail-card__label">地点</text>
+        <text class="detail-card__value">{{task.location}}</text>
+      </view>
+      <view class="detail-card__row">
         <text class="detail-card__label">发布者</text>
-        <view class="detail-card__person">
-          <t-avatar class="detail-card__avatar" image="{{task.publisherAvatar}}" size="72rpx" alt="{{task.publisherName || '发布者头像'}}" />
+        <view class="detail-card__value detail-card__person">
+          <t-avatar class="detail-card__avatar" image="{{task.publisherAvatar}}" icon="{{task.publisherAvatar ? '' : 'user'}}" size="72rpx" alt="{{task.publisherName || '发布者头像'}}" />
           <text class="detail-card__person-name">{{task.publisherName || '发布者'}}</text>
           <text wx:if="{{task.contentTagLabel || task.adminLabel || task.publisherIdentityLabel}}" class="identity-tag identity-tag--{{task.contentTagType || (task.adminLabel ? 'admin' : (task.publisherIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{task.contentTagLabel || task.adminLabel || task.publisherIdentityLabel}}</text>
         </view>
       </view>
       <view class="detail-card__row" wx:if="{{task.takerName}}">
         <text class="detail-card__label">接单人</text>
-        <view class="detail-card__person">
-          <t-avatar class="detail-card__avatar" image="{{task.takerAvatar}}" size="72rpx" alt="{{task.takerName || '接单人头像'}}" />
+        <view class="detail-card__value detail-card__person">
+          <t-avatar class="detail-card__avatar" image="{{task.takerAvatar}}" icon="{{task.takerAvatar ? '' : 'user'}}" size="72rpx" alt="{{task.takerName || '接单人头像'}}" />
           <text class="detail-card__person-name">{{task.takerName}}</text>
         </view>
       </view>
-      <view class="detail-card__row"><text class="detail-card__label">发布时间</text>{{task.createdAt}}</view>
-      <view wx:if="{{task.status === 'in_progress' && task.claimedAt}}" class="detail-card__row"><text class="detail-card__label">领取时间</text>{{task.claimedAt}}</view>
+      <view class="detail-card__row">
+        <text class="detail-card__label">发布时间</text>
+        <text class="detail-card__value">{{task.createdAt}}</text>
+      </view>
+      <view wx:if="{{task.status === 'in_progress' && task.claimedAt}}" class="detail-card__row">
+        <text class="detail-card__label">领取时间</text>
+        <text class="detail-card__value">{{task.claimedAt}}</text>
+      </view>
       <view wx:if="{{task.proofText || task.proofImages.length}}" class="detail-card__proof">
         <text class="detail-card__label">完成凭证</text>
         <text wx:if="{{task.proofText}}" class="detail-card__proof-text">{{task.proofText}}</text>
@@ -106,18 +115,24 @@
               >×</view>
             </view>
           </view>
-          <t-button
-            theme="primary"
-            variant="outline"
-            size="large"
-            block
-            loading="{{proofUploading}}"
-            disabled="{{proofUploading || proofImages.length >= 9}}"
-            bindtap="onAddProofImages"
-          >{{proofImages.length >= 9 ? '最多上传 9 张图片' : '上传完成图片'}}</t-button>
+          <view class="detail-proof__action">
+            <t-button
+              theme="primary"
+              variant="outline"
+              size="large"
+              block
+              loading="{{proofUploading}}"
+              disabled="{{proofUploading || proofImages.length >= 9}}"
+              bindtap="onAddProofImages"
+            >{{proofImages.length >= 9 ? '最多上传 9 张图片' : '上传完成图片'}}</t-button>
+          </view>
           <emoji-panel wx:if="{{showProofEmojiPanel}}" bindselect="onProofEmojiSelect" />
-          <t-button theme="primary" size="large" block bindtap="onSubmitComplete" custom-class="detail-actions__secondary">提交完成</t-button>
-          <t-button theme="default" size="large" block bindtap="onAbandon" style="margin-top: 16rpx;">放弃任务</t-button>
+          <view class="detail-proof__action detail-proof__action--spaced">
+            <t-button theme="primary" size="large" block bindtap="onSubmitComplete">提交完成</t-button>
+          </view>
+          <view class="detail-proof__action detail-proof__action--spaced">
+            <t-button theme="default" size="large" block bindtap="onAbandon">放弃任务</t-button>
+          </view>
         </view>
         <view class="detail-actions__hint">提示：你也可以放弃任务，任务将重新回到待领取。</view>
       </block>

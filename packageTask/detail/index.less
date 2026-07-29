@@ -84,23 +84,17 @@
   &__row {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 8rpx;
+    flex-wrap: nowrap;
+    gap: 16rpx;
     font-size: 26rpx;
     color: @gy2;
-    margin-bottom: 12rpx;
-  }
-
-  &__row--publisher {
-    align-items: flex-start;
+    margin-bottom: 16rpx;
   }
 
   &__person {
     display: flex;
     align-items: center;
     gap: 12rpx;
-    flex: 1;
-    min-width: 0;
   }
 
   &__avatar {
@@ -115,9 +109,17 @@
   }
 
   &__label {
+    width: 112rpx;
     flex-shrink: 0;
     color: @gy3;
-    margin-right: 12rpx;
+    line-height: 40rpx;
+  }
+
+  &__value {
+    flex: 1;
+    min-width: 0;
+    line-height: 40rpx;
+    overflow-wrap: anywhere;
   }
 
   &__proof {
@@ -127,7 +129,11 @@
     font-size: 26rpx;
     color: @gy2;
 
-    .detail-card__label { display: block; margin-bottom: 8rpx; }
+    .detail-card__label {
+      display: block;
+      width: auto;
+      margin-bottom: 8rpx;
+    }
   }
 
   &__proof-text {
@@ -233,6 +239,14 @@
 }
 
 .detail-proof {
+  &__action {
+    width: 100%;
+  }
+
+  &__action--spaced {
+    margin-top: 16rpx;
+  }
+
   &__input {
     width: 100%;
     min-height: 160rpx;

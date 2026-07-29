@@ -112,7 +112,7 @@ async function createHarness(kind, options = {}) {
       redirectIfEntryHidden: () => false,
       syncCustomTabBar() {},
       taskAPI,
-      withDefaultAvatar: (value) => value || '/static/avatar1.png',
+      normalizeAvatar: (value) => value || '',
       wx: {
         navigateTo() {},
         previewImage() {},

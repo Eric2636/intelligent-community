@@ -1,5 +1,5 @@
-export const DEFAULT_AVATAR = '/static/avatar1.png';
+export const DEFAULT_AVATAR_ICON = 'user';
 
-export function withDefaultAvatar(value) {
-  return (typeof value === 'string' && value.trim()) || DEFAULT_AVATAR;
+export function normalizeAvatar(value) {
+  return typeof value === 'string' ? value.trim() : '';
 }

@@ -6,7 +6,7 @@ import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureMutationReady } from '~/utils/authIdentity';
 import { formatDateTimeYmdHm } from '~/utils/date';
-import { withDefaultAvatar } from '~/utils/defaultAvatar';
+import { normalizeAvatar } from '~/utils/defaultAvatar';
 import { createHotSearch } from '~/utils/hotSearch';
 
 Page({
@@ -136,7 +136,7 @@ Page({
         const normalized = raw.map((t) => ({
           ...t,
           id: t._id || t.id,
-          publisherAvatar: withDefaultAvatar(t.publisherAvatar),
+          publisherAvatar: normalizeAvatar(t.publisherAvatar),
           images: Array.isArray(t.images) ? t.images : [],
           videos: Array.isArray(t.videos) ? t.videos : [],
           createdAt: formatDateTimeYmdHm(t.createdAt),
