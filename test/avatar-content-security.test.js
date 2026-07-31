@@ -33,6 +33,7 @@ test('profile save cannot bypass avatar review and both avatar entry points use 
   const payload = page.slice(page.indexOf('function buildUserInfoPayload'), page.indexOf('\n}\n\nPage({'));
   assert.doesNotMatch(payload, /avatar\s*:/);
   assert.match(methodSource(page, 'uploadAvatar'), /uploadAvatarForReview/);
+  assert.match(methodSource(page, 'uploadAvatar'), /_avatarUploadInFlight/);
   assert.doesNotMatch(methodSource(page, 'uploadAvatar'), /personInfo\.avatar/);
   assert.match(methodSource(page, 'onChooseWechatAvatar'), /this\.uploadAvatar\(avatarUrl\)/);
   assert.match(methodSource(page, 'onChooseCustomAvatar'), /this\.uploadAvatar\(file\.tempFilePath\)/);
@@ -46,6 +47,8 @@ test('pending avatar review is resumed, polled, refreshed on pass, and stopped o
   ]);
   assert.match(cloudApi, /getAvatarReview\(reviewId\)[\s\S]*api\/user\/avatar-reviews/);
   assert.match(methodSource(page, 'onLoad'), /resumeAvatarReview/);
+  assert.match(methodSource(page, 'onLoad'), /await this\.getPersonalInfo\(\)[\s\S]*resumeAvatarReview/);
+  assert.match(methodSource(page, 'getPersonalInfo'), /_profileRequestId/);
   assert.match(methodSource(page, 'checkAvatarReview'), /PASSED[\s\S]*getPersonalInfo/);
   assert.match(methodSource(page, 'checkAvatarReview'), /await userAPI\.getAvatarReview\(reviewId\);[\s\S]*if \(!this\._avatarReviewPageAlive\) return;/);
   assert.match(methodSource(page, 'checkAvatarReview'), /REJECTED|FAILED/);

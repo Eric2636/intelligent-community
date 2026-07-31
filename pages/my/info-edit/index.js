@@ -99,19 +99,22 @@ Page({
     },
   },
 
-  onLoad() {
+  async onLoad() {
     this._avatarReviewPageAlive = true;
     this.initAreaData();
-    this.getPersonalInfo();
-    this.resumeAvatarReview();
+    await this.getPersonalInfo();
+    if (this._avatarReviewPageAlive) this.resumeAvatarReview();
   },
 
   async getPersonalInfo() {
+    const requestId = (this._profileRequestId || 0) + 1;
+    this._profileRequestId = requestId;
     try {
       const app = getApp();
       const token = wx.getStorageSync('access_token');
       if (token) {
         const res = await userAPI.getUserInfo();
+        if (requestId !== this._profileRequestId) return;
         const data = res && res.code === 200 && res.data ? res.data : app.globalData.userInfo;
         this.setData(
           {
@@ -223,13 +226,19 @@ Page({
   },
 
   async uploadAvatar(tempFilePath) {
-    if (!(await ensureMutationReady(this))) return;
     const path = String(tempFilePath || '').trim();
     if (!path) return;
+    if (this._avatarUploadInFlight) {
+      wx.showToast({ title: '头像正在上传，请稍候', icon: 'none' });
+      return;
+    }
+    this._avatarUploadInFlight = true;
+    let loading = false;
     try {
+      if (!(await ensureMutationReady(this))) return;
       wx.showLoading({ title: '上传头像...', mask: true });
+      loading = true;
       const result = await uploadAvatarForReview(path);
-      wx.hideLoading();
       const review = result && result.avatarReview;
       if (!review || !review.id) throw new Error('头像审核提交失败，请稍后重试');
       wx.setStorageSync(AVATAR_REVIEW_STORAGE_KEY, { id: review.id });
@@ -237,8 +246,10 @@ Page({
       wx.showToast({ title: '头像审核中，通过后自动生效', icon: 'none' });
       this.scheduleAvatarReviewCheck(review.id);
     } catch (err) {
-      wx.hideLoading();
       wx.showToast({ title: (err && err.message) || '头像上传失败', icon: 'none' });
+    } finally {
+      if (loading) wx.hideLoading();
+      this._avatarUploadInFlight = false;
     }
   },
 
@@ -401,6 +412,7 @@ Page({
   onUnload() {
     this._authPageAlive = false;
     this._avatarReviewPageAlive = false;
+    this._profileRequestId = (this._profileRequestId || 0) + 1;
     if (this._avatarReviewTimer) clearTimeout(this._avatarReviewTimer);
   },
 });
