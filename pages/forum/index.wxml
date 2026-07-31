@@ -30,7 +30,7 @@
   bindscrolltolower="onLoadMore"
   bindscroll="onListScroll"
 >
-  <view wx:if="{{loading && !refreshing}}" class="forum-loading">
+  <view wx:if="{{loading && list.length === 0}}" class="forum-loading">
     <view class="forum-skeleton" wx:for="{{[1,2,3,4]}}" wx:key="*this">
       <view class="forum-skeleton__line forum-skeleton__title"></view>
       <view class="forum-skeleton__line forum-skeleton__meta"></view>
@@ -115,7 +115,7 @@
         </view>
       </view>
     </view>
-    <view class="forum-section forum-section--list {{list.length && !loading ? 'list-fade-in' : ''}}">
+    <view class="forum-section forum-section--list">
       <view class="forum-section__title" wx:if="{{pinned.length > 0}}">最新</view>
       <block wx:if="{{useVirtual && list.length > 0}}">
         <view class="forum-virtual" style="height: {{listTotalHeight}}rpx;">
@@ -188,6 +188,7 @@
         </view>
       </block>
       <t-empty wx:if="{{!loading && list.length === 0 && pinned.length === 0}}" description="暂无帖子，快来发帖吧" />
+      <view wx:if="{{loadingMore}}" class="forum-nomore">加载中...</view>
       <view wx:if="{{showNoMore}}" class="forum-nomore">没有更多了</view>
     </view>
   </block>
