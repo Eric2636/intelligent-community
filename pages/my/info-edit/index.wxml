@@ -6,6 +6,7 @@
       <button class="info-edit__avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseWechatAvatar">微信头像</button>
       <button class="info-edit__avatar-btn info-edit__avatar-btn--plain" bindtap="onChooseCustomAvatar">自定义</button>
     </view>
+    <text wx:if="{{avatarReviewStatus === 'PENDING'}}" class="info-edit__avatar-review-status">头像审核中，通过后自动生效</text>
   </view>
   <t-cell class="info-edit__cell" title="用户名">
     <t-input bind:change="onNameChange" borderless placeholder="请输入用户名" slot="note" value="{{personInfo.name}}" />
