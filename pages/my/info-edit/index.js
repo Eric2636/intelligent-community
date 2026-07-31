@@ -1,7 +1,10 @@
 import { areaList } from './areaData.js';
 import { userAPI } from '~/api/cloud';
-import { uploadLocalFilesToCloud } from '~/utils/cloudMedia';
+import { uploadAvatarForReview } from '~/utils/cloudMedia';
 import { ensureMutationReady } from '~/utils/authIdentity';
+
+const AVATAR_REVIEW_STORAGE_KEY = 'pending_avatar_review_v1';
+const AVATAR_REVIEW_POLL_INTERVAL = 3000;
 
 function defaultPersonInfo() {
   return {
@@ -56,7 +59,6 @@ function buildUserInfoPayload(personInfo) {
   const gender = Number(personInfo.gender);
   return {
     name: String(personInfo.name || '').trim(),
-    avatar: String(personInfo.avatar || personInfo.avatarUrl || personInfo.image || '').trim(),
     gender: Number.isInteger(gender) && gender >= 0 && gender <= 1 ? gender : 0,
     householdNo: String(personInfo.householdNo || '').trim(),
     birth: String(personInfo.birth || '').trim(),
@@ -88,6 +90,7 @@ Page({
     addressVisible: false,
     provinces: [],
     cities: [],
+    avatarReviewStatus: '',
 
     gridConfig: {
       column: 3,
@@ -97,8 +100,10 @@ Page({
   },
 
   onLoad() {
+    this._avatarReviewPageAlive = true;
     this.initAreaData();
     this.getPersonalInfo();
+    this.resumeAvatarReview();
   },
 
   async getPersonalInfo() {
@@ -223,16 +228,78 @@ Page({
     if (!path) return;
     try {
       wx.showLoading({ title: '上传头像...', mask: true });
-      const urls = await uploadLocalFilesToCloud([path], 'avatar/profile/img');
+      const result = await uploadAvatarForReview(path);
       wx.hideLoading();
-      if (urls && urls[0]) {
-        this.setData({
-          'personInfo.avatar': urls[0],
-        });
-      }
+      const review = result && result.avatarReview;
+      if (!review || !review.id) throw new Error('头像审核提交失败，请稍后重试');
+      wx.setStorageSync(AVATAR_REVIEW_STORAGE_KEY, { id: review.id });
+      this.setData({ avatarReviewStatus: 'PENDING' });
+      wx.showToast({ title: '头像审核中，通过后自动生效', icon: 'none' });
+      this.scheduleAvatarReviewCheck(review.id);
     } catch (err) {
       wx.hideLoading();
       wx.showToast({ title: (err && err.message) || '头像上传失败', icon: 'none' });
+    }
+  },
+
+  resumeAvatarReview() {
+    const stored = wx.getStorageSync(AVATAR_REVIEW_STORAGE_KEY);
+    const reviewId = String((stored && stored.id) || stored || '').trim();
+    if (!reviewId) return;
+    this.setData({ avatarReviewStatus: 'PENDING' });
+    this.checkAvatarReview(reviewId);
+  },
+
+  scheduleAvatarReviewCheck(reviewId) {
+    if (this._avatarReviewTimer) clearTimeout(this._avatarReviewTimer);
+    if (!this._avatarReviewPageAlive) return;
+    this._avatarReviewTimer = setTimeout(() => {
+      this.checkAvatarReview(reviewId);
+    }, AVATAR_REVIEW_POLL_INTERVAL);
+  },
+
+  clearAvatarReview() {
+    if (this._avatarReviewTimer) clearTimeout(this._avatarReviewTimer);
+    this._avatarReviewTimer = null;
+    wx.removeStorageSync(AVATAR_REVIEW_STORAGE_KEY);
+    this.setData({ avatarReviewStatus: '' });
+  },
+
+  async checkAvatarReview(reviewId) {
+    if (!this._avatarReviewPageAlive) return;
+    try {
+      const result = await userAPI.getAvatarReview(reviewId);
+      if (!this._avatarReviewPageAlive) return;
+      const status = String((result && result.status) || '').toUpperCase();
+      if (status === 'PASSED') {
+        this.clearAvatarReview();
+        await this.getPersonalInfo();
+        if (!this._avatarReviewPageAlive) return;
+        const app = getApp();
+        const { avatar } = this.data.personInfo;
+        app.globalData.userInfo = {
+          ...(app.globalData.userInfo || {}),
+          avatar,
+          avatarUrl: avatar,
+        };
+        app.eventBus.emit('userInfoChange');
+        wx.showToast({ title: '头像已更新', icon: 'success' });
+        return;
+      }
+      if (status === 'REJECTED') {
+        this.clearAvatarReview();
+        wx.showToast({ title: '头像未通过审核，请重新选择', icon: 'none' });
+        return;
+      }
+      if (status === 'FAILED' || status === 'SUPERSEDED') {
+        this.clearAvatarReview();
+        wx.showToast({ title: '头像审核失败，请稍后重试', icon: 'none' });
+        return;
+      }
+      this.scheduleAvatarReviewCheck(reviewId);
+    } catch (err) {
+      console.warn('查询头像审核状态失败', err);
+      this.scheduleAvatarReviewCheck(reviewId);
     }
   },
 
@@ -302,8 +369,10 @@ Page({
           ...(app.globalData.userInfo || {}),
           ...saved,
           nickName: (saved && saved.name) || payload.name || '',
-          avatar: (saved && (saved.avatar || saved.avatarUrl || saved.image)) || payload.avatar || '',
-          avatarUrl: (saved && (saved.avatarUrl || saved.avatar || saved.image)) || payload.avatar || '',
+          avatar:
+            (saved && (saved.avatar || saved.avatarUrl || saved.image)) || personInfo.avatar || '',
+          avatarUrl:
+            (saved && (saved.avatarUrl || saved.avatar || saved.image)) || personInfo.avatar || '',
         };
         app.eventBus.emit('userInfoChange');
         wx.showToast({
@@ -331,5 +400,7 @@ Page({
 
   onUnload() {
     this._authPageAlive = false;
+    this._avatarReviewPageAlive = false;
+    if (this._avatarReviewTimer) clearTimeout(this._avatarReviewTimer);
   },
 });

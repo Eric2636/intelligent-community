@@ -187,7 +187,7 @@ function parseUploadResponse(raw) {
   }
 }
 
-function uploadFilePromise(filePath, module, type) {
+function uploadFileResultPromise(filePath, module, type) {
   return new Promise((resolve, reject) => {
     const header = {};
     const token = getToken();
@@ -201,7 +201,8 @@ function uploadFilePromise(filePath, module, type) {
       header,
       success: (res) => {
         const data = parseUploadResponse(res.data);
-        const url = data.url || (data.data && data.data.url);
+        const payload = data.data && typeof data.data === 'object' ? data.data : data;
+        const { url } = payload;
         if (res.statusCode >= 400) {
           reject(new Error(data.message || data.hint || `HTTP ${res.statusCode}`));
           return;
@@ -210,11 +211,33 @@ function uploadFilePromise(filePath, module, type) {
           reject(new Error(data.message || '上传失败'));
           return;
         }
-        resolve(url);
+        resolve({ ...payload, url });
       },
       fail: reject,
     });
   });
+}
+
+function uploadFilePromise(filePath, module, type) {
+  return uploadFileResultPromise(filePath, module, type).then((result) => result.url);
+}
+
+export async function uploadAvatarForReview(tempFilePath) {
+  const path = String(tempFilePath || '').trim();
+  if (!path) throw new Error('上传失败：文件路径为空');
+  const ext = extFromPath(path);
+  if (ext) assertFileExtAllowedForFolder(ext, 'avatar/profile/img');
+  const persisted = await persistTempFileForUpload(path);
+  try {
+    const realPath = await resolveExistingFilePath(persisted);
+    const result = await uploadFileResultPromise(realPath, 'avatar', 'img');
+    if (!result.avatarReview || !result.avatarReview.id) {
+      throw new Error('头像审核提交失败，请稍后重试');
+    }
+    return result;
+  } finally {
+    unlinkQuiet(persisted);
+  }
 }
 
 /**
