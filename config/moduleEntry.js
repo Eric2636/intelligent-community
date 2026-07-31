@@ -9,7 +9,6 @@
 export default {
   tabs: [
     { key: 'task', label: '业主互助', icon: 'file-copy', enabled: true },
-    { key: 'errand', label: '小区跑腿', icon: 'service', enabled: false },
     { key: 'forum', label: '小区留言', icon: 'chat', enabled: true },
     { key: 'mall', label: '小区市场', icon: 'cart', enabled: true },
     { key: 'my', label: '我的', icon: 'user', enabled: true, always: true },

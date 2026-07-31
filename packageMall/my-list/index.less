@@ -1,3 +1,5 @@
+@import '/variable.less';
+
 .my-list-page {
   min-height: 100vh;
   background-color: #f5f5f5;
@@ -61,9 +63,6 @@
   font-size: 28rpx;
   color: #333;
   margin-bottom: 12rpx;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .item-price {
@@ -76,4 +75,24 @@
 .item-category {
   font-size: 24rpx;
   color: #999;
+}
+
+.item-title {
+  .list-title-clamp();
+}
+
+.item-card,
+.item-info {
+  .list-width-safe();
+}
+
+.item-status {
+  .list-single-line-ellipsis();
+  max-width: calc(100% - 32rpx);
+  box-sizing: border-box;
+}
+
+.item-price,
+.item-category {
+  .list-single-line-ellipsis();
 }

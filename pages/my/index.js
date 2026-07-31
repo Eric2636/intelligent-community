@@ -4,11 +4,12 @@ import { isModuleEnabled } from '~/utils/moduleEntryGuard';
 import { decryptText } from '~/utils/textCipher';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
-import { ensureIdentitySelected } from '~/utils/authIdentity';
+import { ensureIdentitySelected, ensureMutationReady } from '~/utils/authIdentity';
+import { NOTIFICATION_UNREAD_EVENT } from '~/utils/notificationUnread';
 
 /**
  * 每个入口带 module：与 `isModuleEnabled` 的 key 一致；null 表示不限模块（始终可显）
- * @type {Array<{ module?: 'task'|'errand'|'forum'|'mall'|null, name?: string, nameEnc?: string, icon: string, url: string, desc?: string, descEnc?: string }>}
+ * @type {Array<{ module?: 'task'|'forum'|'mall'|null, name?: string, nameEnc?: string, icon: string, url: string, desc?: string, descEnc?: string }>}
  */
 
 /** 业主互助分区 */
@@ -31,14 +32,10 @@ const RAW_SECTION_MALL = [
   { module: 'mall', nameEnc: 'j/ebhfjrkvbhyPDokeH4', icon: 'star', url: 'mallFav', descEnc: 'j+u8i/vSnfvqyv/qkef/yOm/jPariPzl' },
 ];
 
-/** 更多服务：跑腿 + 通用（module: null 不受模块开关影响） */
+/** 更多服务（module: null 不受模块开关影响） */
 const RAW_SECTION_MORE = [
-  { module: 'errand', name: '小区跑腿', icon: 'service', url: 'errand', desc: '发布取件代拿等便民跑腿需求' },
   { module: null, nameEnc: 'j9Wli+7LnOz/yvrL', icon: 'notification', url: 'notice', descEnc: 'jdiWiOXFkdTrytbVk8nmy8C5j+KC' },
   { module: null, nameEnc: 'j+eihcjlkOPoxMPm', icon: 'edit', url: 'feedback', descEnc: 'j+y9idXAkNffxcvAkvrvxOGfgMG1' },
-  { module: null, nameEnc: 'jOaeidXqk+T0yd7C', icon: 'info-circle', url: 'about', descEnc: 'jdmKiPzlkdfuyt7jkMr3yv+5j/+B' },
-  { module: null, nameEnc: 'gc2TitLK', icon: 'setting', url: '/pages/setting/index', descEnc: 'gdeLiODTkdTrxOX0k+bRxdiPjt6D' },
-  { module: null, nameEnc: 'geK5itzfkMLHy/nj', icon: 'service', url: '', descEnc: 'j/+khPjKnM79y+zQkvroyc2d' },
 ];
 
 function entryVisible(m) {
@@ -89,6 +86,7 @@ Page({
     isLoggingIn: false,
     personalInfo: {},
     menuSections: [],
+    unreadCount: 0,
   },
 
   onShow() {
@@ -101,26 +99,40 @@ Page({
       }
     }
     syncCustomTabBar(this, 'my');
-    if (consumeListRefresh(LIST_REFRESH_KEYS.user)) {
-      this.refreshPersonalInfo();
-    }
+    if (app.refreshNotificationUnreadCount) app.refreshNotificationUnreadCount();
+    consumeListRefresh(LIST_REFRESH_KEYS.user);
+    this.refreshPersonalInfo();
   },
 
   onLoad() {
     const app = getApp();
+    this._servicePageAlive = true;
+    this._openingService = false;
     this._onModuleEntryVisibilityChange = () => {
       this.refreshMenuList();
     };
     this._onUserInfoChange = () => {
       this.refreshPersonalInfo();
     };
+    this._onNotificationUnreadCountChange = (count) => {
+      this.setData({ unreadCount: Number.isSafeInteger(count) && count > 0 ? count : 0 });
+    };
     app.eventBus.on('moduleEntryVisibilityChange', this._onModuleEntryVisibilityChange);
     app.eventBus.on('userInfoChange', this._onUserInfoChange);
+    app.eventBus.on(NOTIFICATION_UNREAD_EVENT, this._onNotificationUnreadCountChange);
+    this._onNotificationUnreadCountChange(app.globalData.notificationUnreadCount);
     this.refreshMenuList();
-    this.refreshPersonalInfo();
   },
 
   onUnload() {
+    this._authPageAlive = false;
+    this._servicePageAlive = false;
+    this._openingService = false;
+    this._personalInfoRequestId = (this._personalInfoRequestId || 0) + 1;
+    if (this._openingServiceTimer) {
+      clearTimeout(this._openingServiceTimer);
+      this._openingServiceTimer = null;
+    }
     const app = getApp();
     if (this._onModuleEntryVisibilityChange) {
       app.eventBus.off('moduleEntryVisibilityChange', this._onModuleEntryVisibilityChange);
@@ -128,25 +140,45 @@ Page({
     if (this._onUserInfoChange) {
       app.eventBus.off('userInfoChange', this._onUserInfoChange);
     }
+    if (this._onNotificationUnreadCountChange) {
+      app.eventBus.off(NOTIFICATION_UNREAD_EVENT, this._onNotificationUnreadCountChange);
+    }
   },
 
   async refreshPersonalInfo() {
     const app = getApp();
     const token = wx.getStorageSync('access_token');
-    const userInfo = app.globalData.userInfo || {};
-    const hasPhone = Boolean(String(userInfo.phoneNumber || userInfo.phone || '').trim());
-    if (app.globalData.useCloudBase && token) {
-      const personalInfo = await this.getPersonalInfo();
+    if (!token) {
       this.setData({
-        isLoad: Boolean(personalInfo && (personalInfo.phoneNumber || personalInfo.phone)),
-        personalInfo: normalizePersonalInfo(personalInfo),
+        isLoad: false,
+        personalInfo: {},
       });
-    } else {
-      this.setData({
-        isLoad: !!token && hasPhone,
-        personalInfo: token && hasPhone ? normalizePersonalInfo(userInfo) : {},
-      });
+      return;
     }
+
+    const requestId = (this._personalInfoRequestId || 0) + 1;
+    this._personalInfoRequestId = requestId;
+    const cachedUserInfo = app.globalData.userInfo || {};
+    const latestUserInfo = await this.getPersonalInfo();
+    if (!this._servicePageAlive || requestId !== this._personalInfoRequestId) return;
+
+    if (latestUserInfo) {
+      const avatar = latestUserInfo.avatar || latestUserInfo.avatarUrl || latestUserInfo.image || '';
+      app.globalData.userInfo = {
+        ...cachedUserInfo,
+        ...latestUserInfo,
+        nickName: latestUserInfo.nickName || latestUserInfo.name || cachedUserInfo.nickName || '',
+        avatar,
+        avatarUrl: latestUserInfo.avatarUrl || avatar,
+      };
+    }
+
+    const personalInfo = app.globalData.userInfo || cachedUserInfo;
+    const hasPhone = Boolean(String(personalInfo.phoneNumber || personalInfo.phone || '').trim());
+    this.setData({
+      isLoad: hasPhone,
+      personalInfo: hasPhone ? normalizePersonalInfo(personalInfo) : {},
+    });
   },
 
   refreshMenuList() {
@@ -169,27 +201,11 @@ Page({
 
   async getPersonalInfo() {
     try {
-      const app = getApp();
-      if (app.globalData.useCloudBase) {
-        try {
-          const res = await userAPI.getUserInfo();
-          if (res.code === 200 && res.data) {
-            return res.data;
-          }
-        } catch (err) {
-          console.error('获取用户信息失败', err);
-        }
-        const { openid } = app.globalData;
-        return {
-          name: '用户',
-          avatar: '',
-          avatarUrl: '',
-          openid: openid || '',
-        };
-      }
-      return {};
-    } catch (e) {
-      return {};
+      const res = await userAPI.getUserInfo();
+      return res && res.code === 200 && res.data ? res.data : null;
+    } catch (err) {
+      console.warn('获取用户信息失败，继续使用本地资料', err);
+      return null;
     }
   },
 
@@ -217,7 +233,7 @@ Page({
         return;
       }
 
-      await ensureIdentitySelected();
+      await ensureIdentitySelected(this);
       this.setData({
         isLoad: true,
         personalInfo: normalizePersonalInfo(app.globalData.userInfo),
@@ -232,8 +248,13 @@ Page({
     }
   },
 
-  onNavigateTo() {
+  async onNavigateTo() {
+    if (!(await ensureMutationReady(this))) return;
     wx.navigateTo({ url: '/pages/my/info-edit/index' });
+  },
+
+  onAuthorized() {
+    this.refreshPersonalInfo();
   },
 
   onAvatarLoadError() {
@@ -242,31 +263,67 @@ Page({
     });
   },
 
-  onMenuTap(e) {
-    const { url, name } = e.currentTarget.dataset;
-    const routes = {
-      task: '/packageTask/my-tasks/index',
-      taskDrafts: '/packageTask/my-tasks/index?type=draft',
-      taskCancelled: '/packageTask/my-tasks/index?type=cancelled',
-      errand: '/packageErrand/my-errands/index',
-      posts: '/packageForum/my-posts/index',
-      favorites: '/packageForum/favorites/index',
-      mall: mallMyItemsUrl(),
-      orders: mallOrdersUrl(),
-      mallFav: mallFavoritesUrl(),
-      notice: '/packageCommon/notice/index',
-      feedback: '/packageCommon/feedback/index',
-      about: '/packageCommon/about/index',
+  async onMenuTap(e) {
+    if (this._openingService) return;
+    this._openingService = true;
+    let navigationStarted = false;
+    const navigateToService = (url) => {
+      wx.navigateTo({
+        url,
+        complete: () => {
+          if (!this._servicePageAlive) {
+            this._openingService = false;
+            return;
+          }
+          if (this._openingServiceTimer) clearTimeout(this._openingServiceTimer);
+          this._openingServiceTimer = setTimeout(() => {
+            this._openingService = false;
+            this._openingServiceTimer = null;
+          }, 300);
+        },
+      });
+      navigationStarted = true;
     };
-    if (routes[url]) {
-      wx.navigateTo({ url: routes[url] });
-      return;
+
+    try {
+      const { url, name } = e.currentTarget.dataset;
+      const routes = {
+        task: '/packageTask/my-tasks/index',
+        taskDrafts: '/packageTask/my-tasks/index?type=draft',
+        taskCancelled: '/packageTask/my-tasks/index?type=cancelled',
+        posts: '/packageForum/my-posts/index',
+        favorites: '/packageForum/favorites/index',
+        mall: mallMyItemsUrl(),
+        orders: mallOrdersUrl(),
+        mallFav: mallFavoritesUrl(),
+        notice: '/packageCommon/notice/index',
+        feedback: '/packageCommon/feedback/index',
+        about: '/packageCommon/about/index',
+      };
+      if (routes[url]) {
+        const protectedRoutes = [
+          'task',
+          'taskDrafts',
+          'taskCancelled',
+          'posts',
+          'favorites',
+          'mall',
+          'orders',
+          'mallFav',
+          'notice',
+        ];
+        if (protectedRoutes.includes(url) && !(await ensureMutationReady(this))) return;
+        navigateToService(routes[url]);
+        return;
+      }
+      if (url) {
+        navigateToService(url);
+        return;
+      }
+      wx.showToast({ title: name || '敬请期待', icon: 'none' });
+    } finally {
+      if (!navigationStarted) this._openingService = false;
     }
-    if (url) {
-      wx.navigateTo({ url });
-      return;
-    }
-    wx.showToast({ title: name || '敬请期待', icon: 'none' });
   },
 
   onLogout() {
@@ -287,6 +344,7 @@ Page({
         app.globalData.openid = '';
         app.globalData.userInfo = null;
         app.globalData.offlineMode = false;
+        if (app.resetNotificationUnreadCount) app.resetNotificationUnreadCount();
         this.setData({ isLoad: false, personalInfo: {} });
         app.eventBus.emit('userInfoChange');
         wx.showToast({ title: '已退出登录', icon: 'none' });

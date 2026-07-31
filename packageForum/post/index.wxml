@@ -6,10 +6,7 @@
   <block wx:elif="{{post}}">
     <view class="post-card">
       <view class="post-card__head">
-        <image wx:if="{{post.authorAvatar}}" class="post-card__avatar" src="{{post.authorAvatar}}" mode="aspectFill" />
-        <view wx:else class="post-card__avatar post-card__avatar--placeholder">
-          <t-icon name="user" size="38rpx" color="#8e8e93" />
-        </view>
+        <t-avatar class="post-card__avatar" image="{{post.authorAvatar}}" icon="{{post.authorAvatar ? '' : 'user'}}" size="68rpx" alt="{{post.authorName || '用户头像'}}" />
         <view class="post-card__head-main">
           <view class="post-card__author">
             <text>{{post.authorName}}</text>
@@ -76,10 +73,7 @@
         wx:for-index="rIndex"
         wx:key="id"
       >
-        <image wx:if="{{item.authorAvatar}}" class="reply-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
-        <view wx:else class="reply-item__avatar reply-item__avatar--placeholder">
-          <t-icon name="user" size="30rpx" color="#8e8e93" />
-        </view>
+        <t-avatar class="reply-item__avatar" image="{{item.authorAvatar}}" icon="{{item.authorAvatar ? '' : 'user'}}" size="56rpx" alt="{{item.authorName || '用户头像'}}" />
         <view class="reply-item__main">
           <view class="reply-item__head">
             <view class="reply-item__head-main">
@@ -208,3 +202,4 @@
   </block>
   <view wx:else class="post-loading">帖子不存在</view>
 </view>
+<auth-login-dialog id="auth-login-dialog" />

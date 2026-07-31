@@ -12,9 +12,7 @@
       clearable
       bindchange="onSearchInput"
       bindclear="onSearchClear"
-      bindconfirm="onSearchConfirm"
     />
-    <view class="forum-search-bar__btn" bindtap="onSearchConfirm">搜索</view>
   </view>
   <view class="forum-order">
     <view class="forum-order__item {{orderBy === 'time' ? 'forum-order__item--active' : ''}}" data-order="time" bindtap="onOrderChange">最新</view>
@@ -32,7 +30,7 @@
   bindscrolltolower="onLoadMore"
   bindscroll="onListScroll"
 >
-  <view wx:if="{{loading && !refreshing}}" class="forum-loading">
+  <view wx:if="{{loading && list.length === 0}}" class="forum-loading">
     <view class="forum-skeleton" wx:for="{{[1,2,3,4]}}" wx:key="*this">
       <view class="forum-skeleton__line forum-skeleton__title"></view>
       <view class="forum-skeleton__line forum-skeleton__meta"></view>
@@ -94,10 +92,7 @@
       >
         <view class="post-item__author-row">
           <view class="post-item__author-main">
-            <image wx:if="{{item.authorAvatar}}" class="post-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
-            <view wx:else class="post-item__avatar post-item__avatar--placeholder">
-              <t-icon name="user" size="32rpx" color="#8e8e93" />
-            </view>
+            <t-avatar class="post-item__avatar" image="{{item.authorAvatar}}" icon="{{item.authorAvatar ? '' : 'user'}}" size="48rpx" alt="{{item.authorName || '用户头像'}}" />
             <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
             <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
           </view>
@@ -106,21 +101,21 @@
         <template is="forumListMedia" data="{{item: item}}" />
         <view class="post-item__actions">
           <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
-            <t-icon name="share" size="30rpx" color="#8e8e93" />
-            <text>{{item.shareCount || item.forwardCount || 0}}</text>
+            <t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" />
+            <text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text>
           </button>
           <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
-            <t-icon name="chat-bubble" size="30rpx" color="#8e8e93" />
-            <text>{{item.replyCount || 0}}</text>
+            <t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" />
+            <text class="post-item__action-count">{{item.replyCount || 0}}</text>
           </view>
           <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike">
-            <t-icon name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
-            <text>{{item.likeCount || 0}}</text>
+            <t-icon class="post-item__action-icon" name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
+            <text class="post-item__action-count">{{item.likeCount || 0}}</text>
           </view>
         </view>
       </view>
     </view>
-    <view class="forum-section forum-section--list {{list.length && !loading ? 'list-fade-in' : ''}}">
+    <view class="forum-section forum-section--list">
       <view class="forum-section__title" wx:if="{{pinned.length > 0}}">最新</view>
       <block wx:if="{{useVirtual && list.length > 0}}">
         <view class="forum-virtual" style="height: {{listTotalHeight}}rpx;">
@@ -134,10 +129,7 @@
           >
             <view class="post-item__author-row">
               <view class="post-item__author-main">
-                <image wx:if="{{item.authorAvatar}}" class="post-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
-                <view wx:else class="post-item__avatar post-item__avatar--placeholder">
-                  <t-icon name="user" size="32rpx" color="#8e8e93" />
-                </view>
+                <t-avatar class="post-item__avatar" image="{{item.authorAvatar}}" icon="{{item.authorAvatar ? '' : 'user'}}" size="48rpx" alt="{{item.authorName || '用户头像'}}" />
                 <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
                 <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
               </view>
@@ -146,16 +138,16 @@
             <template is="forumListMedia" data="{{item: item}}" />
             <view class="post-item__actions">
               <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
-                <t-icon name="share" size="30rpx" color="#8e8e93" />
-                <text>{{item.shareCount || item.forwardCount || 0}}</text>
+                <t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" />
+                <text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text>
               </button>
               <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
-                <t-icon name="chat-bubble" size="30rpx" color="#8e8e93" />
-                <text>{{item.replyCount || 0}}</text>
+                <t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" />
+                <text class="post-item__action-count">{{item.replyCount || 0}}</text>
               </view>
               <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike">
-                <t-icon name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
-                <text>{{item.likeCount || 0}}</text>
+                <t-icon class="post-item__action-icon" name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
+                <text class="post-item__action-count">{{item.likeCount || 0}}</text>
               </view>
             </view>
           </view>
@@ -172,10 +164,7 @@
         >
           <view class="post-item__author-row">
             <view class="post-item__author-main">
-              <image wx:if="{{item.authorAvatar}}" class="post-item__avatar" src="{{item.authorAvatar}}" mode="aspectFill" />
-              <view wx:else class="post-item__avatar post-item__avatar--placeholder">
-                <t-icon name="user" size="32rpx" color="#8e8e93" />
-              </view>
+              <t-avatar class="post-item__avatar" image="{{item.authorAvatar}}" icon="{{item.authorAvatar ? '' : 'user'}}" size="48rpx" alt="{{item.authorName || '用户头像'}}" />
               <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
               <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
             </view>
@@ -184,21 +173,22 @@
           <template is="forumListMedia" data="{{item: item}}" />
           <view class="post-item__actions">
             <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
-              <t-icon name="share" size="30rpx" color="#8e8e93" />
-              <text>{{item.shareCount || item.forwardCount || 0}}</text>
+              <t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" />
+              <text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text>
             </button>
             <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
-              <t-icon name="chat-bubble" size="30rpx" color="#8e8e93" />
-              <text>{{item.replyCount || 0}}</text>
+              <t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" />
+              <text class="post-item__action-count">{{item.replyCount || 0}}</text>
             </view>
             <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike">
-              <t-icon name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
-              <text>{{item.likeCount || 0}}</text>
+              <t-icon class="post-item__action-icon" name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
+              <text class="post-item__action-count">{{item.likeCount || 0}}</text>
             </view>
           </view>
         </view>
       </block>
       <t-empty wx:if="{{!loading && list.length === 0 && pinned.length === 0}}" description="暂无帖子，快来发帖吧" />
+      <view wx:if="{{loadingMore}}" class="forum-nomore">加载中...</view>
       <view wx:if="{{showNoMore}}" class="forum-nomore">没有更多了</view>
     </view>
   </block>
@@ -206,3 +196,4 @@
 <view class="forum-fab" bindtap="goPublish">
   <t-icon name="add" size="48rpx" color="#fff" />
 </view>
+<auth-login-dialog id="auth-login-dialog" />

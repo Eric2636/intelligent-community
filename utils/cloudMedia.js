@@ -7,7 +7,7 @@ import { buildUrl, getToken } from '~/api/http';
 const DEFAULT_MAX_IMAGES = 9;
 const DEFAULT_MAX_VIDEOS = 2;
 
-const COS_MODULES = new Set(['forum', 'task', 'errand', 'mall', 'avatar']);
+const COS_MODULES = new Set(['forum', 'task', 'mall', 'avatar']);
 
 /** 与后端 intelligent-community-admin/src/lib/media-url.ts 后缀白名单一致 */
 const IMAGE_EXTS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'heic', 'heif', 'avif']);

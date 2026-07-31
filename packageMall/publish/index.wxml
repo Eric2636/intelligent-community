@@ -133,3 +133,4 @@
     </t-button>
   </view>
 </view>
+<auth-login-dialog id="auth-login-dialog" />

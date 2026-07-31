@@ -30,7 +30,7 @@ Page({
   },
 
   async onAddMedia() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { mediaImages, mediaVideos } = this.data;
     try {
       const { images, videos } = await chooseAndUploadMedia({
@@ -70,7 +70,7 @@ Page({
   },
 
   async submit() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { title, content, mediaImages, mediaVideos } = this.data;
     const t = (title || '').trim();
     const c = (content || '').trim();
@@ -115,5 +115,9 @@ Page({
         icon: 'none',
       });
     }
+  },
+
+  onUnload() {
+    this._authPageAlive = false;
   },
 });

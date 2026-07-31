@@ -8,8 +8,6 @@ export const LIST_REFRESH_KEYS = {
   mallOrders: 'mallOrders',
   task: 'task',
   taskMine: 'taskMine',
-  errand: 'errand',
-  errandMine: 'errandMine',
   user: 'user',
 };
 
@@ -69,8 +67,4 @@ export function markMallLists() {
 
 export function markTaskLists() {
   markListRefresh([LIST_REFRESH_KEYS.task, LIST_REFRESH_KEYS.taskMine]);
-}
-
-export function markErrandLists() {
-  markListRefresh([LIST_REFRESH_KEYS.errand, LIST_REFRESH_KEYS.errandMine]);
 }

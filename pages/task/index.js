@@ -1,9 +1,13 @@
+import { Subject } from 'rxjs';
+
 import { taskAPI } from '~/api/cloud';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureMutationReady } from '~/utils/authIdentity';
 import { formatDateTimeYmdHm } from '~/utils/date';
+import { normalizeAvatar } from '~/utils/defaultAvatar';
+import { createHotSearch } from '~/utils/hotSearch';
 
 Page({
   data: {
@@ -17,10 +21,30 @@ Page({
     page: 1,
     pageSize: 10,
     keyword: '',
+    queryKeyword: '',
   },
 
   onLoad() {
     if (redirectIfEntryHidden('task')) return;
+    this._pageAlive = true;
+    this._keyword$ = new Subject();
+    this._searchRequestId = 0;
+    this._committedRequestInvalidated = false;
+    this._activeSearchKeyword = '';
+    this._stopHotSearch = createHotSearch(this._keyword$, (keyword) => {
+      if (!this._pageAlive) return;
+      if (keyword === this._activeSearchKeyword) {
+        if (this._committedRequestInvalidated) {
+          this.setData({ page: 1, hasMore: true });
+          this.loadList(true);
+        }
+        return;
+      }
+      this._activeSearchKeyword = keyword;
+      this._committedRequestInvalidated = false;
+      this.setData({ queryKeyword: keyword, page: 1, hasMore: true });
+      this.loadList(true);
+    });
     this._skipNextShowRefresh = true;
     this.loadList();
   },
@@ -38,11 +62,7 @@ Page({
 
   async onRefresh() {
     this.setData({ refreshing: true });
-    try {
-      await this.loadList(true);
-    } finally {
-      this.setData({ refreshing: false });
-    }
+    await this.loadList(true);
   },
 
   async onLoadMore() {
@@ -69,25 +89,31 @@ Page({
   },
 
   onSearchInput(e) {
+    if (!this._pageAlive) return;
     const nextKeyword = e.detail.value || '';
-    const wasSearching = Boolean((this.data.keyword || '').trim());
-    this.setData({ keyword: nextKeyword });
-    if (wasSearching && !String(nextKeyword).trim()) {
-      this.loadList(true);
+    const normalizedKeyword = String(nextKeyword).trim();
+    if (normalizedKeyword !== this._activeSearchKeyword) {
+      const hasInFlightRequest = this._activeListRequestId === this._searchRequestId;
+      this._searchRequestId += 1;
+      this._committedRequestInvalidated =
+        this._committedRequestInvalidated || hasInFlightRequest;
     }
+    this.setData({ keyword: nextKeyword });
+    this._keyword$.next(nextKeyword);
   },
 
   onSearchClear() {
-    this.setData({ keyword: '' });
-    this.loadList(true);
-  },
-
-  onSearchConfirm() {
-    this.loadList(true);
+    if (!this._pageAlive) return;
+    this.onSearchInput({ detail: { value: '' } });
   },
 
   async loadList(refresh = true) {
+    this._searchRequestId += 1;
+    const requestId = this._searchRequestId;
+    this._activeListRequestId = requestId;
+    this._committedRequestInvalidated = false;
     const nextPage = refresh ? 1 : this.data.page;
+    const keyword = String(this.data.queryKeyword || '').trim();
     this.setData({
       page: nextPage,
       hasMore: refresh ? true : this.data.hasMore,
@@ -97,15 +123,20 @@ Page({
     });
     try {
       const res = await taskAPI.getTaskList({
-        keyword: (this.data.keyword || '').trim() || undefined,
+        keyword: keyword || undefined,
         page: nextPage,
         pageSize: this.data.pageSize,
       });
+      if (!this._pageAlive || requestId !== this._searchRequestId) return;
       if (res.code === 200) {
+        if (res.__fromOfflineCache) {
+          wx.showToast({ title: '网络不可用，当前展示缓存数据', icon: 'none' });
+        }
         const raw = res.data || [];
         const normalized = raw.map((t) => ({
           ...t,
           id: t._id || t.id,
+          publisherAvatar: normalizeAvatar(t.publisherAvatar),
           images: Array.isArray(t.images) ? t.images : [],
           videos: Array.isArray(t.videos) ? t.videos : [],
           createdAt: formatDateTimeYmdHm(t.createdAt),
@@ -121,11 +152,15 @@ Page({
         wx.showToast({ title: res.message || '获取任务失败', icon: 'none' });
       }
     } catch (err) {
+      if (!this._pageAlive || requestId !== this._searchRequestId) return;
       console.error('加载任务列表失败', err);
       if (!refresh) this.setData({ page: Math.max(1, nextPage - 1) });
-      wx.showToast({ title: err.errMsg || '网络错误，请重试', icon: 'none' });
+      wx.showToast({ title: err.message || err.errMsg || '网络错误，请重试', icon: 'none' });
     } finally {
-      this.setData({ loading: false, loadingMore: false });
+      if (this._pageAlive && requestId === this._searchRequestId) {
+        this._activeListRequestId = 0;
+        this.setData({ loading: false, loadingMore: false, refreshing: false });
+      }
     }
   },
 
@@ -146,7 +181,15 @@ Page({
   },
 
   async goPublish() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     wx.navigateTo({ url: '/packageTask/publish/index' });
+  },
+
+  onUnload() {
+    this._pageAlive = false;
+    this._authPageAlive = false;
+    if (this._stopHotSearch) this._stopHotSearch();
+    if (this._keyword$) this._keyword$.complete();
+    if (this._noMoreTimer) clearTimeout(this._noMoreTimer);
   },
 });

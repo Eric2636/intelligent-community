@@ -25,16 +25,33 @@
     font-size: 28rpx;
     font-weight: 500;
     color: @gy1;
-    display: block;
     margin-bottom: 12rpx;
   }
 
   &__meta {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
     font-size: 24rpx;
     color: @gy3;
-
-    text + text {
-      margin-left: 24rpx;
-    }
   }
+}
+
+.favorites-item__title {
+  .list-title-clamp();
+}
+
+.favorites-item,
+.favorites-item__meta {
+  .list-width-safe();
+}
+
+.favorites-item__time {
+  .list-flexible-text();
+}
+
+.favorites-item__count {
+  .list-fixed-region();
+  .list-single-line-ellipsis();
+  max-width: 140rpx;
 }

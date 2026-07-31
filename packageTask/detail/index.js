@@ -2,6 +2,8 @@ import { taskAPI } from '~/api/cloud';
 import { config } from '~/config/index';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { ensureMutationReady } from '~/utils/authIdentity';
+import { normalizeAvatar } from '~/utils/defaultAvatar';
+import { chooseAndUploadMedia } from '~/utils/cloudMedia';
 
 const STATUS_TEXT = {
   draft: '草稿',
@@ -27,6 +29,8 @@ Page({
     loading: true,
     STATUS_TEXT,
     proofText: '',
+    proofImages: [],
+    proofUploading: false,
     isPublisher: false,
     isTaker: false,
     otherPartyId: '',
@@ -57,6 +61,13 @@ Page({
     wx.previewImage({ current, urls });
   },
 
+  onPreviewProofImages(e) {
+    const { current } = e.currentTarget.dataset;
+    const urls = (this.data.task && this.data.task.proofImages) || [];
+    if (!urls.length) return;
+    wx.previewImage({ current, urls });
+  },
+
   async loadDetail() {
     const { id } = this.data;
     this.setData({ loading: true });
@@ -69,8 +80,11 @@ Page({
       const raw = res.data;
       const task = {
         ...raw,
+        publisherAvatar: normalizeAvatar(raw.publisherAvatar),
+        takerAvatar: normalizeAvatar(raw.takerAvatar),
         images: Array.isArray(raw.images) ? raw.images : [],
         videos: Array.isArray(raw.videos) ? raw.videos : [],
+        proofImages: Array.isArray(raw.proofImages) ? raw.proofImages : [],
       };
       const app = getApp();
       const me = (app.globalData && app.globalData.userInfo) || null;
@@ -85,7 +99,14 @@ Page({
         (myOpenid && String(task.takerOpenid || '') === myOpenid);
       const otherPartyId = isPublisher ? task.takerId : task.publisherId;
       const otherPartyName = isPublisher ? task.takerName : task.publisherName;
-      this.setData({ task, isPublisher, isTaker, otherPartyId, otherPartyName });
+      const editableProof =
+        isTaker && task.status === 'in_progress'
+          ? {
+              proofText: task.proofText || '',
+              proofImages: [...task.proofImages],
+            }
+          : {};
+      this.setData({ task, isPublisher, isTaker, otherPartyId, otherPartyName, ...editableProof });
     } catch (err) {
       console.error('加载任务详情失败', err);
       wx.showToast({ title: (err && (err.message || err.errMsg)) || '获取任务详情失败', icon: 'none' });
@@ -123,7 +144,7 @@ Page({
   },
 
   async onClaim() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { id } = this.data;
     wx.showModal({
       title: '确认领取',
@@ -159,15 +180,54 @@ Page({
     });
   },
 
+  async onAddProofImages() {
+    if (this._proofUploadInFlight) return;
+    this._proofUploadInFlight = true;
+    this.setData({ proofUploading: true });
+    try {
+      if (!(await ensureMutationReady(this)) || this._authPageAlive === false) return;
+      const current = Array.isArray(this.data.proofImages) ? [...this.data.proofImages] : [];
+      const result = await chooseAndUploadMedia({
+        folder: 'task/proof',
+        maxImages: 9,
+        maxVideos: 0,
+        existingImageCount: current.length,
+        existingVideoCount: 0,
+      });
+      if (this._authPageAlive === false) return;
+      this.setData({ proofImages: [...current, ...(result.images || [])] });
+    } catch (_) {
+      // 上传工具已提示错误；保留已有凭证图片，方便重试。
+    } finally {
+      this._proofUploadInFlight = false;
+      if (this._authPageAlive !== false) this.setData({ proofUploading: false });
+    }
+  },
+
+  onRemoveProofImage(e) {
+    if (this._proofUploadInFlight) return;
+    const index = Number(e.currentTarget.dataset.index);
+    const proofImages = (this.data.proofImages || []).filter((_, i) => i !== index);
+    this.setData({ proofImages });
+  },
+
+  onPreviewEditableProofImages(e) {
+    const { current } = e.currentTarget.dataset;
+    const urls = this.data.proofImages || [];
+    if (urls.length) wx.previewImage({ current, urls });
+  },
+
   async onSubmitComplete() {
-    if (!(await ensureMutationReady())) return;
-    const { id, proofText } = this.data;
+    if (!(await ensureMutationReady(this))) return;
+    const { id, proofText, proofImages, proofUploading } = this.data;
+    if (proofUploading || this._proofUploadInFlight) return;
     const text = (proofText || '').trim();
-    if (!text) {
-      wx.showToast({ title: '请填写完成说明', icon: 'none' });
+    const images = Array.isArray(proofImages) ? proofImages : [];
+    if (!text && images.length === 0) {
+      wx.showToast({ title: '请填写完成说明或上传图片', icon: 'none' });
       return;
     }
-    taskAPI.submitComplete(id, text).then((r) => {
+    taskAPI.submitComplete(id, text, images).then((r) => {
       if (r.code === 200) {
         wx.showToast({ title: '已提交' });
         this.setData({ showProofEmojiPanel: false });
@@ -177,7 +237,7 @@ Page({
   },
 
   async onConfirmComplete() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { id, task } = this.data;
     const reward = (task && task.reward) ? String(task.reward) : '0';
     const usePayment = config.enableTaskPayment;
@@ -243,33 +303,85 @@ Page({
     });
   },
 
-  async onCancel() {
-    if (!(await ensureMutationReady())) return;
-    const { id } = this.data;
-    wx.showModal({
-      title: '撤销发布',
-      content: '确定要撤销发布该任务吗？撤销后该任务将不再可领取。',
-      success: (res) => {
-        if (!res.confirm) return;
-        taskAPI.cancelTask(id).then((r) => {
-          if (r.code === 200) {
-            wx.showToast({ title: '已撤销' });
-            setTimeout(() => {
-              wx.switchTab({ url: '/pages/task/index' });
-            }, 600);
-          } else {
-            wx.showToast({ title: r.message || '撤销失败', icon: 'none' });
-          }
-        }).catch((err) => {
-          console.error('撤销发布失败', err);
-          wx.showToast({ title: (err && (err.message || err.errMsg)) || '撤销失败', icon: 'none' });
+  async onRejectComplete() {
+    if (this._rejectInFlight) return;
+    this._rejectInFlight = true;
+    try {
+      if (!(await ensureMutationReady(this)) || this._authPageAlive === false) return;
+      const confirmed = await new Promise((resolve) => {
+        wx.showModal({
+          title: '驳回完成',
+          content: '确认驳回本次完成提交吗？上次凭证会保留，接单人可修改后重新提交。',
+          confirmText: '确认驳回',
+          confirmColor: '#d54941',
+          success: (res) => resolve(Boolean(res.confirm)),
+          fail: () => resolve(false),
         });
-      },
-    });
+      });
+      if (!confirmed || this._authPageAlive === false) return;
+      const { id } = this.data;
+      const res = await taskAPI.rejectComplete(id);
+      if (this._authPageAlive === false) return;
+      if (res.code === 200) {
+        wx.showToast({ title: '已驳回', icon: 'success' });
+        await this.loadDetail();
+      } else {
+        wx.showToast({ title: res.message || '驳回失败', icon: 'none' });
+      }
+    } catch (err) {
+      if (this._authPageAlive !== false) {
+        wx.showToast({
+          title: (err && (err.message || err.errMsg)) || '驳回失败',
+          icon: 'none',
+        });
+      }
+    } finally {
+      this._rejectInFlight = false;
+    }
+  },
+
+  async onCancel() {
+    if (this._cancelInFlight) return;
+    this._cancelInFlight = true;
+    try {
+      if (!(await ensureMutationReady(this)) || this._authPageAlive === false) return;
+      const taskStatus = this.data.task && this.data.task.status;
+      const assigned = ['in_progress', 'pending_confirm'].includes(taskStatus);
+      const confirmed = await new Promise((resolve) => {
+        wx.showModal({
+          title: assigned ? '取消任务' : '撤销发布',
+          content: assigned
+            ? '任务已有接单人，取消后将通知对方。确定继续吗？'
+            : '撤销后该任务将不再可领取，确定继续吗？',
+          confirmText: assigned ? '确认取消' : '确认撤销',
+          confirmColor: '#d54941',
+          success: (res) => resolve(Boolean(res.confirm)),
+          fail: () => resolve(false),
+        });
+      });
+      if (!confirmed || this._authPageAlive === false) return;
+      const result = await taskAPI.cancelTask(this.data.id);
+      if (this._authPageAlive === false) return;
+      if (result.code === 200) {
+        wx.showToast({ title: assigned ? '任务已取消' : '已撤销', icon: 'success' });
+        await this.loadDetail();
+      } else {
+        wx.showToast({ title: result.message || '取消失败', icon: 'none' });
+      }
+    } catch (err) {
+      if (this._authPageAlive !== false) {
+        wx.showToast({
+          title: (err && (err.message || err.errMsg)) || '取消失败',
+          icon: 'none',
+        });
+      }
+    } finally {
+      this._cancelInFlight = false;
+    }
   },
 
   async onRepublish() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { id } = this.data;
     wx.showModal({
       title: '重新发布',
@@ -287,7 +399,7 @@ Page({
   },
 
   async onDeleteTask() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { id } = this.data;
     wx.showModal({
       title: '删除任务',
@@ -305,7 +417,7 @@ Page({
   },
 
   async onAbandon() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { id } = this.data;
     wx.showModal({
       title: '放弃任务',
@@ -323,7 +435,7 @@ Page({
   },
 
   async onPublishDraft() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { id } = this.data;
     wx.showModal({
       title: '发布任务',
@@ -358,7 +470,7 @@ Page({
   },
 
   async onSubmitRating() {
-    if (!(await ensureMutationReady())) return;
+    if (!(await ensureMutationReady(this))) return;
     const { id, task, otherPartyId, ratingScore, ratingComment } = this.data;
     if (!otherPartyId) return wx.showToast({ title: '无法评价', icon: 'none' });
     const res = await taskAPI.submitRating({
@@ -374,5 +486,12 @@ Page({
     } else {
       wx.showToast({ title: res.message || '评价失败', icon: 'none' });
     }
+  },
+
+  onUnload() {
+    this._authPageAlive = false;
+    this._rejectInFlight = false;
+    this._cancelInFlight = false;
+    this._proofUploadInFlight = false;
   },
 });

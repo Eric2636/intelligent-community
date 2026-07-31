@@ -53,3 +53,45 @@
 @headline-medium: 28px;
 @body-large: 16px;
 @body-small: 12px;
+
+// 业务列表文字与弹性布局约束
+.list-width-safe() {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.list-single-line-ellipsis() {
+  .list-width-safe();
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-title-clamp() {
+  .list-single-line-ellipsis();
+  display: block;
+}
+
+.list-description-clamp() {
+  .list-width-safe();
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.list-fixed-region() {
+  flex-shrink: 0;
+}
+
+.list-flexible-text() {
+  flex: 1;
+  .list-single-line-ellipsis();
+}
+
+.list-flexible-region() {
+  flex: 1;
+  .list-width-safe();
+}

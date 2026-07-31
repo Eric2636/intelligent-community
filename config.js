@@ -11,4 +11,7 @@ const configs = {
 
 const selected = configs[appEnv] || localConfig;
 
-export default selected;
+export default {
+  ...selected,
+  enableVConsole: appEnv === 'local',
+};

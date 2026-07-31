@@ -1,5 +1,6 @@
 import { mallAPI } from '~/api/cloud';
 import { getCurrentUserId } from '~/utils/getOpenid';
+import { ensureMutationReady } from '~/utils/authIdentity';
 
 Page({
   data: {
@@ -37,6 +38,7 @@ Page({
   },
 
   async onConfirmComplete() {
+    if (!(await ensureMutationReady(this))) return;
     const { order } = this.data;
     if (order.status !== 'pending') return;
     const res = await mallAPI.updateOrderStatus(order._id, 'completed');
@@ -49,6 +51,7 @@ Page({
   },
 
   async onCancel() {
+    if (!(await ensureMutationReady(this))) return;
     const { order } = this.data;
     if (order.status !== 'pending') return;
     wx.showModal({
@@ -65,5 +68,9 @@ Page({
         }
       },
     });
+  },
+
+  onUnload() {
+    this._authPageAlive = false;
   },
 });

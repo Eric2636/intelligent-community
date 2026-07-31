@@ -4,6 +4,7 @@
     "nav": "/components/nav",
     "emoji-panel": "/components/emoji-panel",
     "t-loading": "tdesign-miniprogram/loading/loading",
-    "t-icon": "tdesign-miniprogram/icon/icon"
+    "t-icon": "tdesign-miniprogram/icon/icon",
+    "t-avatar": "tdesign-miniprogram/avatar/avatar"
   }
 }
