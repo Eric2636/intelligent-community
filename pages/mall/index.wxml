@@ -52,7 +52,7 @@
       </view>
     </view>
   </view>
-  <view wx:else class="mall-list list-fade-in">
+  <view wx:else class="mall-list">
     <view
       class="mall-card"
       wx:for="{{list}}"

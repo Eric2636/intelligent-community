@@ -681,6 +681,14 @@ export const userAPI = {
       auth: true,
     }).then((res) => refreshAfterSuccess(res && res.code === 200 ? res : { code: 200, data: res }, () => markListRefresh(LIST_REFRESH_KEYS.user)));
   },
+
+  getAvatarReview(reviewId) {
+    return httpRequest({
+      method: 'GET',
+      path: `api/user/avatar-reviews/${encodeURIComponent(reviewId)}`,
+      auth: true,
+    }).then((res) => (res && res.code === 200 ? res.data : res));
+  },
 };
 
 /**

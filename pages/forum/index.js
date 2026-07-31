@@ -20,6 +20,7 @@ Page({
     pinned: [],
     list: [],
     loading: true,
+    loadingMore: false,
     refreshing: false,
     showNoMore: false,
     hasMore: true,
@@ -89,7 +90,7 @@ Page({
 
   // 上拉加载更多
   async onLoadMore() {
-    if (this.data.loading) return;
+    if (this.data.loading || this.data.loadingMore || this.data.refreshing) return;
     if (!this.data.hasMore) {
       this.showNoMoreTip();
       return;
@@ -144,7 +145,8 @@ Page({
     const keyword = String(queryKeyword || '').trim();
     this.setData({
       page,
-      loading: true,
+      loading: refresh,
+      loadingMore: !refresh,
       showNoMore: refresh ? false : this.data.showNoMore,
     });
 
@@ -217,7 +219,7 @@ Page({
     } finally {
       if (this._pageAlive && requestId === this._searchRequestId) {
         this._activeListRequestId = 0;
-        this.setData({ loading: false, refreshing: false });
+        this.setData({ loading: false, loadingMore: false, refreshing: false });
       }
     }
   },

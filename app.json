@@ -29,6 +29,7 @@
       "desc": "用于选择和展示门店地点"
     }
   },
+  "requiredPrivateInfos": ["chooseLocation"],
   "tabBar": {
     "custom": true,
     "list": [
