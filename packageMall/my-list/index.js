@@ -85,7 +85,7 @@ Page({
       ownerActionVisible: true,
       ownerActions: [
         { label: '编辑', value: 'edit', icon: 'edit-1' },
-        { label: isOnline ? '隐藏信息' : '公开信息', value: 'visibility', icon: isOnline ? 'browse-off' : 'browse' },
+        { label: isOnline ? '隐藏' : '公开', value: 'visibility', icon: isOnline ? 'browse-off' : 'browse' },
         { label: '删除', value: 'delete', icon: 'delete-1', color: '#d54941' },
       ],
     });

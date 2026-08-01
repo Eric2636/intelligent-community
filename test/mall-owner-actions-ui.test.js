@@ -46,6 +46,8 @@ test('owner actions update visibility and confirm destructive deletion', () => {
     assert.match(source, /mallAPI\.setItemVisibility/);
     assert.match(source, /mallAPI\.deleteItem/);
     assert.match(source, /wx\.showModal/);
+    assert.match(source, /isOnline \? '隐藏' : '公开'/);
+    assert.doesNotMatch(source, /隐藏信息|公开信息/);
   });
 });
 
