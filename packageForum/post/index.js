@@ -2,7 +2,7 @@ import { forumAPI } from '~/api/cloud';
 import { chooseAndUploadMedia, MEDIA_LIMITS } from '~/utils/cloudMedia';
 import { FORUM_REPLY_EMOJI_LIST } from '~/utils/forumReplyEmoji';
 import { ensureMutationReady } from '~/utils/authIdentity';
-import { emitListMutation } from '~/utils/listMutation';
+import { emitListMutation } from '../../utils/listMutation.js';
 
 function firstUrl(list) {
   return Array.isArray(list) && list.length ? String(list[0] || '') : '';

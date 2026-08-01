@@ -8,7 +8,7 @@ import { ensureMutationReady } from '~/utils/authIdentity';
 import { formatDateTimeYmdHm } from '~/utils/date';
 import { normalizeAvatar } from '~/utils/defaultAvatar';
 import { createHotSearch } from '~/utils/hotSearch';
-import { navigateToWithListMutation } from '~/utils/listMutation';
+import { navigateToWithListMutation } from '../../utils/listMutation.js';
 
 Page({
   data: {
