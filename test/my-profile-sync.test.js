@@ -26,6 +26,13 @@ async function loadMyPage(options = {}) {
     refreshNotificationUnreadCount() {},
   };
   let profileRequests = 0;
+  const storage = {
+    access_token: 'token',
+    phone_authorized_login_v1: true,
+    wechat_authorized_login_v2: true,
+    wechat_authorized_login: true,
+  };
+  const removedStorageKeys = [];
 
   vm.runInNewContext(pageSource.replace(/^import .*;\s*$/gm, ''), {
     Page(config) {
@@ -76,7 +83,11 @@ async function loadMyPage(options = {}) {
     },
     wx: {
       getStorageSync(key) {
-        return key === 'access_token' ? 'token' : '';
+        return storage[key] || '';
+      },
+      removeStorageSync(key) {
+        removedStorageKeys.push(key);
+        delete storage[key];
       },
     },
     console: {
@@ -98,7 +109,7 @@ async function loadMyPage(options = {}) {
   Object.entries(definition).forEach(([name, value]) => {
     if (typeof value === 'function') page[name] = value.bind(page);
   });
-  return { app, page, getProfileRequests: () => profileRequests };
+  return { app, page, storage, removedStorageKeys, getProfileRequests: () => profileRequests };
 }
 
 test('logged-in my page fetches and displays the latest server profile', async () => {
@@ -122,6 +133,28 @@ test('profile request failure preserves the logged-in cached profile', async () 
   assert.equal(harness.page.data.isLoad, true);
   assert.equal(harness.page.data.personalInfo.displayName, '用户4592');
   assert.equal(harness.app.globalData.userInfo.phoneNumber, '13800004592');
+});
+
+test('authentication failure clears stale login and renders the guest profile', async () => {
+  const authError = new Error('登录已失效');
+  authError.statusCode = 401;
+  const harness = await loadMyPage({ error: authError });
+
+  await harness.page.refreshPersonalInfo();
+
+  assert.equal(harness.page.data.isLoad, false);
+  assert.equal(Object.keys(harness.page.data.personalInfo).length, 0);
+  assert.equal(harness.app.globalData.userInfo, null);
+  assert.equal(harness.storage.access_token, undefined);
+  assert.deepEqual(
+    [...harness.removedStorageKeys].sort(),
+    [
+      'access_token',
+      'phone_authorized_login_v1',
+      'wechat_authorized_login',
+      'wechat_authorized_login_v2',
+    ],
+  );
 });
 
 test('my page refreshes the profile whenever the tab becomes visible', async () => {
