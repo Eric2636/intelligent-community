@@ -166,7 +166,7 @@ page {
 
 .mall-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: @spacing-card-compact;
   margin-bottom: 16rpx;
   background: @bg-color-white;
@@ -174,8 +174,8 @@ page {
   box-shadow: @shadow-card;
 
   &__thumb {
-    width: 168rpx;
-    height: 168rpx;
+    width: 152rpx;
+    height: 152rpx;
     background: @bg-color-section;
     border-radius: @image-radius;
     display: flex;
@@ -191,7 +191,11 @@ page {
   }
 
   &__main {
+    height: 152rpx;
     margin-left: 24rpx;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
   &__title {
@@ -202,10 +206,11 @@ page {
   }
 
   &__meta {
-    margin-top: 12rpx;
+    margin-top: auto;
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
+    padding-top: 12rpx;
   }
 
   &__price {
@@ -255,13 +260,20 @@ page {
   box-shadow: @shadow-card-hover;
 }
 
-.mall-card__title {
-  .list-title-clamp();
-}
-
 .mall-card,
 .mall-card__meta {
   .list-width-safe();
+}
+
+.mall-card__title {
+  .list-title-clamp();
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .mall-card__thumb {
