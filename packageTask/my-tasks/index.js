@@ -4,6 +4,7 @@ import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { formatDateTimeYmdHm } from '~/utils/date';
 import { normalizeAvatar } from '~/utils/defaultAvatar';
 import { ensureMutationReady } from '~/utils/authIdentity';
+import { navigateToWithListMutation } from '~/utils/listMutation';
 
 const STATUS_TEXT = {
   draft: '草稿',
@@ -83,7 +84,16 @@ Page({
       this._skipNextShowRefresh = false;
       return;
     }
-    if (consumeListRefresh(LIST_REFRESH_KEYS.taskMine)) this.loadTasks();
+    const marked = consumeListRefresh(LIST_REFRESH_KEYS.taskMine);
+    if (!marked) {
+      this._listMutationHandled = false;
+      return;
+    }
+    if (this._listMutationHandled) {
+      this._listMutationHandled = false;
+      return;
+    }
+    this.loadTasks({ silent: true });
   },
 
   onPullDownRefresh() {
@@ -106,13 +116,13 @@ Page({
     this.setData({ activeTab: tab }, () => this.loadTasks());
   },
 
-  async loadTasks() {
+  async loadTasks({ silent = false } = {}) {
     if (redirectIfEntryHidden('task')) return;
     const { activeTab } = this.data;
     const requestId = (this._taskLoadRequestId || 0) + 1;
     this._taskLoadRequestId = requestId;
     const isCurrentRequest = () => this._taskPageAlive && requestId === this._taskLoadRequestId;
-    this.setData({ loading: true });
+    if (!silent) this.setData({ loading: true });
     try {
       if (!(await ensureMutationReady(this))) {
         if (isCurrentRequest()) this.setData({ loading: false });
@@ -167,7 +177,12 @@ Page({
       wx.navigateTo({ url: `/packageTask/publish/index?draftId=${encodeURIComponent(id)}` });
       return;
     }
-    wx.navigateTo({ url: `/packageTask/detail/index?id=${id}` });
+    navigateToWithListMutation(
+      this,
+      `/packageTask/detail/index?id=${id}`,
+      ['publishedList', 'takenList', 'draftList', 'cancelledList'],
+      normalizeTaskRow,
+    );
   },
 
   onUnload() {

@@ -205,15 +205,27 @@
         </view>
       </view>
       <view wx:if="{{isMine}}" class="detail-bar__row">
-        <t-button class="detail-bar__action" theme="primary" size="large" block bindtap="onContact">联系商家</t-button>
         <t-button wx:if="{{item.latitude && item.longitude}}" class="detail-bar__action" variant="outline" size="large" block bindtap="openLocation">导航到店</t-button>
         <button class="detail-bar__share" open-type="share">
           <t-icon name="share" size="44rpx" />
           <text>分享</text>
         </button>
+        <view wx:if="{{isMine}}" class="detail-bar__more" bindtap="onOpenOwnerActions" aria-role="button" aria-label="更多操作">
+          <t-icon name="more" size="44rpx" />
+          <text>更多</text>
+        </view>
       </view>
     </view>
   </block>
   <view wx:else class="detail-loading">信息不存在</view>
 </view>
+<t-action-sheet
+  visible="{{ownerActionVisible}}"
+  items="{{ownerActions}}"
+  description="管理这条信息"
+  show-cancel
+  bind:selected="onOwnerActionSelected"
+  bind:visible-change="onOwnerActionVisibleChange"
+  bind:close="onOwnerActionClose"
+/>
 <auth-login-dialog id="auth-login-dialog" />

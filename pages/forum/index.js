@@ -7,6 +7,7 @@ import { normalizeForumListPost, forumListPostHasMedia } from '~/utils/forumPost
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureMutationReady } from '~/utils/authIdentity';
 import { createHotSearch } from '~/utils/hotSearch';
+import { applyListMutation } from '~/utils/listMutation';
 
 function getPostIdFromEvent(e) {
   const { id } = e.currentTarget.dataset;
@@ -72,9 +73,16 @@ Page({
       this._skipNextShowRefresh = false;
       return;
     }
-    consumeListRefresh(LIST_REFRESH_KEYS.forum);
-    this.setData({ page: 1, hasMore: true });
-    Promise.all([this.loadAnnouncements(), this.loadPosts(true)]);
+    const marked = consumeListRefresh(LIST_REFRESH_KEYS.forum);
+    if (!marked) {
+      this._listMutationHandled = false;
+      return;
+    }
+    if (this._listMutationHandled) {
+      this._listMutationHandled = false;
+      return;
+    }
+    this.loadPosts(true, { silent: true });
   },
 
   // 下拉刷新
@@ -135,25 +143,28 @@ Page({
     }, 2000);
   },
 
-  async loadPosts(refresh = true) {
+  async loadPosts(refresh = true, { silent = false } = {}) {
     this._searchRequestId += 1;
     const requestId = this._searchRequestId;
     this._activeListRequestId = requestId;
     this._committedRequestInvalidated = false;
     const { queryKeyword, orderBy } = this.data;
+    const requestPageSize = silent
+      ? Math.max(this.data.pageSize, this.data.list.length)
+      : this.data.pageSize;
     const page = refresh ? 1 : this.data.page;
     const keyword = String(queryKeyword || '').trim();
     this.setData({
-      page,
-      loading: refresh,
-      loadingMore: !refresh,
+      page: silent ? this.data.page : page,
+      loading: silent ? this.data.loading : refresh,
+      loadingMore: silent ? this.data.loadingMore : !refresh,
       showNoMore: refresh ? false : this.data.showNoMore,
     });
 
     try {
       const res = await forumAPI.getPostList({
         page,
-        pageSize: this.data.pageSize,
+        pageSize: requestPageSize,
         keyword: keyword || undefined,
         orderBy
       });
@@ -185,7 +196,7 @@ Page({
           this.setData({
             pinned: pinnedNorm,
             list: fullList,
-            hasMore: (list || []).length >= this.data.pageSize,
+            hasMore: (list || []).length >= requestPageSize,
             useVirtual,
             displayList,
             virtualStart: 0,
@@ -340,8 +351,10 @@ Page({
       return;
     }
 
+    this._listMutationHandled = false;
     wx.navigateTo({
       url: `/packageForum/post/index?postId=${encodeURIComponent(postId)}`,
+      events: { listMutation: (mutation) => this.onDetailListMutation(mutation) },
     });
   },
 
@@ -351,9 +364,29 @@ Page({
       wx.showToast({ title: '帖子信息异常', icon: 'none' });
       return;
     }
+    this._listMutationHandled = false;
     wx.navigateTo({
       url: `/packageForum/post/index?postId=${encodeURIComponent(postId)}&anchor=comments`,
+      events: { listMutation: (mutation) => this.onDetailListMutation(mutation) },
     });
+  },
+
+  onDetailListMutation(mutation) {
+    this._listMutationHandled = true;
+    const normalized = mutation && mutation.data
+      ? { ...mutation, data: normalizeForumListPost(mutation.data) }
+      : mutation;
+    const list = applyListMutation(this.data.list, normalized);
+    const pinned = applyListMutation(this.data.pinned, normalized);
+    const updates = {};
+    if (list !== this.data.list) {
+      updates.list = list;
+      updates.displayList = this.data.useVirtual
+        ? list.slice(this.data.virtualStart, this.data.virtualStart + this.data.VIRTUAL_WINDOW)
+        : list;
+    }
+    if (pinned !== this.data.pinned) updates.pinned = pinned;
+    if (Object.keys(updates).length) this.setData(updates);
   },
 
   onShareAppMessage(options = {}) {

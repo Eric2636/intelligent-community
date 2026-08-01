@@ -3,6 +3,7 @@ import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { normalizeForumListPost } from '~/utils/forumPostList';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureMutationReady } from '~/utils/authIdentity';
+import { navigateToWithListMutation } from '~/utils/listMutation';
 
 Page({
   data: {
@@ -24,7 +25,16 @@ Page({
       this._skipNextShowRefresh = false;
       return;
     }
-    if (consumeListRefresh(LIST_REFRESH_KEYS.forumMine)) this.loadPosts();
+    const marked = consumeListRefresh(LIST_REFRESH_KEYS.forumMine);
+    if (!marked) {
+      this._listMutationHandled = false;
+      return;
+    }
+    if (this._listMutationHandled) {
+      this._listMutationHandled = false;
+      return;
+    }
+    this.loadPosts({ silent: true });
   },
 
   onPullDownRefresh() {
@@ -40,13 +50,13 @@ Page({
     return this.loadPosts();
   },
 
-  async loadPosts() {
+  async loadPosts({ silent = false } = {}) {
     if (redirectIfEntryHidden('forum')) return;
     if (!(await ensureMutationReady(this))) {
-      this.setData({ loading: false });
+      if (!silent) this.setData({ loading: false });
       return;
     }
-    this.setData({ loading: true });
+    if (!silent) this.setData({ loading: true });
     const res = await forumAPI.getMyPosts();
     if (res.code === 200) {
       const postList = (res.data || []).map(normalizeForumListPost);
@@ -69,9 +79,12 @@ Page({
 
   goPost(e) {
     const { id } = e.currentTarget.dataset;
-    wx.navigateTo({
-      url: `/packageForum/post/index?postId=${id}`,
-    });
+    navigateToWithListMutation(
+      this,
+      `/packageForum/post/index?postId=${id}`,
+      'postList',
+      normalizeForumListPost,
+    );
   },
 
   onUnload() {
