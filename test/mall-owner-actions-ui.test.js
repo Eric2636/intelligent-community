@@ -55,3 +55,11 @@ test('public mall cards have no decorative right arrow', () => {
   assert.doesNotMatch(wxml, /mall-card__arrow|chevron-right/);
   assert.doesNotMatch(less, /\.mall-card__arrow/);
 });
+
+test('public mall cards use a compact aligned TDesign-style information hierarchy', () => {
+  const less = read('pages/mall/index.less');
+  assert.match(less, /&__thumb\s*\{[\s\S]*?width:\s*152rpx;[\s\S]*?height:\s*152rpx;/);
+  assert.match(less, /&__main\s*\{[\s\S]*?height:\s*152rpx;[\s\S]*?display:\s*flex;[\s\S]*?flex-direction:\s*column;[\s\S]*?justify-content:\s*space-between;/);
+  assert.match(less, /\.mall-card__title\s*\{[\s\S]*?-webkit-line-clamp:\s*2;/);
+  assert.match(less, /&__meta\s*\{[\s\S]*?margin-top:\s*auto;[\s\S]*?align-items:\s*baseline;/);
+});
