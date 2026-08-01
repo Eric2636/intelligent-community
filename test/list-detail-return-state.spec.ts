@@ -27,6 +27,33 @@ test('list mutation patches, replaces and removes only the target row', () => {
   assert.equal(applyListMutation(list, null), list);
 });
 
+test('list mutation imports use explicit relative paths that the WeChat packager can include', () => {
+  const files = [
+    'pages/task/index.js',
+    'pages/forum/index.js',
+    'pages/mall/index.js',
+    'packageTask/detail/index.js',
+    'packageTask/my-tasks/index.js',
+    'packageForum/post/index.js',
+    'packageForum/my-posts/index.js',
+    'packageForum/favorites/index.js',
+    'packageMall/detail/index.js',
+    'packageMall/publish/index.js',
+    'packageMall/my-list/index.js',
+    'packageMall/favorites/index.js',
+  ];
+
+  for (const file of files) {
+    const source = read(file);
+    assert.doesNotMatch(source, /from ['"]~\/utils\/listMutation['"]/, `${file} must not use the alias`);
+    assert.match(
+      source,
+      /from ['"]\.\.\/\.\.\/utils\/listMutation\.js['"]/,
+      `${file} must use an explicit relative .js import`,
+    );
+  }
+});
+
 test('task and forum home pages no longer refresh every time onShow runs', () => {
   const task = read('pages/task/index.js');
   const forum = read('pages/forum/index.js');

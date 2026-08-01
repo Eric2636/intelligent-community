@@ -1,7 +1,7 @@
 import { mallAPI } from '~/api/cloud';
 import { chooseAndUploadMedia } from '~/utils/cloudMedia';
 import { ensureMutationReady } from '~/utils/authIdentity';
-import { emitListMutation } from '~/utils/listMutation';
+import { emitListMutation } from '../../utils/listMutation.js';
 
 Page({
   data: {

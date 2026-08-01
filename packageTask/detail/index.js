@@ -4,7 +4,7 @@ import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { ensureMutationReady } from '~/utils/authIdentity';
 import { normalizeAvatar } from '~/utils/defaultAvatar';
 import { chooseAndUploadMedia } from '~/utils/cloudMedia';
-import { emitListMutation } from '~/utils/listMutation';
+import { emitListMutation } from '../../utils/listMutation.js';
 
 const STATUS_TEXT = {
   draft: '草稿',
