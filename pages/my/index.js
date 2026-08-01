@@ -159,7 +159,26 @@ Page({
     const requestId = (this._personalInfoRequestId || 0) + 1;
     this._personalInfoRequestId = requestId;
     const cachedUserInfo = app.globalData.userInfo || {};
-    const latestUserInfo = await this.getPersonalInfo();
+    let latestUserInfo;
+    try {
+      latestUserInfo = await this.getPersonalInfo();
+    } catch (err) {
+      if (!this._servicePageAlive || requestId !== this._personalInfoRequestId) return;
+      try {
+        wx.removeStorageSync('access_token');
+        wx.removeStorageSync('phone_authorized_login_v1');
+        wx.removeStorageSync('wechat_authorized_login_v2');
+        wx.removeStorageSync('wechat_authorized_login');
+      } catch (e) {
+        /* ignore */
+      }
+      app.globalData.openid = '';
+      app.globalData.userInfo = null;
+      app.globalData.offlineMode = false;
+      if (app.resetNotificationUnreadCount) app.resetNotificationUnreadCount();
+      this.setData({ isLoad: false, personalInfo: {} });
+      return;
+    }
     if (!this._servicePageAlive || requestId !== this._personalInfoRequestId) return;
 
     if (latestUserInfo) {
@@ -204,6 +223,7 @@ Page({
       const res = await userAPI.getUserInfo();
       return res && res.code === 200 && res.data ? res.data : null;
     } catch (err) {
+      if ([401, 403].includes(Number(err && err.statusCode))) throw err;
       console.warn('获取用户信息失败，继续使用本地资料', err);
       return null;
     }
