@@ -4,6 +4,7 @@ import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { ensureMutationReady } from '~/utils/authIdentity';
 import { normalizeAvatar } from '~/utils/defaultAvatar';
 import { chooseAndUploadMedia } from '~/utils/cloudMedia';
+import { emitListMutation } from '~/utils/listMutation';
 
 const STATUS_TEXT = {
   draft: '草稿',
@@ -107,6 +108,7 @@ Page({
             }
           : {};
       this.setData({ task, isPublisher, isTaker, otherPartyId, otherPartyName, ...editableProof });
+      emitListMutation(this, { type: 'upsert', id: task.id || task._id || id, data: task });
     } catch (err) {
       console.error('加载任务详情失败', err);
       wx.showToast({ title: (err && (err.message || err.errMsg)) || '获取任务详情失败', icon: 'none' });
@@ -409,6 +411,7 @@ Page({
         taskAPI.deleteTask(id).then((r) => {
           if (r.code === 200) {
             wx.showToast({ title: '已删除' });
+            emitListMutation(this, { type: 'remove', id });
             wx.navigateBack();
           } else wx.showToast({ title: r.message || '删除失败', icon: 'none' });
         });

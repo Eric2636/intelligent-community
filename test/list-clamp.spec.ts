@@ -167,7 +167,7 @@ const flexContracts = [
   {
     file: 'pages/mall/index',
     rows: [
-      ['mall-card', ['mall-card__main'], [], ['mall-card__thumb', 'mall-card__arrow']],
+      ['mall-card', ['mall-card__main'], [], ['mall-card__thumb']],
       ['mall-card__meta', [], ['mall-card__price'], ['mall-card__time']],
     ],
   },

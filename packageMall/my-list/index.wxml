@@ -12,7 +12,10 @@
     <view class="item-grid">
       <view class="item-card" wx:for="{{itemList}}" wx:key="id" bind:tap="goDetail" data-id="{{item.id}}">
         <view class="item-status {{item.visibility === 'ONLINE' ? 'item-status--online' : 'item-status--offline'}}">
-          {{item.visibility === 'ONLINE' ? '已上架' : '待上架'}}
+          {{item.visibility === 'ONLINE' ? '已公开' : '已隐藏'}}
+        </view>
+        <view class="item-more" data-id="{{item.id || item._id}}" catchtap="onOpenOwnerActions" aria-role="button" aria-label="更多操作">
+          <t-icon name="more" size="40rpx" color="#1f2329" />
         </view>
         <image wx:if="{{item.coverImage}}" class="item-image" src="{{item.coverImage}}" mode="aspectFill" lazy-load />
         <view wx:else class="item-image item-image--placeholder">暂无图片</view>
@@ -26,4 +29,13 @@
     <t-empty wx:if="{{!loading && itemList.length === 0}}" description="暂无发布的商品" />
   </t-pull-down-refresh>
 </view>
+<t-action-sheet
+  visible="{{ownerActionVisible}}"
+  items="{{ownerActions}}"
+  description="管理这条信息"
+  show-cancel
+  bind:selected="onOwnerActionSelected"
+  bind:visible-change="onOwnerActionVisibleChange"
+  bind:close="onOwnerActionClose"
+/>
 <auth-login-dialog id="auth-login-dialog" bindauthorized="onAuthorized" />

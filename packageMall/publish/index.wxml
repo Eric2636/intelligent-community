@@ -1,4 +1,4 @@
-<nav title-text="发布" show-back="{{true}}" />
+<nav title-text="{{isEditMode ? '编辑信息' : '发布'}}" show-back="{{true}}" />
 <view class="publish-page">
   <view class="publish-form">
     <view class="publish-field">
@@ -129,7 +129,7 @@
       </view>
     </view>
     <t-button class="publish-submit" theme="primary" size="large" block bindtap="submit" loading="{{submitting}}">
-      发布
+      {{isEditMode ? '保存修改' : '发布'}}
     </t-button>
   </view>
 </view>

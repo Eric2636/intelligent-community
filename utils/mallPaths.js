@@ -4,8 +4,10 @@ export function mallDetailUrl(itemId) {
   return `/packageMall/detail/index?id=${encodeURIComponent(itemId)}`;
 }
 
-export function mallPublishUrl() {
-  return '/packageMall/publish/index';
+export function mallPublishUrl(itemId) {
+  return itemId
+    ? `/packageMall/publish/index?id=${encodeURIComponent(itemId)}`
+    : '/packageMall/publish/index';
 }
 
 export function mallMyItemsUrl() {

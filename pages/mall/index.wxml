@@ -59,6 +59,7 @@
       wx:key="id"
       data-id="{{item._id || item.id}}"
       bindtap="goDetail"
+      hover-class="mall-card--pressed"
     >
       <view class="mall-card__thumb">
         <image
@@ -78,7 +79,6 @@
           <text wx:if="{{item.adminLabel}}" class="admin-tag admin-tag--corner">{{item.adminLabel}}</text>
         </view>
       </view>
-      <t-icon name="chevron-right" size="32rpx" class="mall-card__arrow" />
     </view>
     <view wx:if="{{!loading && list.length === 0}}" class="mall-empty">
       <t-empty description="暂无信息" />
