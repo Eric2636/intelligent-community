@@ -8,6 +8,7 @@ import { ensureMutationReady } from '~/utils/authIdentity';
 import { formatDateTimeYmdHm } from '~/utils/date';
 import { normalizeAvatar } from '~/utils/defaultAvatar';
 import { createHotSearch } from '~/utils/hotSearch';
+import { navigateToWithListMutation } from '~/utils/listMutation';
 
 Page({
   data: {
@@ -56,8 +57,16 @@ Page({
       this._skipNextShowRefresh = false;
       return;
     }
-    consumeListRefresh(LIST_REFRESH_KEYS.task);
-    this.loadList(true);
+    const marked = consumeListRefresh(LIST_REFRESH_KEYS.task);
+    if (!marked) {
+      this._listMutationHandled = false;
+      return;
+    }
+    if (this._listMutationHandled) {
+      this._listMutationHandled = false;
+      return;
+    }
+    this.loadList(true, { silent: true });
   },
 
   async onRefresh() {
@@ -107,25 +116,28 @@ Page({
     this.onSearchInput({ detail: { value: '' } });
   },
 
-  async loadList(refresh = true) {
+  async loadList(refresh = true, { silent = false } = {}) {
     this._searchRequestId += 1;
     const requestId = this._searchRequestId;
     this._activeListRequestId = requestId;
     this._committedRequestInvalidated = false;
     const nextPage = refresh ? 1 : this.data.page;
+    const requestPageSize = silent
+      ? Math.max(this.data.pageSize, this.data.list.length)
+      : this.data.pageSize;
     const keyword = String(this.data.queryKeyword || '').trim();
     this.setData({
-      page: nextPage,
+      page: silent ? this.data.page : nextPage,
       hasMore: refresh ? true : this.data.hasMore,
       showNoMore: refresh ? false : this.data.showNoMore,
-      loading: refresh,
-      loadingMore: !refresh,
+      loading: silent ? this.data.loading : refresh,
+      loadingMore: silent ? this.data.loadingMore : !refresh,
     });
     try {
       const res = await taskAPI.getTaskList({
         keyword: keyword || undefined,
         page: nextPage,
-        pageSize: this.data.pageSize,
+        pageSize: requestPageSize,
       });
       if (!this._pageAlive || requestId !== this._searchRequestId) return;
       if (res.code === 200) {
@@ -146,7 +158,7 @@ Page({
         this.setData({
           list,
           listTotal: list.length,
-          hasMore: normalized.length >= this.data.pageSize,
+          hasMore: normalized.length >= requestPageSize,
         });
       } else {
         wx.showToast({ title: res.message || '获取任务失败', icon: 'none' });
@@ -177,7 +189,14 @@ Page({
 
   goDetail(e) {
     const { id } = e.currentTarget.dataset;
-    wx.navigateTo({ url: `/packageTask/detail/index?id=${id}` });
+    navigateToWithListMutation(this, `/packageTask/detail/index?id=${id}`, 'list', (task) => ({
+      ...task,
+      id: task.id || task._id,
+      publisherAvatar: normalizeAvatar(task.publisherAvatar),
+      images: Array.isArray(task.images) ? task.images : [],
+      videos: Array.isArray(task.videos) ? task.videos : [],
+      createdAt: formatDateTimeYmdHm(task.createdAt),
+    }));
   },
 
   async goPublish() {

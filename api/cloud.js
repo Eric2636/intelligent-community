@@ -559,6 +559,41 @@ export const mallAPI = {
     });
   },
 
+  updateItem(itemId, data) {
+    return httpRequest({
+      method: 'PATCH',
+      path: `api/items/${encodeURIComponent(itemId)}`,
+      data,
+      auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearItemListCache();
+      return refreshAfterSuccess(res, markMallLists);
+    });
+  },
+
+  setItemVisibility(itemId, visibility) {
+    return httpRequest({
+      method: 'PATCH',
+      path: `api/items/${encodeURIComponent(itemId)}/visibility`,
+      data: { visibility },
+      auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearItemListCache();
+      return refreshAfterSuccess(res, markMallLists);
+    });
+  },
+
+  deleteItem(itemId) {
+    return httpRequest({
+      method: 'DELETE',
+      path: `api/items/${encodeURIComponent(itemId)}`,
+      auth: true,
+    }).then((res) => {
+      if (res && res.code === 200) clearItemListCache();
+      return refreshAfterSuccess(res, markMallLists);
+    });
+  },
+
   // 获取我的商品
   getMyItems() {
     return httpRequest({

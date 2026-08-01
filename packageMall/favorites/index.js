@@ -3,6 +3,7 @@ import { mallDetailUrl } from '~/utils/mallPaths';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureMutationReady } from '~/utils/authIdentity';
+import { navigateToWithListMutation } from '~/utils/listMutation';
 
 Page({
   data: {
@@ -24,7 +25,16 @@ Page({
       this._skipNextShowRefresh = false;
       return;
     }
-    if (consumeListRefresh(LIST_REFRESH_KEYS.mallFavorites)) this.loadList();
+    const marked = consumeListRefresh(LIST_REFRESH_KEYS.mallFavorites);
+    if (!marked) {
+      this._listMutationHandled = false;
+      return;
+    }
+    if (this._listMutationHandled) {
+      this._listMutationHandled = false;
+      return;
+    }
+    this.loadList({ silent: true });
   },
 
   onPullDownRefresh() {
@@ -40,13 +50,13 @@ Page({
     return this.loadList();
   },
 
-  async loadList() {
+  async loadList({ silent = false } = {}) {
     if (redirectIfEntryHidden('mall')) return;
     if (!(await ensureMutationReady(this))) {
-      this.setData({ loading: false });
+      if (!silent) this.setData({ loading: false });
       return;
     }
-    this.setData({ loading: true });
+    if (!silent) this.setData({ loading: true });
     const res = await mallAPI.getMyFavoriteItems();
     if (res.code === 200) this.setData({ list: res.data || [], loading: false });
     else this.setData({ loading: false });
@@ -54,7 +64,15 @@ Page({
 
   goDetail(e) {
     const { id } = e.currentTarget.dataset;
-    wx.navigateTo({ url: mallDetailUrl(id) });
+    navigateToWithListMutation(
+      this,
+      mallDetailUrl(id),
+      'list',
+      undefined,
+      (mutation) => mutation && mutation.data && mutation.data.isFavorited === false
+        ? { type: 'remove', id: mutation.id }
+        : mutation,
+    );
   },
 
   onUnload() {

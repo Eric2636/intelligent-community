@@ -7,6 +7,7 @@ import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureMutationReady } from '~/utils/authIdentity';
 import { createHotSearch } from '~/utils/hotSearch';
+import { applyMutationToPageLists } from '~/utils/listMutation';
 
 Page({
   data: {
@@ -66,9 +67,16 @@ Page({
       this._skipNextShowRefresh = false;
       return;
     }
-    if (consumeListRefresh(LIST_REFRESH_KEYS.mall)) {
-      this.refreshMall();
+    const marked = consumeListRefresh(LIST_REFRESH_KEYS.mall);
+    if (!marked) {
+      this._listMutationHandled = false;
+      return;
     }
+    if (this._listMutationHandled) {
+      this._listMutationHandled = false;
+      return;
+    }
+    this.loadList(true, this.data.currentCategory, { silent: true });
   },
 
   async onRefresh() {
@@ -152,7 +160,7 @@ Page({
     }
   },
 
-  async loadList(refresh = true, confirmedCategoryId = '') {
+  async loadList(refresh = true, confirmedCategoryId = '', { silent = false } = {}) {
     const categoryId = confirmedCategoryId || this.data.currentCategory;
     if (!this._categoryReady || !categoryId) return;
     this._searchRequestId += 1;
@@ -160,13 +168,16 @@ Page({
     this._activeListRequestId = requestId;
     this._committedRequestInvalidated = false;
     const { queryKeyword, orderBy, pageSize } = this.data;
+    const visibleSize = silent ? Math.max(pageSize, this.data.list.length) : pageSize;
+    let nextPage = this.data.page;
+    if (!silent && refresh) nextPage = 1;
     const normalizedKeyword = String(queryKeyword || '').trim();
     this.setData({
-      page: refresh ? 1 : this.data.page,
+      page: nextPage,
       hasMore: refresh ? true : this.data.hasMore,
       showNoMore: refresh ? false : this.data.showNoMore,
-      loading: refresh,
-      loadingMore: !refresh,
+      loading: silent ? this.data.loading : refresh,
+      loadingMore: silent ? this.data.loadingMore : !refresh,
     });
     try {
       const res = await mallAPI.getItems({
@@ -180,7 +191,7 @@ Page({
           wx.showToast({ title: '网络不可用，当前展示缓存数据', icon: 'none' });
         }
         const raw = res.data || [];
-        const list = raw.slice(0, pageSize);
+        const list = raw.slice(0, visibleSize);
         this.setData({
           fullList: raw,
           list,
@@ -286,7 +297,50 @@ Page({
 
   goDetail(e) {
     const { id } = e.currentTarget.dataset;
-    wx.navigateTo({ url: mallDetailUrl(id) });
+    this._listMutationHandled = false;
+    wx.navigateTo({
+      url: mallDetailUrl(id),
+      events: {
+        listMutation: (mutation) => {
+          this._listMutationHandled = true;
+          this.reconcileMallMutation(mutation);
+        },
+      },
+    });
+  },
+
+  reconcileMallMutation(mutation) {
+    if (!mutation) return;
+    const data = mutation.data || {};
+    const keyword = String(this.data.queryKeyword || '').trim().toLowerCase();
+    const matchesCategory = this.data.currentCategory === 'all' || data.categoryId === this.data.currentCategory;
+    const searchable = `${data.title || ''} ${data.desc || ''}`.toLowerCase();
+    const shouldRemove = mutation.type === 'remove'
+      || data.visibility === 'OFFLINE'
+      || (mutation.data && (!matchesCategory || (keyword && !searchable.includes(keyword))));
+    if (shouldRemove) {
+      applyMutationToPageLists(this, ['list', 'fullList'], { type: 'remove', id: mutation.id });
+      return;
+    }
+    if (!mutation.data) return;
+    const id = String(mutation.id || data.id || data._id || '');
+    const current = this.data.fullList || [];
+    const index = current.findIndex((item) => String(item.id || item._id) === id);
+    const fullList = index >= 0
+      ? current.map((item, itemIndex) => itemIndex === index ? { ...data, id: data.id || data._id || id } : item)
+      : [{ ...data, id: data.id || data._id || id }, ...current];
+    const price = (item) => {
+      const value = Number.parseFloat(String(item.price || '').replace(/[^\d.-]/g, ''));
+      return Number.isFinite(value) ? value : 0;
+    };
+    const sorted = [...fullList].sort((left, right) => {
+      if (this.data.orderBy === 'price_asc') return price(left) - price(right);
+      if (this.data.orderBy === 'price_desc') return price(right) - price(left);
+      return Date.parse(right.createdAt || 0) - Date.parse(left.createdAt || 0);
+    });
+    const visibleSize = Math.max(this.data.pageSize, this.data.list.length);
+    const list = sorted.slice(0, visibleSize);
+    this.setData({ fullList: sorted, list, listTotal: sorted.length, hasMore: sorted.length > list.length });
   },
 
   async goPublish() {

@@ -1,6 +1,7 @@
 import { mallAPI } from '~/api/cloud';
 import { chooseAndUploadMedia } from '~/utils/cloudMedia';
 import { ensureMutationReady } from '~/utils/authIdentity';
+import { emitListMutation } from '~/utils/listMutation';
 
 Page({
   data: {
@@ -17,12 +18,16 @@ Page({
     subImages: [],
     videos: [],
     submitting: false,
+    itemId: '',
+    isEditMode: false,
   },
 
-  onLoad() {
-    mallAPI.getCategories().then((res) => {
-      if (res.code !== 200) return;
-      const list = res.data || [];
+  async onLoad(options = {}) {
+    const itemId = options.id || '';
+    this.setData({ itemId, isEditMode: Boolean(itemId) });
+    const categoriesRes = await mallAPI.getCategories();
+    if (categoriesRes.code === 200) {
+      const list = categoriesRes.data || [];
       const first = list[0] || null;
       this.setData({
         categories: list,
@@ -30,6 +35,38 @@ Page({
         categoryId: first ? first.id : 'flea',
         categoryName: first ? first.name : '跳蚤市场',
       });
+    }
+    if (itemId) await this.loadEditingItem(itemId);
+  },
+
+  async loadEditingItem(itemId) {
+    const res = await mallAPI.getItemDetail(itemId);
+    if (res.code !== 200 || !res.data) return;
+    const item = res.data;
+    const categories = this.data.categories || [];
+    const matchedIndex = categories.findIndex((category) => category.id === item.categoryId);
+    const categoryIndex = matchedIndex >= 0 ? matchedIndex : 0;
+    const selectedCategory = categories[categoryIndex];
+    let mainImages = [];
+    if (Array.isArray(item.mainImages) && item.mainImages.length) mainImages = item.mainImages.slice(0, 1);
+    else if (item.coverImage) mainImages = [item.coverImage];
+    this.setData({
+      categoryIndex,
+      categoryId: item.categoryId || (selectedCategory && selectedCategory.id) || 'flea',
+      categoryName: item.categoryName || (selectedCategory && selectedCategory.name) || '跳蚤市场',
+      title: item.title || '',
+      price: item.price == null ? '' : String(item.price),
+      desc: item.desc || '',
+      contact: item.contact === '保密' ? '' : (item.contact || ''),
+      location: item.locationName || item.locationAddress ? {
+        name: item.locationName || '',
+        address: item.locationAddress || '',
+        latitude: item.latitude,
+        longitude: item.longitude,
+      } : null,
+      mainImages,
+      subImages: Array.isArray(item.subImages) ? item.subImages : [],
+      videos: Array.isArray(item.videos) ? item.videos : [],
     });
   },
 
@@ -165,25 +202,38 @@ Page({
       return;
     }
     this.setData({ submitting: true });
-    const res = await mallAPI.publishItem({
+    const emptyLocation = this.data.isEditMode ? null : undefined;
+    const payload = {
       categoryId,
       title: t,
       price: (price || '').trim(),
       unit: '元',
       desc: (desc || '').trim(),
       contact: (contact || '').trim() || '保密',
-      locationName: location ? location.name : undefined,
-      locationAddress: location ? location.address : undefined,
-      latitude: location ? location.latitude : undefined,
-      longitude: location ? location.longitude : undefined,
+      locationName: location ? location.name : emptyLocation,
+      locationAddress: location ? location.address : emptyLocation,
+      latitude: location ? location.latitude : emptyLocation,
+      longitude: location ? location.longitude : emptyLocation,
       mainImages,
       subImages,
       videos,
-    });
-    this.setData({ submitting: false });
-    if (res.code === 200 && res.data) {
-      wx.showToast({ title: '发布成功', icon: 'success' });
-      setTimeout(() => wx.navigateBack(), 800);
+    };
+    try {
+      const res = this.data.isEditMode
+        ? await mallAPI.updateItem(this.data.itemId, payload)
+        : await mallAPI.publishItem(payload);
+      if (res.code === 200 && res.data) {
+        const itemId = this.data.itemId || res.data.id || res.data._id;
+        emitListMutation(this, { type: 'upsert', id: itemId, data: res.data });
+        wx.showToast({ title: this.data.isEditMode ? '修改成功' : '发布成功', icon: 'success' });
+        setTimeout(() => wx.navigateBack(), 800);
+      } else {
+        wx.showToast({ title: res.message || (this.data.isEditMode ? '修改失败' : '发布失败'), icon: 'none' });
+      }
+    } catch (err) {
+      wx.showToast({ title: (err && (err.message || err.errMsg)) || (this.data.isEditMode ? '修改失败' : '发布失败'), icon: 'none' });
+    } finally {
+      this.setData({ submitting: false });
     }
   },
 

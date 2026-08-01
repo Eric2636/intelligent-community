@@ -2,6 +2,7 @@ import { forumAPI } from '~/api/cloud';
 import { chooseAndUploadMedia, MEDIA_LIMITS } from '~/utils/cloudMedia';
 import { FORUM_REPLY_EMOJI_LIST } from '~/utils/forumReplyEmoji';
 import { ensureMutationReady } from '~/utils/authIdentity';
+import { emitListMutation } from '~/utils/listMutation';
 
 function firstUrl(list) {
   return Array.isArray(list) && list.length ? String(list[0] || '') : '';
@@ -159,6 +160,7 @@ Page({
           const r = await forumAPI.deletePost(postId);
           if (r && r.code === 200) {
             wx.showToast({ title: '已删除', icon: 'success' });
+            emitListMutation(this, { type: 'remove', id: postId });
             setTimeout(() => wx.navigateBack(), 400);
           } else {
             wx.showToast({ title: (r && r.message) || '删除失败', icon: 'none' });
@@ -230,15 +232,17 @@ Page({
       const res = await forumAPI.getPostDetail(postId);
 
       if (res.code === 200 && res.data) {
+        const post = normalizeForumPost(res.data);
         this.setData(
           {
-            post: normalizeForumPost(res.data),
+            post,
             loading: silent ? this.data.loading : false,
           },
           () => {
             if (this.data.anchor === 'comments') this.scrollToComments();
           },
         );
+        emitListMutation(this, { type: 'upsert', id: postId, data: post });
       } else if (res.code === 404) {
         if (!silent) {
           this.setData({ post: null, loading: false });
