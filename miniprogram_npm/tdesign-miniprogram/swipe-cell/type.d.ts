@@ -15,10 +15,6 @@ export interface TdSwipeCellProps {
         type: ArrayConstructor;
         value?: Array<SwipeActionItem>;
     };
-    style?: {
-        type: StringConstructor;
-        value?: string;
-    };
 }
 export interface SwipeActionItem {
     text?: string;

@@ -25,6 +25,7 @@ export default class Input extends SuperComponent {
         updateValue(value: any): void;
         updateClearIconVisible(value?: boolean): void;
         onInput(e: any): void;
+        onChange(e: any): void;
         onFocus(e: any): void;
         onBlur(e: any): void;
         onConfirm(e: any): void;

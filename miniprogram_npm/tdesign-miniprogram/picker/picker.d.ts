@@ -8,20 +8,15 @@ export default class Picker extends SuperComponent {
     };
     relations: RelationsOptions;
     observers: {
-        'value, visible'(): void;
-        keys(obj: any): void;
-    };
-    lifetimes: {
-        attached(): void;
+        'value, visible'(value: any, visible: any): void;
+        'itemHeight, visibleItemCount'(): void;
     };
     data: {
         prefix: string;
         classPrefix: string;
-        labelAlias: string;
-        valueAlias: string;
         defaultPopUpProps: {};
         defaultPopUpzIndex: number;
-        pickItemHeight: number;
+        indicatorTop: number;
     };
     methods: {
         updateChildren(): void;
@@ -35,6 +30,7 @@ export default class Picker extends SuperComponent {
         onCancel(): void;
         onPopupChange(e: any): void;
         close(trigger: any): void;
+        updateIndicatorPosition(): void;
     };
     ready(): void;
 }

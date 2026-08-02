@@ -15,6 +15,14 @@ export interface TdNavbarProps {
         type: BooleanConstructor;
         value?: boolean;
     };
+    placeholder?: {
+        type: BooleanConstructor;
+        value?: boolean;
+    };
+    safeAreaInsetTop?: {
+        type: BooleanConstructor;
+        value?: boolean;
+    };
     title?: {
         type: StringConstructor;
         value?: string;
@@ -26,5 +34,9 @@ export interface TdNavbarProps {
     visible?: {
         type: BooleanConstructor;
         value?: boolean;
+    };
+    zIndex?: {
+        type: NumberConstructor;
+        value?: number;
     };
 }

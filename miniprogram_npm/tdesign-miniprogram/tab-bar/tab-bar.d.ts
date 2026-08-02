@@ -6,6 +6,7 @@ export default class Tabbar extends SuperComponent {
     data: {
         prefix: string;
         classPrefix: string;
+        placeholderHeight: number;
     };
     properties: import("./type").TdTabBarProps;
     controlledProps: {
@@ -14,11 +15,13 @@ export default class Tabbar extends SuperComponent {
     }[];
     observers: {
         value(): void;
+        'fixed, placeholder'(): void;
     };
     lifetimes: {
         ready(): void;
     };
     methods: {
+        setPlaceholderHeight(): void;
         showChildren(): void;
         updateChildren(): void;
         updateValue(value: any): void;

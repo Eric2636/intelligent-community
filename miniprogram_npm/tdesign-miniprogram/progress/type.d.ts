@@ -11,6 +11,10 @@ export interface TdProgressProps {
         type: NumberConstructor;
         value?: number;
     };
+    size?: {
+        type: null;
+        value?: string | number;
+    };
     status?: {
         type: StringConstructor;
         value?: ProgressStatus;
@@ -18,10 +22,6 @@ export interface TdProgressProps {
     strokeWidth?: {
         type: null;
         value?: string | number;
-    };
-    style?: {
-        type: StringConstructor;
-        value?: string;
     };
     theme?: {
         type: StringConstructor;

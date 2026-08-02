@@ -15,10 +15,6 @@ export interface TdBadgeProps {
         type: BooleanConstructor;
         value?: boolean;
     };
-    externalClasses?: {
-        type: ArrayConstructor;
-        value?: ['t-class', 't-class-content', 't-class-count'];
-    };
     maxCount?: {
         type: NumberConstructor;
         value?: number;
@@ -29,7 +25,7 @@ export interface TdBadgeProps {
     };
     shape?: {
         type: StringConstructor;
-        value?: 'circle' | 'square' | 'bubble' | 'ribbon';
+        value?: 'circle' | 'square' | 'bubble' | 'ribbon' | 'ribbon-right' | 'ribbon-left' | 'triangle-right' | 'triangle-left';
     };
     showZero?: {
         type: BooleanConstructor;

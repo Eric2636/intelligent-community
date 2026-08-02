@@ -1,12 +1,16 @@
-import { TreeOptionData, KeysType } from '../common/common';
+import { TreeOptionData, TreeKeysType } from '../common/common';
 export interface TdTreeSelectProps<DataOption extends TreeOptionData = TreeOptionData> {
+    customValue?: {
+        type: null;
+        value?: TreeSelectValue;
+    };
     height?: {
         type: null;
         value?: string | number;
     };
     keys?: {
         type: ObjectConstructor;
-        value?: KeysType;
+        value?: TreeKeysType;
     };
     multiple?: {
         type: BooleanConstructor;

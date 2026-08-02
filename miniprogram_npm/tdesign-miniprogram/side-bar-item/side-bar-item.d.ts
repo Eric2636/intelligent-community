@@ -29,6 +29,7 @@ export default class SideBarItem extends SuperComponent {
     relations: RelationsOptions;
     observers: {
         icon(v: any): void;
+        disabled(v: any): void;
     };
     data: {
         classPrefix: string;

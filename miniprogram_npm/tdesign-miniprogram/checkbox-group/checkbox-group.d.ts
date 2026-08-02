@@ -1,6 +1,7 @@
 import { SuperComponent, RelationsOptions } from '../common/src/index';
 export default class CheckBoxGroup extends SuperComponent {
     externalClasses: string[];
+    behaviors: string[];
     relations: RelationsOptions;
     data: {
         prefix: string;

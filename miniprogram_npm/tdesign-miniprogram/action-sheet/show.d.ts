@@ -1,11 +1,7 @@
 /// <reference types="miniprogram-api-typings" />
 /// <reference types="miniprogram-api-typings" />
-export interface ActionSheetItem {
-    label: string;
-    color?: string;
-    disabled?: boolean;
-    icon?: string;
-}
+import { ActionSheetItem } from './type';
+export { ActionSheetItem };
 declare type Context = WechatMiniprogram.Page.TrivialInstance | WechatMiniprogram.Component.TrivialInstance;
 export declare enum ActionSheetTheme {
     List = "list",
@@ -28,4 +24,3 @@ export interface ActionSheetShowOption extends Omit<ActionSheetProps, 'visible'>
 }
 export declare const show: (options: ActionSheetShowOption) => WechatMiniprogram.Component.TrivialInstance;
 export declare const close: (options: ActionSheetShowOption) => void;
-export {};

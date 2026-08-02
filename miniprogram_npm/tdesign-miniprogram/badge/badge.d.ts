@@ -14,8 +14,12 @@ export default class Badge extends SuperComponent {
         value: string;
         labelID: string;
         descriptionID: string;
+        useOuterClass: boolean;
     };
     lifetimes: {
         ready(): void;
+    };
+    methods: {
+        checkForActualContent(): Promise<void>;
     };
 }

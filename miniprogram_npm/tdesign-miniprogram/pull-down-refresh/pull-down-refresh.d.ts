@@ -1,4 +1,4 @@
-import { SuperComponent, RelationsOptions } from '../common/src/index';
+import { RelationsOptions, SuperComponent } from '../common/src/index';
 export default class PullDownRefresh extends SuperComponent {
     pixelRatio: number;
     startPoint: {
@@ -10,16 +10,17 @@ export default class PullDownRefresh extends SuperComponent {
     closingAnimateTimeFlag: number;
     refreshStatusTimer: any;
     externalClasses: string[];
+    behaviors: string[];
     options: {
         multipleSlots: boolean;
         pureDataPattern: RegExp;
     };
     relations: RelationsOptions;
     properties: import("./type").TdPullDownRefreshProps;
-    behaviors: string[];
     data: {
         prefix: string;
         classPrefix: string;
+        distanceTop: number;
         barHeight: number;
         tipsHeight: number;
         refreshStatus: number;
@@ -40,6 +41,7 @@ export default class PullDownRefresh extends SuperComponent {
         loadingBarHeight(v: any): void;
     };
     methods: {
+        updateDistanceTop(): void;
         resetTimer(): void;
         onScrollToBottom(): void;
         onScrollToTop(): void;

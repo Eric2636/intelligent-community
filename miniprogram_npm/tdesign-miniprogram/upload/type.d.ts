@@ -1,5 +1,9 @@
 import { ImageProps } from '../image/index';
 export interface TdUploadProps {
+    addBtn?: {
+        type: BooleanConstructor;
+        value?: boolean;
+    };
     addContent?: {
         type: StringConstructor;
         value?: string;
@@ -54,6 +58,14 @@ export interface TdUploadProps {
     mediaType?: {
         type: ArrayConstructor;
         value?: Array<MediaType>;
+    };
+    preview?: {
+        type: BooleanConstructor;
+        value?: boolean;
+    };
+    removeBtn?: {
+        type: BooleanConstructor;
+        value?: boolean;
     };
     requestMethod?: {
         type: undefined;

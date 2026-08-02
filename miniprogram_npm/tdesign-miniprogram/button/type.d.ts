@@ -92,10 +92,6 @@ export interface TdButtonProps {
         type: StringConstructor;
         value?: 'extra-small' | 'small' | 'medium' | 'large';
     };
-    style?: {
-        type: StringConstructor;
-        value?: string;
-    };
     tId?: {
         type: StringConstructor;
         value?: string;

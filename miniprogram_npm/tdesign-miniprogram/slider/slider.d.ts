@@ -18,6 +18,8 @@ declare type dataType = {
     scaleTextArray: any[];
     _value: SliderValue;
     prefix: string;
+    realLabel: string | string[];
+    extremeLabel: string[];
     isVisibleToScreenReader: boolean;
     identifier: number[];
     __inited: boolean;
@@ -37,7 +39,10 @@ export default class Slider extends SuperComponent {
         value(newValue: SliderValue): void;
         _value(newValue: SliderValue): void;
         marks(val: any): void;
+        label(val: any): void;
+        'showExtremeValue, min, max'(): void;
     };
+    getwExtremeLabel(): void;
     lifetimes: {
         created(): void;
         attached(): void;
@@ -47,7 +52,9 @@ export default class Slider extends SuperComponent {
     toggleA11yTips(): void;
     renderLine(val: any): void;
     triggerValue(value?: SliderValue): void;
+    getLabelByValue(value: SliderValue, position?: 'start' | 'end' | 'min' | 'max'): any;
     handlePropsChange(newValue: SliderValue): void;
+    valueToPosition(value: number): number;
     handleMark(marks: any): void;
     setSingleBarWidth(value: number): void;
     init(): Promise<void>;

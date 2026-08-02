@@ -8,9 +8,9 @@ export default class Drawer extends SuperComponent {
         classPrefix: string;
     };
     methods: {
-        visibleChange({ detail }: {
+        onVisibleChange({ detail }: {
             detail: any;
         }): void;
-        itemClick(detail: any): void;
+        onItemClick(detail: any): void;
     };
 }

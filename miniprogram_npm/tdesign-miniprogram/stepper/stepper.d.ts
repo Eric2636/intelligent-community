@@ -71,6 +71,7 @@ export default class Stepper extends SuperComponent {
         minusValue(): boolean;
         plusValue(): boolean;
         filterIllegalChar(value: string | number): string;
+        updateCurrentValue(value: any): void;
         handleFocus(e: any): void;
         handleInput(e: any): void;
         handleBlur(e: any): void;

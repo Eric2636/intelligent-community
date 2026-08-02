@@ -1,4 +1,4 @@
-import enLocale from 'dayjs/locale/en';
+import * as enLocale from 'dayjs/locale/en';
 declare const _default: {
     default: {
         key: string;

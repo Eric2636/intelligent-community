@@ -3,10 +3,6 @@ export interface TdEmptyProps {
         type: StringConstructor;
         value?: string;
     };
-    externalClasses?: {
-        type: ArrayConstructor;
-        value?: ['t-class', 't-class-description', 't-class-image', 't-class-actions'];
-    };
     icon?: {
         type: null;
         value?: string | object;

@@ -4,7 +4,15 @@ export interface TdColorPickerProps {
         type: BooleanConstructor;
         value?: boolean;
     };
+    colorModes?: {
+        type: null;
+        value?: colorModesEnum | colorModesEnum[];
+    };
     enableAlpha?: {
+        type: BooleanConstructor;
+        value?: boolean;
+    };
+    enableMultipleGradient?: {
         type: BooleanConstructor;
         value?: boolean;
     };
@@ -14,7 +22,7 @@ export interface TdColorPickerProps {
     };
     format?: {
         type: StringConstructor;
-        value?: 'RGB' | 'RGBA' | 'HSL' | 'HSLA' | 'HSB' | 'HSV' | 'HSVA' | 'HEX' | 'CMYK' | 'CSS';
+        value?: 'HEX' | 'HEX8' | 'RGB' | 'RGBA' | 'HSL' | 'HSLA' | 'HSV' | 'HSVA' | 'CMYK' | 'CSS';
     };
     popupProps?: {
         type: ObjectConstructor;
@@ -22,7 +30,7 @@ export interface TdColorPickerProps {
     };
     swatchColors?: {
         type: ArrayConstructor;
-        value?: Array<string> | null;
+        value?: Array<string> | null | undefined;
     };
     type?: {
         type: StringConstructor;
@@ -45,4 +53,5 @@ export interface TdColorPickerProps {
         value?: boolean;
     };
 }
+export declare type colorModesEnum = 'monochrome' | 'linear-gradient';
 export declare type TypeEnum = 'base' | 'multiple';

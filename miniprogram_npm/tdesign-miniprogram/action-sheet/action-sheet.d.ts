@@ -6,7 +6,7 @@ export default class ActionSheet extends SuperComponent {
     properties: {
         align?: {
             type: StringConstructor;
-            value?: "center" | "left";
+            value?: "left" | "center";
         };
         cancelText?: {
             type: StringConstructor;
@@ -45,15 +45,13 @@ export default class ActionSheet extends SuperComponent {
             type: BooleanConstructor;
             value?: boolean;
         };
-        visible: {
+        visible?: {
             type: BooleanConstructor;
             value?: boolean;
-            required?: boolean;
         };
-        defaultVisible: {
+        defaultVisible?: {
             type: BooleanConstructor;
             value?: boolean;
-            required?: boolean;
         };
     };
     data: {
@@ -69,7 +67,10 @@ export default class ActionSheet extends SuperComponent {
         event: string;
     }[];
     observers: {
-        'visible, items'(visible: boolean): void;
+        items(): void;
+    };
+    lifetimes: {
+        ready(): void;
     };
     methods: {
         init(): void;

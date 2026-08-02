@@ -11,10 +11,6 @@ export interface TdCollapsePanelProps {
         type: BooleanConstructor;
         value?: boolean;
     };
-    externalClasses?: {
-        type: ArrayConstructor;
-        value?: ['t-class', 't-class-header', 't-class-content'];
-    };
     header?: {
         type: StringConstructor;
         value?: string;

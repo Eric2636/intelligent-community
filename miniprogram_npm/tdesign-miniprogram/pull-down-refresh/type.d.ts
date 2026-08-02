@@ -12,10 +12,6 @@ export interface TdPullDownRefreshProps {
         type: BooleanConstructor;
         value?: boolean;
     };
-    externalClasses?: {
-        type: ArrayConstructor;
-        value?: ['t-class', 't-class-loading', 't-class-text', 't-class-indicator'];
-    };
     loadingBarHeight?: {
         type: null;
         value?: string | number;
@@ -47,6 +43,10 @@ export interface TdPullDownRefreshProps {
     showScrollbar?: {
         type: BooleanConstructor;
         value?: boolean;
+    };
+    successDuration?: {
+        type: null;
+        value?: string | number;
     };
     upperThreshold?: {
         type: null;

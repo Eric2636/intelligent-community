@@ -24,6 +24,10 @@ export interface TdCheckboxGroupProps<T = CheckboxGroupValue> {
         type: ArrayConstructor;
         value?: Array<CheckboxOption>;
     };
+    readonly?: {
+        type: BooleanConstructor;
+        value?: boolean;
+    };
     value?: {
         type: ArrayConstructor;
         value?: T;

@@ -12,7 +12,7 @@ export default class Steps extends SuperComponent {
         classPrefix: string;
     };
     observers: {
-        current(): void;
+        'current, theme, sequence'(): void;
     };
     methods: {
         updateChildren(): void;

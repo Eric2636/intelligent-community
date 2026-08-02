@@ -16,10 +16,6 @@ export interface TdPopupProps {
         type: NumberConstructor;
         value?: number;
     };
-    externalClasses?: {
-        type: ArrayConstructor;
-        value?: ['t-class', 't-class-overlay', 't-class-content'];
-    };
     overlayProps?: {
         type: ObjectConstructor;
         value?: OverlayProps;

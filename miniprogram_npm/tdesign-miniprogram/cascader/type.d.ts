@@ -1,4 +1,4 @@
-import { TreeOptionData, KeysType } from '../common/common';
+import { TreeOptionData, TreeKeysType } from '../common/common';
 export interface TdCascaderProps<CascaderOption extends TreeOptionData = TreeOptionData> {
     checkStrictly?: {
         type: BooleanConstructor;
@@ -10,7 +10,7 @@ export interface TdCascaderProps<CascaderOption extends TreeOptionData = TreeOpt
     };
     keys?: {
         type: ObjectConstructor;
-        value?: KeysType;
+        value?: CascaderKeysType;
     };
     options?: {
         type: ArrayConstructor;
@@ -45,3 +45,4 @@ export interface TdCascaderProps<CascaderOption extends TreeOptionData = TreeOpt
         value?: boolean;
     };
 }
+export declare type CascaderKeysType = TreeKeysType;

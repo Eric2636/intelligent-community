@@ -10,7 +10,7 @@ export declare const getDateRect: (date: Date | number) => {
     day: number;
     time: number;
 };
-export declare const isSameDate: (date1: CompareDate, date2: CompareDate) => boolean;
+export declare const isSameDate: (date1: CompareDate, date2: CompareDate) => Boolean;
 export declare const getMonthDateRect: (date: Date | number) => {
     year: number;
     month: number;

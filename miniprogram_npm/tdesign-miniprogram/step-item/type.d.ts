@@ -3,6 +3,10 @@ export interface TdStepItemProps {
         type: StringConstructor;
         value?: string;
     };
+    extra?: {
+        type: StringConstructor;
+        value?: string;
+    };
     icon?: {
         type: StringConstructor;
         value?: string;

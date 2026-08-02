@@ -24,9 +24,13 @@ function isObject(obj) {
   return obj && obj.constructor === 'Object';
 }
 
-var isNoEmptyObj = function (obj) {
+function isBoolean(value) {
+  return typeof value === 'boolean';
+}
+
+function isNoEmptyObj(obj) {
   return isObject(obj) && JSON.stringify(obj) !== '{}';
-};
+}
 
 function includes(arr, value) {
   if (!arr || !isArray(arr)) return false;
@@ -127,7 +131,7 @@ function _style(styles) {
 
 function isValidIconName(str) {
   // prettier-ignore
-  return getRegExp('^[A-Za-z0-9\-]+$').test(str);
+  return getRegExp('^[A-Za-z0-9\-\_]+$').test(str);
 }
 
 module.exports = {
@@ -135,6 +139,7 @@ module.exports = {
   isString: isString,
   isArray: isArray,
   isObject: isObject,
+  isBoolean: isBoolean,
   isNoEmptyObj: isNoEmptyObj,
   includes: includes,
   cls: cls,

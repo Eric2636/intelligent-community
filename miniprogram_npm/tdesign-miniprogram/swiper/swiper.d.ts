@@ -3,6 +3,7 @@ export default class Swiper extends SuperComponent {
     externalClasses: string[];
     options: {
         multipleSlots: boolean;
+        pureDataPattern: RegExp;
     };
     properties: import("./type").TdSwiperProps;
     observers: {
@@ -13,6 +14,7 @@ export default class Swiper extends SuperComponent {
     data: {
         prefix: string;
         classPrefix: string;
+        _source: string;
     };
     lifetimes: {
         ready(): void;
@@ -21,6 +23,7 @@ export default class Swiper extends SuperComponent {
         updateNav(currentValue: any): void;
         onTap(e: any): void;
         onChange(e: any): void;
+        onAnimationFinish(e: WechatMiniprogram.SwiperAnimationFinish): void;
         onNavBtnChange(e: any): void;
         doNavBtnChange(dir: any, source: any): void;
         onImageLoad(e: any): void;

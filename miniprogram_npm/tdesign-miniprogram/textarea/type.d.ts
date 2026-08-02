@@ -34,6 +34,10 @@ export interface TdTextareaProps {
         type: NumberConstructor;
         value?: number;
     };
+    cursorColor?: {
+        type: StringConstructor;
+        value?: string;
+    };
     cursorSpacing?: {
         type: NumberConstructor;
         value?: number;

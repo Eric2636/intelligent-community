@@ -1,3 +1,4 @@
+import { OverlayProps } from '../overlay/index';
 export interface TdDrawerProps {
     closeOnOverlayClick?: {
         type: BooleanConstructor;
@@ -10,6 +11,10 @@ export interface TdDrawerProps {
     items?: {
         type: ArrayConstructor;
         value?: DrawerItem[];
+    };
+    overlayProps?: {
+        type: ObjectConstructor;
+        value?: OverlayProps;
     };
     placement?: {
         type: StringConstructor;

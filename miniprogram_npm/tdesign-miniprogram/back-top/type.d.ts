@@ -11,10 +11,6 @@ export interface TdBackTopProps {
         type: NumberConstructor;
         value?: number;
     };
-    style?: {
-        type: StringConstructor;
-        value?: string;
-    };
     text?: {
         type: StringConstructor;
         value?: string;

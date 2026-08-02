@@ -25,7 +25,9 @@ export default class Button extends SuperComponent {
         setClass(): void;
         getuserinfo(e: any): void;
         contact(e: any): void;
+        createliveactivity(e: any): void;
         getphonenumber(e: any): void;
+        getrealtimephonenumber(e: any): void;
         error(e: any): void;
         opensetting(e: any): void;
         launchapp(e: any): void;

@@ -5,6 +5,7 @@ export default class TCalendar {
     type: TCalendarType;
     minDate: Date;
     maxDate: Date;
+    allowSameDay: Boolean;
     format: (day: TDate) => TDate;
     constructor(options?: {});
     getTrimValue(): Date | Date[];

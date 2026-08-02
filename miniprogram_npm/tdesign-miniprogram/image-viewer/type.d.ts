@@ -1,3 +1,4 @@
+import { ImageProps } from '../image/index';
 export interface TdImageViewerProps {
     backgroundColor?: {
         type: StringConstructor;
@@ -11,6 +12,10 @@ export interface TdImageViewerProps {
         type: null;
         value?: string | boolean | object;
     };
+    imageProps?: {
+        type: ObjectConstructor;
+        value?: ImageProps;
+    };
     images?: {
         type: ArrayConstructor;
         value?: Array<string>;
@@ -18,6 +23,10 @@ export interface TdImageViewerProps {
     initialIndex?: {
         type: NumberConstructor;
         value?: Number;
+    };
+    lazy?: {
+        type: BooleanConstructor;
+        value?: boolean;
     };
     showIndex?: {
         type: BooleanConstructor;

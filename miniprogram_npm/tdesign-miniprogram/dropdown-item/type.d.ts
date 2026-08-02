@@ -4,17 +4,6 @@ export interface TdDropdownItemProps {
         type: BooleanConstructor;
         value?: boolean;
     };
-    externalClasses?: {
-        type: ArrayConstructor;
-        value?: [
-            't-class',
-            't-class-content',
-            't-class-column',
-            't-class-column-item',
-            't-class-column-item-label',
-            't-class-footer'
-        ];
-    };
     keys?: {
         type: ObjectConstructor;
         value?: KeysType;

@@ -1,5 +1,9 @@
 import { ButtonProps } from '../button/index';
 export interface TdCalendarProps {
+    allowSameDay?: {
+        type: BooleanConstructor;
+        value?: boolean;
+    };
     autoClose?: {
         type: BooleanConstructor;
         value?: boolean;
@@ -27,6 +31,10 @@ export interface TdCalendarProps {
     minDate?: {
         type: NumberConstructor;
         value?: number;
+    };
+    readonly?: {
+        type: BooleanConstructor;
+        value?: boolean;
     };
     switchMode?: {
         type: StringConstructor;
@@ -62,7 +70,7 @@ export interface TdCalendarProps {
     };
 }
 export declare type CalendarFormatType = (day: TDate) => TDate;
-export declare type TDateType = 'selected' | 'disabled' | 'start' | 'centre' | 'end' | '';
+export declare type TDateType = 'selected' | 'disabled' | 'start' | 'start-end' | 'centre' | 'end' | '';
 export interface TDate {
     date: Date;
     day: number;

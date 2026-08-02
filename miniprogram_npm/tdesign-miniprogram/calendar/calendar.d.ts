@@ -33,6 +33,7 @@ export default class Calendar extends SuperComponent {
     };
     observers: {
         type(v: any): void;
+        allowSameDay(v: any): void;
         confirmBtn(v: any): void;
         'firstDayOfWeek,minDate,maxDate'(firstDayOfWeek: any, minDate: any, maxDate: any): void;
         value(v: any): void;
@@ -47,6 +48,7 @@ export default class Calendar extends SuperComponent {
             month: number;
         };
         updateActionButton(value: Date): void;
+        updateCurrentMonth(newValue?: any): void;
         calcCurrentMonth(newValue?: any): void;
         calcMonths(): void;
         close(trigger: any): void;

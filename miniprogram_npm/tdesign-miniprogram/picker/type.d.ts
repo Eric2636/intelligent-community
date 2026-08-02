@@ -1,4 +1,3 @@
-import { ButtonProps } from '../button/index';
 import { PopupProps } from '../popup/index';
 import { KeysType } from '../common/common';
 export interface TdPickerProps {
@@ -8,11 +7,11 @@ export interface TdPickerProps {
     };
     cancelBtn?: {
         type: null;
-        value?: boolean | string | ButtonProps;
+        value?: boolean | string;
     };
     confirmBtn?: {
         type: null;
-        value?: boolean | string | ButtonProps;
+        value?: boolean | string;
     };
     header?: {
         type: BooleanConstructor;
@@ -53,6 +52,10 @@ export interface TdPickerProps {
     visible?: {
         type: BooleanConstructor;
         value?: boolean;
+    };
+    visibleItemCount?: {
+        type: NumberConstructor;
+        value?: number;
     };
 }
 export declare type PickerValue = string | number;

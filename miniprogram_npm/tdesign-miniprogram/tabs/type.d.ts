@@ -4,9 +4,9 @@ export interface TdTabsProps {
         type: ObjectConstructor;
         value?: TabAnimation;
     };
-    externalClasses?: {
-        type: ArrayConstructor;
-        value?: ['t-class', 't-class-item', 't-class-active', 't-class-track'];
+    bottomLineMode?: {
+        type: StringConstructor;
+        value?: 'fixed' | 'auto' | 'full';
     };
     showBottomLine?: {
         type: BooleanConstructor;
