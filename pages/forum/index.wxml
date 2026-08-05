@@ -174,7 +174,7 @@
           <view class="post-item__actions">
             <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
               <t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" />
-              <text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text>
+              <text class="post-item__action-count" style="text-align: left; margin-left: 3rpx;">{{item.shareCount || item.forwardCount || 0}}</text>
             </button>
             <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
               <t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" />
