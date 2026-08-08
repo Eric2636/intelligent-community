@@ -2,7 +2,7 @@ import { mallAPI } from '~/api/cloud';
 import { getCurrentUserId } from '~/utils/getOpenid';
 import { chooseAndUploadMedia } from '~/utils/cloudMedia';
 import { ensureMutationReady } from '~/utils/authIdentity';
-import { emitListMutation } from '~/utils/listMutation';
+import { emitListMutation } from '../../utils/listMutation.js';
 import { mallPublishUrl } from '~/utils/mallPaths';
 
 function firstUrl(list) {
@@ -102,7 +102,7 @@ Page({
     this.setData({
       ownerActions: [
         { label: '编辑', value: 'edit', icon: 'edit-1' },
-        { label: isOnline ? '隐藏信息' : '公开信息', value: 'visibility', icon: isOnline ? 'browse-off' : 'browse' },
+        { label: isOnline ? '隐藏' : '公开', value: 'visibility', icon: isOnline ? 'browse-off' : 'browse' },
         { label: '删除', value: 'delete', icon: 'delete-1', color: '#d54941' },
       ],
     });

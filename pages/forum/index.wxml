@@ -94,7 +94,7 @@
           <view class="post-item__author-main">
             <t-avatar class="post-item__avatar" image="{{item.authorAvatar}}" icon="{{item.authorAvatar ? '' : 'user'}}" size="48rpx" alt="{{item.authorName || '用户头像'}}" />
             <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
-            <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
+            <text wx:if="{{item.userTagLabel}}" class="identity-tag identity-tag--{{item.userTagType}}">{{item.userTagLabel}}</text>
           </view>
         </view>
         <text class="post-item__title">{{item.title}}</text>
@@ -131,7 +131,7 @@
               <view class="post-item__author-main">
                 <t-avatar class="post-item__avatar" image="{{item.authorAvatar}}" icon="{{item.authorAvatar ? '' : 'user'}}" size="48rpx" alt="{{item.authorName || '用户头像'}}" />
                 <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
-                <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
+                <text wx:if="{{item.userTagLabel}}" class="identity-tag identity-tag--{{item.userTagType}}">{{item.userTagLabel}}</text>
               </view>
             </view>
             <text class="post-item__title">{{item.title}}</text>
@@ -166,7 +166,7 @@
             <view class="post-item__author-main">
               <t-avatar class="post-item__avatar" image="{{item.authorAvatar}}" icon="{{item.authorAvatar ? '' : 'user'}}" size="48rpx" alt="{{item.authorName || '用户头像'}}" />
               <text class="post-item__author-name">{{item.authorName || '匿名用户'}}</text>
-              <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
+              <text wx:if="{{item.userTagLabel}}" class="identity-tag identity-tag--{{item.userTagType}}">{{item.userTagLabel}}</text>
             </view>
           </view>
           <text class="post-item__title">{{item.title}}</text>
@@ -174,7 +174,7 @@
           <view class="post-item__actions">
             <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
               <t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" />
-              <text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text>
+              <text class="post-item__action-count" style="text-align: left; margin-left: 3rpx;">{{item.shareCount || item.forwardCount || 0}}</text>
             </button>
             <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
               <t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" />

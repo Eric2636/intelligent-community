@@ -32,9 +32,6 @@
       <view class="detail-card__price" wx:if="{{item.price}}">{{item.price}}{{item.unit}}</view>
       <view class="detail-card__title">{{item.title}}</view>
       <view class="detail-card__meta">{{item.createdAt}}</view>
-      <view class="detail-card__meta" wx:if="{{item.adminLabel}}">
-        <text class="admin-tag">{{item.adminLabel}}</text>
-      </view>
       <view class="detail-card__desc">{{item.desc}}</view>
       <view class="detail-card__contact">联系：{{item.contact}}</view>
     </view>

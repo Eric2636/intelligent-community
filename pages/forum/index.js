@@ -7,7 +7,7 @@ import { normalizeForumListPost, forumListPostHasMedia } from '~/utils/forumPost
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureMutationReady } from '~/utils/authIdentity';
 import { createHotSearch } from '~/utils/hotSearch';
-import { applyListMutation } from '~/utils/listMutation';
+import { applyListMutation } from '../../utils/listMutation.js';
 
 function getPostIdFromEvent(e) {
   const { id } = e.currentTarget.dataset;

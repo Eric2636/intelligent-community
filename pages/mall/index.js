@@ -7,7 +7,7 @@ import { syncCustomTabBar } from '~/utils/syncCustomTabBar';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureMutationReady } from '~/utils/authIdentity';
 import { createHotSearch } from '~/utils/hotSearch';
-import { applyMutationToPageLists } from '~/utils/listMutation';
+import { applyMutationToPageLists } from '../../utils/listMutation.js';
 
 Page({
   data: {

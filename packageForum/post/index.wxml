@@ -10,7 +10,7 @@
         <view class="post-card__head-main">
           <view class="post-card__author">
             <text>{{post.authorName}}</text>
-            <text wx:if="{{post.contentTagLabel || post.adminLabel || post.authorIdentityLabel}}" class="identity-tag identity-tag--{{post.contentTagType || (post.adminLabel ? 'admin' : (post.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{post.contentTagLabel || post.adminLabel || post.authorIdentityLabel}}</text>
+            <text wx:if="{{post.userTagLabel}}" class="identity-tag identity-tag--{{post.userTagType}}">{{post.userTagLabel}}</text>
             <text class="post-card__time">{{post.createTime}}</text>
           </view>
         </view>
@@ -78,7 +78,7 @@
           <view class="reply-item__head">
             <view class="reply-item__head-main">
               <text class="reply-item__author">{{item.authorName}}</text>
-              <text wx:if="{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}" class="identity-tag identity-tag--{{item.contentTagType || (item.adminLabel ? 'admin' : (item.authorIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{item.contentTagLabel || item.adminLabel || item.authorIdentityLabel}}</text>
+              <text wx:if="{{item.userTagLabel}}" class="identity-tag identity-tag--{{item.userTagType}}">{{item.userTagLabel}}</text>
               <text class="reply-item__time">{{item.createTime}}</text>
             </view>
           </view>

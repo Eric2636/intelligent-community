@@ -3,7 +3,7 @@ import { mallDetailUrl } from '~/utils/mallPaths';
 import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureMutationReady } from '~/utils/authIdentity';
-import { navigateToWithListMutation } from '~/utils/listMutation';
+import { navigateToWithListMutation } from '../../utils/listMutation.js';
 
 Page({
   data: {

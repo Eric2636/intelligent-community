@@ -4,7 +4,7 @@ import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { formatDateTimeYmdHm } from '~/utils/date';
 import { normalizeAvatar } from '~/utils/defaultAvatar';
 import { ensureMutationReady } from '~/utils/authIdentity';
-import { navigateToWithListMutation } from '~/utils/listMutation';
+import { navigateToWithListMutation } from '../../utils/listMutation.js';
 
 const STATUS_TEXT = {
   draft: '草稿',

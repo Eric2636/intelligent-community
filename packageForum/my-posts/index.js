@@ -3,7 +3,7 @@ import { redirectIfEntryHidden } from '~/utils/moduleEntryGuard';
 import { normalizeForumListPost } from '~/utils/forumPostList';
 import { LIST_REFRESH_KEYS, consumeListRefresh } from '~/utils/listRefresh';
 import { ensureMutationReady } from '~/utils/authIdentity';
-import { navigateToWithListMutation } from '~/utils/listMutation';
+import { navigateToWithListMutation } from '../../utils/listMutation.js';
 
 Page({
   data: {

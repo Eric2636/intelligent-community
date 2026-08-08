@@ -198,7 +198,7 @@ Promise.all([
   const detailPublisherTags =
     taskDetailTemplate.match(/<t-avatar\b[^>]*image="\{\{task\.publisherAvatar\}\}"[^>]*\/>/g) || [];
   assert.equal(detailPublisherTags.length, 1, '业主互助详情必须且只能绑定一次发布者头像');
-  assert.match(detailPublisherTags[0], /size="72rpx"/, '业主互助详情发布者头像必须使用详情尺寸');
+  assert.match(detailPublisherTags[0], /size="32rpx"/, '业主互助详情发布者头像应与用户名行高接近');
   assert.match(
     detailPublisherTags[0],
     /alt="\{\{task\.publisherName \|\| '发布者头像'\}\}"/,
@@ -207,7 +207,7 @@ Promise.all([
   const detailTakerTags =
     taskDetailTemplate.match(/<t-avatar\b[^>]*image="\{\{task\.takerAvatar\}\}"[^>]*\/>/g) || [];
   assert.equal(detailTakerTags.length, 1, '业主互助详情必须且只能绑定一次接单人头像');
-  assert.match(detailTakerTags[0], /size="72rpx"/, '业主互助详情接单人头像必须使用详情尺寸');
+  assert.match(detailTakerTags[0], /size="32rpx"/, '业主互助详情接单人头像应与用户名行高接近');
   assert.match(
     detailTakerTags[0],
     /alt="\{\{task\.takerName \|\| '接单人头像'\}\}"/,

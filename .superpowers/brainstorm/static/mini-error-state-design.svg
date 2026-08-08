@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1450" height="940" viewBox="0 0 1450 940">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#10233f" flood-opacity=".12"/>
+    </filter>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+      .title{font-size:30px;font-weight:700;fill:#17233d}
+      .sub{font-size:16px;fill:#667085}
+      .nav{font-size:22px;font-weight:700;fill:#17233d}
+      .h{font-size:17px;font-weight:650;fill:#1f2937}
+      .body{font-size:14px;fill:#667085}
+      .meta{font-size:12px;fill:#98a2b3}
+      .label{font-size:18px;font-weight:700;fill:#17233d}
+    </style>
+  </defs>
+  <rect width="1450" height="940" fill="#f4f7fb"/>
+  <text x="60" y="58" class="title">A 风格 · 请求失败状态设计</text>
+  <text x="60" y="88" class="sub">只在请求失败时增加必要提示与重试入口，不增加任何业务字段。</text>
+
+  <!-- first load -->
+  <g transform="translate(55,125)">
+    <rect width="410" height="680" rx="40" fill="#fff" filter="url(#shadow)"/>
+    <rect x="145" y="14" width="120" height="27" rx="14" fill="#111827"/>
+    <text x="26" y="78" class="nav">业主互助</text>
+    <rect x="22" y="102" width="366" height="46" rx="23" fill="#f3f5f7"/>
+    <text x="62" y="131" class="body">搜索任务</text>
+    <text x="26" y="184" font-size="14" font-weight="700" fill="#1769ff">全部</text>
+    <text x="88" y="184" class="body">待领取</text>
+    <text x="166" y="184" class="body">进行中</text>
+    <rect x="26" y="196" width="30" height="3" rx="2" fill="#1769ff"/>
+
+    <circle cx="205" cy="322" r="44" fill="#f3f6fa"/>
+    <path d="M188 330c9-20 26-20 34 0M205 293a14 14 0 1 1 0 28" fill="none" stroke="#98a2b3" stroke-width="3"/>
+    <circle cx="234" cy="292" r="15" fill="#fff" stroke="#d0d5dd"/>
+    <path d="M228 292h12M234 286v12" stroke="#98a2b3" stroke-width="2"/>
+    <text x="151" y="394" class="h">加载失败</text>
+    <text x="121" y="423" class="body">网络异常，请稍后重试</text>
+    <rect x="145" y="452" width="120" height="42" rx="21" fill="#1769ff"/>
+    <text x="177" y="479" font-size="14" font-weight="700" fill="#fff">重新加载</text>
+
+    <rect x="22" y="608" width="366" height="1" fill="#eef0f3"/>
+    <text x="43" y="644" font-size="13" font-weight="700" fill="#1769ff">互助</text>
+    <text x="137" y="644" class="body">留言</text>
+    <text x="231" y="644" class="body">市场</text>
+    <text x="330" y="644" class="body">我的</text>
+  </g>
+  <text x="58" y="844" class="label">1. 首次加载失败</text>
+  <text x="58" y="874" class="body">页面没有旧数据时，使用完整错误状态和主重试按钮。</text>
+
+  <!-- refresh fail -->
+  <g transform="translate(520,125)">
+    <rect width="410" height="680" rx="40" fill="#fff" filter="url(#shadow)"/>
+    <rect x="145" y="14" width="120" height="27" rx="14" fill="#111827"/>
+    <text x="26" y="78" class="nav">业主互助</text>
+    <rect x="22" y="102" width="366" height="46" rx="23" fill="#f3f5f7"/>
+    <text x="62" y="131" class="body">搜索任务</text>
+    <rect x="18" y="164" width="374" height="48" rx="12" fill="#fff8eb" stroke="#f4d59b"/>
+    <circle cx="42" cy="188" r="11" fill="#ed7b2f"/>
+    <text x="39" y="193" font-size="13" font-weight="700" fill="#fff">!</text>
+    <text x="62" y="193" class="body" fill="#9a5b00">刷新失败，当前内容未更新</text>
+    <text x="338" y="193" font-size="13" font-weight="700" fill="#1769ff">重试</text>
+
+    <g transform="translate(18,230)">
+      <rect width="374" height="164" rx="18" fill="#fff" stroke="#eaecf0"/>
+      <circle cx="36" cy="36" r="18" fill="#dfeaff"/>
+      <text x="64" y="32" class="body">林先生</text>
+      <text x="64" y="51" class="meta">2分钟前</text>
+      <text x="20" y="89" class="h">帮忙取一下小区门口的快递</text>
+      <text x="20" y="117" class="body">下午六点前送到3号楼，快递不重。</text>
+      <text x="323" y="145" font-size="18" font-weight="700" fill="#ff6b00">¥ 8</text>
+    </g>
+    <g transform="translate(18,412)">
+      <rect width="374" height="142" rx="18" fill="#fff" stroke="#eaecf0"/>
+      <circle cx="36" cy="36" r="18" fill="#e8f7ef"/>
+      <text x="64" y="32" class="body">周女士</text>
+      <text x="64" y="51" class="meta">10分钟前</text>
+      <text x="20" y="89" class="h">周末帮忙照看宠物半天</text>
+      <text x="313" y="123" font-size="18" font-weight="700" fill="#ff6b00">¥ 20</text>
+    </g>
+    <rect x="22" y="608" width="366" height="1" fill="#eef0f3"/>
+    <text x="43" y="644" font-size="13" font-weight="700" fill="#1769ff">互助</text>
+    <text x="137" y="644" class="body">留言</text>
+    <text x="231" y="644" class="body">市场</text>
+    <text x="330" y="644" class="body">我的</text>
+  </g>
+  <text x="523" y="844" class="label">2. 刷新失败</text>
+  <text x="523" y="874" class="body">保留旧数据，在列表顶部显示轻提示，避免误以为内容已刷新。</text>
+
+  <!-- load more fail -->
+  <g transform="translate(985,125)">
+    <rect width="410" height="680" rx="40" fill="#fff" filter="url(#shadow)"/>
+    <rect x="145" y="14" width="120" height="27" rx="14" fill="#111827"/>
+    <text x="26" y="78" class="nav">业主互助</text>
+    <rect x="22" y="102" width="366" height="46" rx="23" fill="#f3f5f7"/>
+    <text x="62" y="131" class="body">搜索任务</text>
+
+    <g transform="translate(18,172)">
+      <rect width="374" height="158" rx="18" fill="#fff" stroke="#eaecf0"/>
+      <circle cx="36" cy="36" r="18" fill="#dfeaff"/>
+      <text x="64" y="32" class="body">林先生</text>
+      <text x="64" y="51" class="meta">2分钟前</text>
+      <text x="20" y="89" class="h">帮忙取一下小区门口的快递</text>
+      <text x="20" y="117" class="body">下午六点前送到3号楼。</text>
+      <text x="323" y="140" font-size="18" font-weight="700" fill="#ff6b00">¥ 8</text>
+    </g>
+    <g transform="translate(18,348)">
+      <rect width="374" height="136" rx="18" fill="#fff" stroke="#eaecf0"/>
+      <circle cx="36" cy="36" r="18" fill="#e8f7ef"/>
+      <text x="64" y="32" class="body">周女士</text>
+      <text x="64" y="51" class="meta">10分钟前</text>
+      <text x="20" y="89" class="h">周末帮忙照看宠物半天</text>
+      <text x="313" y="118" font-size="18" font-weight="700" fill="#ff6b00">¥ 20</text>
+    </g>
+
+    <line x1="24" y1="520" x2="386" y2="520" stroke="#eef0f3"/>
+    <text x="94" y="556" class="body">加载更多失败，请稍后重试</text>
+    <text x="310" y="556" font-size="13" font-weight="700" fill="#1769ff">重试</text>
+    <rect x="22" y="608" width="366" height="1" fill="#eef0f3"/>
+    <text x="43" y="644" font-size="13" font-weight="700" fill="#1769ff">互助</text>
+    <text x="137" y="644" class="body">留言</text>
+    <text x="231" y="644" class="body">市场</text>
+    <text x="330" y="644" class="body">我的</text>
+  </g>
+  <text x="988" y="844" class="label">3. 加载更多失败</text>
+  <text x="988" y="874" class="body">保留已有列表，只在底部显示失败原因和文本重试入口。</text>
+</svg>
