@@ -43,13 +43,6 @@ App({
     const storedTabs = readStoredModuleTabs();
     this.globalData.moduleEntryTabs = storedTabs && Array.isArray(storedTabs.tabs) ? storedTabs.tabs : null;
 
-    // 每次启动都同步调试开关，避免从 local 切到 test/production 后仍残留 vConsole。
-    try {
-      wx.setEnableDebug({ enableDebug: Boolean(config.enableVConsole) });
-    } catch (e) {
-      /* ignore */
-    }
-
     let apiBase;
     if (config.useLocalDevApi) {
       apiBase = `http://${config.devLanHost}:${config.devPort}`;
