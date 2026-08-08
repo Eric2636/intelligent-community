@@ -36,15 +36,15 @@
       <view class="detail-card__row">
         <text class="detail-card__label">发布者</text>
         <view class="detail-card__value detail-card__person">
-          <t-avatar class="detail-card__avatar" image="{{task.publisherAvatar}}" icon="{{task.publisherAvatar ? '' : 'user'}}" size="72rpx" alt="{{task.publisherName || '发布者头像'}}" />
+          <t-avatar class="detail-card__avatar" image="{{task.publisherAvatar}}" icon="{{task.publisherAvatar ? '' : 'user'}}" size="32rpx" alt="{{task.publisherName || '发布者头像'}}" />
           <text class="detail-card__person-name">{{task.publisherName || '发布者'}}</text>
-          <text wx:if="{{task.contentTagLabel || task.adminLabel || task.publisherIdentityLabel}}" class="identity-tag identity-tag--{{task.contentTagType || (task.adminLabel ? 'admin' : (task.publisherIdentityLabel === '小区外人员' ? 'outsider' : 'owner'))}}">{{task.contentTagLabel || task.adminLabel || task.publisherIdentityLabel}}</text>
+          <text wx:if="{{task.userTagLabel}}" class="identity-tag identity-tag--{{task.userTagType}}">{{task.userTagLabel}}</text>
         </view>
       </view>
       <view class="detail-card__row" wx:if="{{task.takerName}}">
         <text class="detail-card__label">接单人</text>
         <view class="detail-card__value detail-card__person">
-          <t-avatar class="detail-card__avatar" image="{{task.takerAvatar}}" icon="{{task.takerAvatar ? '' : 'user'}}" size="72rpx" alt="{{task.takerName || '接单人头像'}}" />
+          <t-avatar class="detail-card__avatar" image="{{task.takerAvatar}}" icon="{{task.takerAvatar ? '' : 'user'}}" size="32rpx" alt="{{task.takerName || '接单人头像'}}" />
           <text class="detail-card__person-name">{{task.takerName}}</text>
         </view>
       </view>

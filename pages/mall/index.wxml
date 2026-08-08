@@ -76,7 +76,6 @@
         <view class="mall-card__meta">
           <text wx:if="{{item.price}}" class="mall-card__price">{{item.price}}{{item.unit}}</text>
           <text class="mall-card__time">{{item.createdAt}}</text>
-          <text wx:if="{{item.adminLabel}}" class="admin-tag admin-tag--corner">{{item.adminLabel}}</text>
         </view>
       </view>
     </view>
