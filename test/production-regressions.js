@@ -100,24 +100,11 @@ Promise.all([
 ]) => {
   assert.doesNotMatch(myPage, /profileDisplay/, '“我的”页不应依赖可能被遗漏打包的新工具模块');
   assert.doesNotMatch(infoEdit, /profileDisplay/, '资料编辑页不应依赖可能被遗漏打包的新工具模块');
-  assert.match(
-    app,
-    /wx\.setEnableDebug\(\{\s*enableDebug:\s*Boolean\(config\.enableVConsole\),?\s*\}\)/,
-    '每次启动都必须显式同步微信调试面板开关，避免关闭配置后仍残留',
-  );
   assert.doesNotMatch(
-    app,
-    /if\s*\(config\.enableVConsole\)/,
-    '关闭调试时不能跳过 setEnableDebug(false)',
+    [app, configEntry, localConfig, testConfig, productionConfig].join('\n'),
+    /vconsole|enableVConsole|wx\.setEnableDebug/i,
+    '小程序不再集成 vConsole 或保留相关调试开关',
   );
-  assert.match(
-    configEntry,
-    /enableVConsole:\s*appEnv\s*===\s*'local'/,
-    'vConsole 必须只由 config.env.js 选择的环境决定',
-  );
-  [localConfig, testConfig, productionConfig].forEach((profileConfig) => {
-    assert.doesNotMatch(profileConfig, /enableVConsole/, '各环境详情配置不得重复维护 vConsole 开关');
-  });
   assert.match(
     moduleEntryGuard,
     /DEFAULT_TAB_LIST[\s\S]*?key: 'my'[\s\S]*?always: true/,
@@ -198,7 +185,7 @@ Promise.all([
   const detailPublisherTags =
     taskDetailTemplate.match(/<t-avatar\b[^>]*image="\{\{task\.publisherAvatar\}\}"[^>]*\/>/g) || [];
   assert.equal(detailPublisherTags.length, 1, '业主互助详情必须且只能绑定一次发布者头像');
-  assert.match(detailPublisherTags[0], /size="72rpx"/, '业主互助详情发布者头像必须使用详情尺寸');
+  assert.match(detailPublisherTags[0], /size="32rpx"/, '业主互助详情发布者头像应与用户名行高接近');
   assert.match(
     detailPublisherTags[0],
     /alt="\{\{task\.publisherName \|\| '发布者头像'\}\}"/,
@@ -207,7 +194,7 @@ Promise.all([
   const detailTakerTags =
     taskDetailTemplate.match(/<t-avatar\b[^>]*image="\{\{task\.takerAvatar\}\}"[^>]*\/>/g) || [];
   assert.equal(detailTakerTags.length, 1, '业主互助详情必须且只能绑定一次接单人头像');
-  assert.match(detailTakerTags[0], /size="72rpx"/, '业主互助详情接单人头像必须使用详情尺寸');
+  assert.match(detailTakerTags[0], /size="32rpx"/, '业主互助详情接单人头像应与用户名行高接近');
   assert.match(
     detailTakerTags[0],
     /alt="\{\{task\.takerName \|\| '接单人头像'\}\}"/,

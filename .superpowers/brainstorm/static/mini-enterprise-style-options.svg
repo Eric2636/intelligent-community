@@ -1,0 +1,216 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1520" height="1040" viewBox="0 0 1520 1040">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="22" flood-color="#10233f" flood-opacity=".13"/>
+    </filter>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="9" flood-color="#173760" flood-opacity=".09"/>
+    </filter>
+    <linearGradient id="brandGrad" x1="0" x2="1">
+      <stop offset="0" stop-color="#1769ff"/>
+      <stop offset="1" stop-color="#4f8cff"/>
+    </linearGradient>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+      .title{font-size:30px;font-weight:700;fill:#17233d}
+      .sub{font-size:16px;fill:#667085}
+      .phone-title{font-size:22px;font-weight:700;fill:#17233d}
+      .tab{font-size:14px;fill:#667085}
+      .tab-on{font-size:14px;font-weight:700;fill:#1769ff}
+      .card-title{font-size:17px;font-weight:650;fill:#1f2937}
+      .body{font-size:13px;fill:#667085}
+      .meta{font-size:12px;fill:#98a2b3}
+      .chip{font-size:11px;font-weight:600}
+      .choice{font-size:18px;font-weight:700;fill:#17233d}
+      .desc{font-size:14px;fill:#667085}
+      .tiny{font-size:11px;fill:#98a2b3}
+    </style>
+  </defs>
+
+  <rect width="1520" height="1040" fill="#f4f7fb"/>
+  <text x="64" y="62" class="title">小程序企业级视觉方向对比</text>
+  <text x="64" y="92" class="sub">同一份“业主互助”内容，用三种设计语言呈现。请重点比较信息层级、操作效率和社区亲和力。</text>
+
+  <!-- OPTION A -->
+  <g transform="translate(55,125)">
+    <rect x="0" y="0" width="430" height="780" rx="42" fill="#ffffff" filter="url(#shadow)"/>
+    <rect x="154" y="14" width="122" height="28" rx="14" fill="#111827"/>
+    <text x="28" y="76" class="phone-title">业主互助</text>
+    <circle cx="385" cy="68" r="18" fill="#f4f6f8"/>
+    <path d="M378 68h14M385 61v14" stroke="#4b5563" stroke-width="2" stroke-linecap="round"/>
+
+    <rect x="24" y="98" width="382" height="48" rx="24" fill="#f3f5f7"/>
+    <circle cx="48" cy="122" r="7" fill="none" stroke="#98a2b3" stroke-width="2"/>
+    <path d="M53 127l6 6" stroke="#98a2b3" stroke-width="2"/>
+    <text x="70" y="127" class="body">搜索任务</text>
+
+    <text x="28" y="184" class="tab-on">全部</text>
+    <text x="92" y="184" class="tab">待领取</text>
+    <text x="170" y="184" class="tab">进行中</text>
+    <rect x="27" y="195" width="30" height="3" rx="2" fill="#1769ff"/>
+
+    <g transform="translate(20,218)">
+      <rect width="390" height="202" rx="18" fill="#ffffff" stroke="#eaecf0"/>
+      <circle cx="36" cy="36" r="18" fill="#dfeaff"/>
+      <path d="M29 38c3-7 11-7 14 0M36 25a6 6 0 1 1 0 12" fill="none" stroke="#1769ff" stroke-width="2"/>
+      <text x="64" y="32" class="body" fill="#344054">林先生</text>
+      <text x="64" y="50" class="meta">2分钟前 · 3号楼</text>
+      <rect x="310" y="22" width="58" height="25" rx="12" fill="#eaf2ff"/>
+      <text x="326" y="39" class="chip" fill="#1769ff">待领取</text>
+      <text x="22" y="88" class="card-title">帮忙取一下小区门口的快递</text>
+      <text x="22" y="115" class="body">下午六点前送到3号楼，快递不重，</text>
+      <text x="22" y="137" class="body">有空的邻居麻烦帮忙带一下。</text>
+      <line x1="22" y1="157" x2="368" y2="157" stroke="#f0f1f3"/>
+      <text x="22" y="187" class="meta">约 500m</text>
+      <text x="318" y="187" font-size="18" font-weight="700" fill="#ff6b00">¥ 8</text>
+    </g>
+
+    <g transform="translate(20,438)">
+      <rect width="390" height="182" rx="18" fill="#ffffff" stroke="#eaecf0"/>
+      <circle cx="36" cy="36" r="18" fill="#e8f7ef"/>
+      <text x="31" y="42" font-size="16" fill="#12a150">周</text>
+      <text x="64" y="32" class="body" fill="#344054">周女士</text>
+      <text x="64" y="50" class="meta">10分钟前 · 8号楼</text>
+      <rect x="310" y="22" width="58" height="25" rx="12" fill="#eaf2ff"/>
+      <text x="326" y="39" class="chip" fill="#1769ff">待领取</text>
+      <text x="22" y="88" class="card-title">周末帮忙照看宠物半天</text>
+      <text x="22" y="115" class="body">猫咪很乖，提供猫粮和用品。</text>
+      <line x1="22" y1="137" x2="368" y2="137" stroke="#f0f1f3"/>
+      <text x="22" y="167" class="meta">约 300m</text>
+      <text x="308" y="167" font-size="18" font-weight="700" fill="#ff6b00">¥ 20</text>
+    </g>
+
+    <rect x="24" y="704" width="382" height="1" fill="#eef0f3"/>
+    <text x="48" y="738" class="tab-on">互助</text>
+    <text x="144" y="738" class="tab">留言</text>
+    <text x="241" y="738" class="tab">市场</text>
+    <text x="346" y="738" class="tab">我的</text>
+  </g>
+  <circle cx="81" cy="938" r="18" fill="#1769ff"/>
+  <text x="75" y="945" font-size="17" font-weight="700" fill="#fff">A</text>
+  <text x="111" y="940" class="choice">轻量社区型</text>
+  <text x="56" y="974" class="desc">亲和、留白多、卡片柔和；最接近微信日常使用习惯。</text>
+  <text x="56" y="1000" class="tiny">优势：学习成本低　风险：内容较多时页面会偏长</text>
+
+  <!-- OPTION B -->
+  <g transform="translate(545,125)">
+    <rect x="0" y="0" width="430" height="780" rx="42" fill="#f7f9fc" filter="url(#shadow)"/>
+    <rect x="154" y="14" width="122" height="28" rx="14" fill="#111827"/>
+    <rect x="0" y="42" width="430" height="118" fill="#ffffff"/>
+    <text x="28" y="82" class="phone-title">业主互助</text>
+    <rect x="335" y="60" width="70" height="34" rx="17" fill="#1769ff"/>
+    <text x="353" y="82" font-size="13" font-weight="700" fill="#fff">发布</text>
+    <rect x="24" y="105" width="382" height="42" rx="10" fill="#f2f4f7"/>
+    <circle cx="47" cy="126" r="6" fill="none" stroke="#98a2b3" stroke-width="2"/>
+    <path d="M51 130l5 5" stroke="#98a2b3" stroke-width="2"/>
+    <text x="67" y="131" class="body">搜索标题、内容</text>
+
+    <rect x="0" y="160" width="430" height="52" fill="#fff"/>
+    <rect x="16" y="170" width="74" height="32" rx="8" fill="#eaf2ff"/>
+    <text x="39" y="191" class="tab-on">全部</text>
+    <text x="116" y="191" class="tab">待领取</text>
+    <text x="198" y="191" class="tab">进行中</text>
+    <text x="280" y="191" class="tab">已完成</text>
+
+    <g transform="translate(16,228)">
+      <rect width="398" height="164" rx="12" fill="#fff" filter="url(#soft)"/>
+      <rect x="0" y="0" width="4" height="164" rx="2" fill="#1769ff"/>
+      <text x="20" y="34" class="card-title">帮忙取一下小区门口的快递</text>
+      <rect x="316" y="17" width="62" height="26" rx="6" fill="#eaf2ff"/>
+      <text x="332" y="35" class="chip" fill="#1769ff">待领取</text>
+      <text x="20" y="64" class="body">下午六点前送到3号楼，快递不重，</text>
+      <text x="20" y="85" class="body">有空的邻居麻烦帮忙带一下。</text>
+      <circle cx="31" cy="119" r="13" fill="#dfeaff"/>
+      <text x="51" y="123" class="meta">林先生 · 3号楼 · 2分钟前</text>
+      <text x="20" y="149" class="meta">距离 500m</text>
+      <text x="326" y="149" font-size="18" font-weight="700" fill="#ff6b00">¥ 8</text>
+    </g>
+
+    <g transform="translate(16,408)">
+      <rect width="398" height="144" rx="12" fill="#fff" filter="url(#soft)"/>
+      <rect x="0" y="0" width="4" height="144" rx="2" fill="#12a150"/>
+      <text x="20" y="34" class="card-title">周末帮忙照看宠物半天</text>
+      <rect x="316" y="17" width="62" height="26" rx="6" fill="#eaf2ff"/>
+      <text x="332" y="35" class="chip" fill="#1769ff">待领取</text>
+      <text x="20" y="64" class="body">猫咪很乖，提供猫粮和用品。</text>
+      <circle cx="31" cy="98" r="13" fill="#e8f7ef"/>
+      <text x="51" y="102" class="meta">周女士 · 8号楼 · 10分钟前</text>
+      <text x="326" y="128" font-size="18" font-weight="700" fill="#ff6b00">¥ 20</text>
+    </g>
+
+    <g transform="translate(16,568)">
+      <rect width="398" height="90" rx="12" fill="#fff" stroke="#e4e7ec" stroke-dasharray="5 4"/>
+      <circle cx="42" cy="45" r="17" fill="#fff4e8"/>
+      <path d="M42 34v13M42 53v2" stroke="#ed7b2f" stroke-width="3" stroke-linecap="round"/>
+      <text x="72" y="39" class="card-title" font-size="15">网络连接失败</text>
+      <text x="72" y="61" class="body">当前展示上次内容</text>
+      <text x="328" y="50" font-size="13" font-weight="700" fill="#1769ff">重试</text>
+    </g>
+
+    <rect x="0" y="706" width="430" height="74" fill="#fff"/>
+    <rect x="26" y="716" width="76" height="42" rx="12" fill="#eaf2ff"/>
+    <text x="50" y="742" class="tab-on">互助</text>
+    <text x="150" y="742" class="tab">留言</text>
+    <text x="248" y="742" class="tab">市场</text>
+    <text x="348" y="742" class="tab">我的</text>
+  </g>
+  <circle cx="571" cy="938" r="18" fill="#1769ff"/>
+  <text x="565" y="945" font-size="17" font-weight="700" fill="#fff">B</text>
+  <text x="601" y="940" class="choice">信息效率型（推荐）</text>
+  <text x="546" y="974" class="desc">TDesign 企业风格，信息紧凑但不拥挤，状态与操作更明确。</text>
+  <text x="546" y="1000" class="tiny">优势：扩展性和一致性最好　风险：需要统一改造公共组件</text>
+
+  <!-- OPTION C -->
+  <g transform="translate(1035,125)">
+    <rect x="0" y="0" width="430" height="780" rx="42" fill="#f5f8ff" filter="url(#shadow)"/>
+    <rect x="154" y="14" width="122" height="28" rx="14" fill="#111827"/>
+    <path d="M0 42h430v185c-92 30-337 26-430-16z" fill="url(#brandGrad)"/>
+    <text x="28" y="86" font-size="24" font-weight="750" fill="#fff">邻里互助</text>
+    <text x="28" y="112" font-size="13" fill="#dbe8ff">让每一次举手之劳都有回应</text>
+    <circle cx="376" cy="86" r="22" fill="#ffffff" fill-opacity=".18"/>
+    <path d="M369 86h14M376 79v14" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <rect x="24" y="137" width="382" height="48" rx="16" fill="#fff"/>
+    <circle cx="48" cy="161" r="7" fill="none" stroke="#98a2b3" stroke-width="2"/>
+    <path d="M53 166l6 6" stroke="#98a2b3" stroke-width="2"/>
+    <text x="70" y="166" class="body">搜索邻里需求</text>
+
+    <g transform="translate(20,220)">
+      <rect width="390" height="218" rx="22" fill="#fff" filter="url(#soft)"/>
+      <rect x="20" y="20" width="54" height="54" rx="18" fill="#e7efff"/>
+      <path d="M37 52c4-10 16-10 20 0M47 32a8 8 0 1 1 0 16" fill="none" stroke="#1769ff" stroke-width="2"/>
+      <text x="90" y="40" class="body" fill="#344054">林先生</text>
+      <text x="90" y="61" class="meta">3号楼 · 2分钟前</text>
+      <rect x="302" y="25" width="66" height="28" rx="14" fill="#eaf2ff"/>
+      <text x="320" y="44" class="chip" fill="#1769ff">待领取</text>
+      <text x="22" y="109" class="card-title">帮忙取一下小区门口的快递</text>
+      <text x="22" y="138" class="body">下午六点前送到3号楼，快递不重，</text>
+      <text x="22" y="160" class="body">有空的邻居麻烦帮忙带一下。</text>
+      <rect x="22" y="180" width="92" height="25" rx="12" fill="#fff5eb"/>
+      <text x="39" y="197" class="chip" fill="#ed7b2f">500m 内</text>
+      <text x="316" y="201" font-size="21" font-weight="750" fill="#ff6b00">¥ 8</text>
+    </g>
+
+    <g transform="translate(20,458)">
+      <rect width="390" height="174" rx="22" fill="#fff" filter="url(#soft)"/>
+      <rect x="20" y="20" width="54" height="54" rx="18" fill="#e8f7ef"/>
+      <text x="38" y="54" font-size="20" fill="#12a150">周</text>
+      <text x="90" y="40" class="body" fill="#344054">周女士</text>
+      <text x="90" y="61" class="meta">8号楼 · 10分钟前</text>
+      <text x="22" y="108" class="card-title">周末帮忙照看宠物半天</text>
+      <text x="22" y="137" class="body">猫咪很乖，提供猫粮和用品。</text>
+      <text x="306" y="151" font-size="21" font-weight="750" fill="#ff6b00">¥ 20</text>
+    </g>
+
+    <rect x="0" y="706" width="430" height="74" fill="#fff"/>
+    <circle cx="64" cy="731" r="15" fill="#eaf2ff"/>
+    <text x="50" y="758" class="tab-on">互助</text>
+    <text x="150" y="758" class="tab">留言</text>
+    <text x="248" y="758" class="tab">市场</text>
+    <text x="348" y="758" class="tab">我的</text>
+  </g>
+  <circle cx="1061" cy="938" r="18" fill="#1769ff"/>
+  <text x="1055" y="945" font-size="17" font-weight="700" fill="#fff">C</text>
+  <text x="1091" y="940" class="choice">品牌强调型</text>
+  <text x="1036" y="974" class="desc">更强的头图、渐变和情绪表达，适合强调社区品牌形象。</text>
+  <text x="1036" y="1000" class="tiny">优势：辨识度高　风险：视觉偏重，多个业务模块较难长期统一</text>
+</svg>

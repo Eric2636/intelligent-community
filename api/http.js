@@ -47,6 +47,25 @@ export function getToken() {
   }
 }
 
+function clearFrozenSession() {
+  try {
+    wx.removeStorageSync('access_token');
+    wx.removeStorageSync('phone_authorized_login_v1');
+    wx.removeStorageSync('wechat_authorized_login_v2');
+    wx.removeStorageSync('wechat_authorized_login');
+  } catch (e) {
+    /* ignore */
+  }
+  const app = getApp();
+  if (app && app.globalData) {
+    app.globalData.openid = '';
+    app.globalData.userInfo = null;
+    app.globalData.offlineMode = false;
+  }
+  if (app && app.resetNotificationUnreadCount) app.resetNotificationUnreadCount();
+  if (app && app.eventBus) app.eventBus.emit('userInfoChange');
+}
+
 export function request({ method = 'GET', path, query, data, auth = true, timeout = DEFAULT_TIMEOUT } = {}) {
   const header = { 'content-type': 'application/json' };
   if (auth) {
@@ -89,6 +108,7 @@ export function request({ method = 'GET', path, query, data, auth = true, timeou
           const data = res.data && typeof res.data === 'object' ? res.data : {};
           const msg =
             data.message || data.hint || (typeof res.data === 'string' ? res.data : '') || `HTTP ${code}`;
+          if (code === 403 && String(msg).includes('账号已被冻结')) clearFrozenSession();
           const err = new Error(msg);
           err.statusCode = code;
           err.body = data;

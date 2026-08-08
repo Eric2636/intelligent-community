@@ -43,18 +43,19 @@ App({
     const storedTabs = readStoredModuleTabs();
     this.globalData.moduleEntryTabs = storedTabs && Array.isArray(storedTabs.tabs) ? storedTabs.tabs : null;
 
-    // 每次启动都同步调试开关，避免从 local 切到 test/production 后仍残留 vConsole。
-    try {
-      wx.setEnableDebug({ enableDebug: Boolean(config.enableVConsole) });
-    } catch (e) {
-      /* ignore */
+    let apiBase;
+    if (config.useLocalDevApi) {
+      apiBase = `http://${config.devLanHost}:${config.devPort}`;
+      try {
+        if (wx.getSystemInfoSync().platform === 'devtools') {
+          apiBase = `http://127.0.0.1:${config.devPort}`;
+        }
+      } catch (e) {
+        /* ignore */
+      }
+    } else {
+      apiBase = String(config.productionApiBase || '').replace(/\/+$/, '');
     }
-
-    const apiBase = String(
-      config.apiBaseUrl ||
-        config.productionApiBase ||
-        (config.devLanHost ? `http://${config.devLanHost}:${config.devPort}` : ''),
-    ).replace(/\/+$/, '');
     this.globalData.apiBaseUrl = apiBase;
     this.globalData.offlineMode = false;
 
