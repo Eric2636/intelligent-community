@@ -38,12 +38,34 @@
       />
     </view>
     <view class="publish-field">
+      <view class="publish-field__label">微信号（选填）</view>
       <input
         class="publish-field__input"
-        placeholder="请输入联系方式"
-        value="{{contact}}"
-        bindinput="onContactInput"
+        placeholder="请输入微信号"
+        value="{{wechatContact}}"
+        maxlength="100"
+        bindinput="onWechatContactInput"
       />
+    </view>
+    <view class="publish-field">
+      <view class="publish-field__label">手机号（选填）</view>
+      <input
+        class="publish-field__input"
+        type="number"
+        placeholder="请输入手机号"
+        value="{{phoneContact}}"
+        maxlength="11"
+        bindinput="onPhoneContactInput"
+      />
+      <checkbox-group class="publish-contact-option" bindchange="onPhoneIsWechatChange">
+        <label class="publish-contact-option__label">
+          <checkbox value="phone-is-wechat" checked="{{phoneIsWechat}}" color="#0052d9" />
+          <text>手机号也是微信号</text>
+        </label>
+      </checkbox-group>
+    </view>
+    <view wx:if="{{legacyContact}}" class="publish-contact-legacy">
+      历史联系方式：{{legacyContact}}。请补充微信号或手机号后保存。
     </view>
 
     <view class="publish-field">

@@ -33,7 +33,6 @@
       <view class="detail-card__title">{{item.title}}</view>
       <view class="detail-card__meta">{{item.createdAt}}</view>
       <view class="detail-card__desc">{{item.desc}}</view>
-      <view class="detail-card__contact">联系：{{item.contact}}</view>
     </view>
 
     <view wx:if="{{item.locationName || item.locationAddress}}" class="location-card">
@@ -189,19 +188,8 @@
     </view>
 
     <view class="detail-bar">
-      <view wx:if="{{!isMine}}" class="detail-bar__row">
+      <view class="detail-bar__row">
         <t-button class="detail-bar__action" theme="primary" size="large" block bindtap="onContact">联系商家</t-button>
-        <t-button wx:if="{{item.latitude && item.longitude}}" class="detail-bar__action" variant="outline" size="large" block bindtap="openLocation">导航到店</t-button>
-        <button class="detail-bar__share" open-type="share">
-          <t-icon name="share" size="44rpx" />
-          <text>分享</text>
-        </button>
-        <view class="detail-bar__fav {{item.isFavorited ? 'detail-bar__fav--active' : ''}}" bindtap="onFavorite">
-          <t-icon name="{{item.isFavorited ? 'star-filled' : 'star'}}" size="44rpx" />
-          <text>{{item.isFavorited ? '已收藏' : '收藏'}}</text>
-        </view>
-      </view>
-      <view wx:if="{{isMine}}" class="detail-bar__row">
         <t-button wx:if="{{item.latitude && item.longitude}}" class="detail-bar__action" variant="outline" size="large" block bindtap="openLocation">导航到店</t-button>
         <button class="detail-bar__share" open-type="share">
           <t-icon name="share" size="44rpx" />
@@ -210,6 +198,10 @@
         <view wx:if="{{isMine}}" class="detail-bar__more" bindtap="onOpenOwnerActions" aria-role="button" aria-label="更多操作">
           <t-icon name="more" size="44rpx" />
           <text>更多</text>
+        </view>
+        <view wx:else class="detail-bar__fav {{item.isFavorited ? 'detail-bar__fav--active' : ''}}" bindtap="onFavorite">
+          <t-icon name="{{item.isFavorited ? 'star-filled' : 'star'}}" size="44rpx" />
+          <text>{{item.isFavorited ? '已收藏' : '收藏'}}</text>
         </view>
       </view>
     </view>
@@ -225,4 +217,23 @@
   bind:visible-change="onOwnerActionVisibleChange"
   bind:close="onOwnerActionClose"
 />
+<t-popup
+  visible="{{contactPopupVisible}}"
+  placement="bottom"
+  bind:visible-change="onContactPopupVisibleChange"
+>
+  <view class="contact-popup" aria-role="dialog" aria-label="联系商家">
+    <view class="contact-popup__header">
+      <text class="contact-popup__title">联系商家</text>
+      <view class="contact-popup__close" bindtap="onCloseContactPopup" aria-role="button" aria-label="关闭">
+        <t-icon name="close" size="40rpx" />
+      </view>
+    </view>
+    <view wx:for="{{contactEntries}}" wx:key="type" class="contact-popup__item">
+      <text class="contact-popup__label">{{item.label}}</text>
+      <text class="contact-popup__value">{{item.value}}</text>
+      <t-button class="contact-popup__copy" theme="primary" variant="outline" block data-value="{{item.value}}" bindtap="onCopyContact">复制{{item.label}}</t-button>
+    </view>
+  </view>
+</t-popup>
 <auth-login-dialog id="auth-login-dialog" />
