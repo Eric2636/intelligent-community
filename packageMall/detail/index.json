@@ -8,6 +8,7 @@
     "t-avatar": "tdesign-miniprogram/avatar/avatar",
     "t-button": "tdesign-miniprogram/button/button",
     "t-empty": "tdesign-miniprogram/empty/empty",
-    "t-action-sheet": "tdesign-miniprogram/action-sheet/action-sheet"
+    "t-action-sheet": "tdesign-miniprogram/action-sheet/action-sheet",
+    "t-popup": "tdesign-miniprogram/popup/popup"
   }
 }

@@ -81,9 +81,63 @@
     margin-bottom: 20rpx;
   }
 
-  &__contact {
-    font-size: 26rpx;
-    color: @gy2;
+}
+
+.contact-popup {
+  box-sizing: border-box;
+  padding: 32rpx 32rpx calc(40rpx + env(safe-area-inset-bottom));
+  background: @bg-color-white;
+  border-radius: 28rpx 28rpx 0 0;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48rpx;
+  }
+
+  &__title {
+    color: @gy1;
+    font-size: 34rpx;
+    font-weight: 600;
+    line-height: 48rpx;
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56rpx;
+    height: 56rpx;
+    color: @gy3;
+  }
+
+  &__item {
+    margin-top: 28rpx;
+  }
+
+  &__label {
+    display: block;
+    color: @gy3;
+    font-size: 24rpx;
+    line-height: 1.4;
+  }
+
+  &__value {
+    display: block;
+    margin-top: 12rpx;
+    padding: 28rpx 24rpx;
+    overflow-wrap: anywhere;
+    color: @gy1;
+    font-size: 32rpx;
+    font-weight: 500;
+    line-height: 1.5;
+    background: @bg-color-section;
+    border-radius: 16rpx;
+  }
+
+  &__copy {
+    margin-top: 16rpx;
   }
 }
 

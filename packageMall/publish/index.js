@@ -12,7 +12,10 @@ Page({
     title: '',
     price: '',
     desc: '',
-    contact: '',
+    wechatContact: '',
+    phoneContact: '',
+    phoneIsWechat: false,
+    legacyContact: '',
     location: null,
     mainImages: [],
     subImages: [],
@@ -57,7 +60,10 @@ Page({
       title: item.title || '',
       price: item.price == null ? '' : String(item.price),
       desc: item.desc || '',
-      contact: item.contact === '保密' ? '' : (item.contact || ''),
+      wechatContact: item.wechatContact || '',
+      phoneContact: item.phoneContact || '',
+      phoneIsWechat: Boolean(item.phoneIsWechat),
+      legacyContact: !item.wechatContact && !item.phoneContact && item.contact !== '保密' ? (item.contact || '') : '',
       location: item.locationName || item.locationAddress ? {
         name: item.locationName || '',
         address: item.locationAddress || '',
@@ -80,7 +86,12 @@ Page({
   onTitleInput(e) { this.setData({ title: e.detail.value }); },
   onPriceInput(e) { this.setData({ price: e.detail.value }); },
   onDescInput(e) { this.setData({ desc: e.detail.value }); },
-  onContactInput(e) { this.setData({ contact: e.detail.value }); },
+  onWechatContactInput(e) { this.setData({ wechatContact: e.detail.value }); },
+  onPhoneContactInput(e) { this.setData({ phoneContact: e.detail.value }); },
+  onPhoneIsWechatChange(e) {
+    const phoneIsWechat = Boolean(e.detail && e.detail.value && e.detail.value.length);
+    this.setData({ phoneIsWechat, wechatContact: phoneIsWechat ? '' : this.data.wechatContact });
+  },
 
   chooseLocation() {
     wx.chooseLocation({
@@ -187,7 +198,7 @@ Page({
 
   async submit() {
     if (!(await ensureMutationReady(this))) return;
-    const { categoryId, title, price, desc, contact, location, mainImages, subImages, videos } = this.data;
+    const { categoryId, title, price, desc, wechatContact, phoneContact, phoneIsWechat, location, mainImages, subImages, videos } = this.data;
     const t = (title || '').trim();
     if (!t) {
       wx.showToast({ title: '请输入标题', icon: 'none' });
@@ -201,6 +212,20 @@ Page({
       wx.showToast({ title: '图片最多 6 张', icon: 'none' });
       return;
     }
+    const normalizedWechatContact = (wechatContact || '').trim();
+    const normalizedPhoneContact = (phoneContact || '').trim();
+    if (!normalizedWechatContact && !normalizedPhoneContact) {
+      wx.showToast({ title: '请至少填写微信号或手机号', icon: 'none' });
+      return;
+    }
+    if (normalizedPhoneContact && !/^1[3-9]\d{9}$/.test(normalizedPhoneContact)) {
+      wx.showToast({ title: '手机号格式不正确', icon: 'none' });
+      return;
+    }
+    if (phoneIsWechat && !normalizedPhoneContact) {
+      wx.showToast({ title: '请先填写手机号', icon: 'none' });
+      return;
+    }
     this.setData({ submitting: true });
     const emptyLocation = this.data.isEditMode ? null : undefined;
     const payload = {
@@ -209,7 +234,9 @@ Page({
       price: (price || '').trim(),
       unit: '元',
       desc: (desc || '').trim(),
-      contact: (contact || '').trim() || '保密',
+      wechatContact: normalizedWechatContact || undefined,
+      phoneContact: normalizedPhoneContact || undefined,
+      phoneIsWechat: Boolean(phoneIsWechat),
       locationName: location ? location.name : emptyLocation,
       locationAddress: location ? location.address : emptyLocation,
       latitude: location ? location.latitude : emptyLocation,
