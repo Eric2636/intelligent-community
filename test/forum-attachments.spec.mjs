@@ -19,6 +19,21 @@ test('mini program exposes attachments only for administrators and submits compl
   assert.match(wxml, /附件（最多5个，单个20MB）/);
 });
 
+test('forum publish styles reference only defined shared LESS variables', async () => {
+  const source = await read('packageForum/publish/index.less');
+  const variables = await read('variable.less');
+  const defined = new Set(
+    [...variables.matchAll(/^@([\w-]+)\s*:/gm)].map((match) => match[1]),
+  );
+  const referenced = new Set(
+    [...source.matchAll(/@([\w-]+)/g)]
+      .map((match) => match[1])
+      .filter((name) => name !== 'import'),
+  );
+  const undefinedVariables = [...referenced].filter((name) => !defined.has(name));
+  assert.deepEqual(undefinedVariables, []);
+});
+
 test('mini program performs SHA-256 preflight and uses a multipart upload only on a miss', async () => {
   const api = await read('api/cloud.js');
   const page = await read('packageForum/publish/index.js');
