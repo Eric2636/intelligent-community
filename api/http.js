@@ -6,8 +6,14 @@ function getBaseUrl() {
   const app = getApp();
   const fromGlobal = app && app.globalData && app.globalData.apiBaseUrl;
   if (fromGlobal) return fromGlobal;
+  if (config.apiBaseUrl) {
+    return String(config.apiBaseUrl).replace(/\/+$/, '');
+  }
   if (!config.useLocalDevApi && config.productionApiBase) {
     return String(config.productionApiBase).replace(/\/+$/, '');
+  }
+  if (config.devLanHost) {
+    return `http://${config.devLanHost}:${config.devPort}`;
   }
   return `http://127.0.0.1:${config.devPort}`;
 }

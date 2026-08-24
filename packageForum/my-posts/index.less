@@ -16,6 +16,7 @@
 }
 
 .post-card {
+  position: relative;
   background: @bg-color-white;
   border-radius: @radius-card;
   padding: 32rpx;
@@ -26,8 +27,24 @@
   font-size: 32rpx;
   font-weight: 600;
   color: @gy1;
-  margin-bottom: 16rpx;
+  min-width: 0;
 }
+
+.post-card__title-row, .post-card__title-main, .post-card__more, .registration-entry, .post-meta__left, .post-meta__states { display: flex; align-items: center; }
+.post-card__title-row { gap: 16rpx; margin-bottom: 16rpx; }
+.post-card__title-main { flex: 1; min-width: 0; }
+.post-card__title-main .post-title { flex: 1; }
+.post-card__more { flex-shrink: 0; width: 64rpx; height: 64rpx; margin: -12rpx -12rpx -12rpx 0; justify-content: center; border-radius: 50%; }
+.registration-entries { padding: 36rpx 32rpx calc(32rpx + env(safe-area-inset-bottom)); background: @bg-color-white; border-radius: 24rpx 24rpx 0 0; max-height: 70vh; overflow-y: auto; }
+.registration-entries__title { font-size: 34rpx; font-weight: 600; margin-bottom: 24rpx; }
+.registration-entries__empty, .registration-entry__meta { color: @gy3; font-size: 24rpx; }
+.registration-entry { gap: 16rpx; padding: 16rpx 0; border-bottom: 1rpx solid @gray3; }
+.registration-entry__avatar { width: 64rpx; height: 64rpx; border-radius: 50%; background: @gray3; }
+.post-label { flex-shrink: 0; font-size: 22rpx; line-height: 1; }
+.post-label + .post-label::before { content: '·'; margin: 0 10rpx; color: @gy3; }
+.post-label--pinned { color: #c53a25; }
+.post-label--announcement { color: @gy2; }
+.post-label--registration { color: @color-primary; }
 
 .post-content {
   font-size: 28rpx;
@@ -43,6 +60,9 @@
   font-size: 24rpx;
   color: @gy3;
 }
+
+.post-meta__left { min-width: 0; gap: 16rpx; }
+.post-meta__states { flex-shrink: 0; }
 
 .post-title {
   .list-title-clamp();

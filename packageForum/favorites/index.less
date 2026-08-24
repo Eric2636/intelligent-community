@@ -28,6 +28,14 @@
     margin-bottom: 12rpx;
   }
 
+  &__title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8rpx;
+    margin-bottom: 12rpx;
+  }
+
   &__meta {
     display: flex;
     align-items: center;
@@ -36,6 +44,12 @@
     color: @gy3;
   }
 }
+
+.favorites-item__title-row .favorites-item__title { flex: 1; min-width: 0; margin-bottom: 0; }
+.post-label { flex-shrink: 0; padding: 0 10rpx; border-radius: 4rpx; font-size: 20rpx; line-height: 32rpx; }
+.post-label--pinned { color: #c53a25; background: #fff0ec; }
+.post-label--announcement { color: #6d4fb3; background: #f1edff; }
+.post-label--registration { color: #246fe5; background: #eaf2ff; }
 
 .favorites-item__title {
   .list-title-clamp();

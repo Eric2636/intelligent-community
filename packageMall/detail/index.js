@@ -24,6 +24,33 @@ function countCommentTree(roots) {
   return n;
 }
 
+function getContactEntries(item = {}) {
+  if (Array.isArray(item.contacts) && item.contacts.length) {
+    return item.contacts
+      .filter((entry) => entry && entry.value)
+      .map((entry) => ({
+        type: entry.type || 'LEGACY',
+        label: entry.label || '联系方式',
+        value: String(entry.value).trim(),
+      }))
+      .filter((entry) => entry.value && entry.value !== '保密');
+  }
+  const entries = [];
+  const wechatContact = String(item.wechatContact || '').trim();
+  const phoneContact = String(item.phoneContact || '').trim();
+  if (wechatContact) entries.push({ type: 'WECHAT', label: '微信号', value: wechatContact });
+  if (phoneContact) entries.push({
+    type: item.phoneIsWechat ? 'PHONE_WECHAT' : 'PHONE',
+    label: item.phoneIsWechat ? '手机号（可添加微信）' : '手机号',
+    value: phoneContact,
+  });
+  if (entries.length) return entries;
+  const legacyContact = String(item.contact || '').trim();
+  return legacyContact && legacyContact !== '保密'
+    ? [{ type: 'LEGACY', label: '联系方式', value: legacyContact }]
+    : [];
+}
+
 Page({
   data: {
     id: '',
@@ -45,6 +72,8 @@ Page({
     ownerActionVisible: false,
     ownerActionLoading: false,
     ownerActions: [],
+    contactPopupVisible: false,
+    contactEntries: [],
   },
 
   onLoad(options) {
@@ -119,6 +148,14 @@ Page({
 
   onOwnerActionClose() {
     this.setData({ ownerActionVisible: false });
+  },
+
+  onContactPopupVisibleChange(e) {
+    this.setData({ contactPopupVisible: Boolean(e.detail && e.detail.visible) });
+  },
+
+  onCloseContactPopup() {
+    this.setData({ contactPopupVisible: false });
   },
 
   async onOwnerActionSelected(e) {
@@ -372,24 +409,26 @@ Page({
   },
 
   onContact() {
-    const contact = String((this.data.item && this.data.item.contact) || '').trim();
+    const contactEntries = getContactEntries(this.data.item || {});
+    if (!contactEntries.length) {
+      wx.showToast({ title: '暂无商家联系方式', icon: 'none' });
+      return;
+    }
+    this.setData({ contactEntries, contactPopupVisible: true });
+  },
+
+  onCopyContact(e) {
+    const contact = String(e.currentTarget.dataset.value || '').trim();
     if (!contact) {
       wx.showToast({ title: '暂无商家联系方式', icon: 'none' });
       return;
     }
-    const phone = contact.replace(/[^\d+]/g, '');
-    if (/^(?:\+?86)?1\d{10}$/.test(phone) || /^0\d{2,3}\d{7,8}$/.test(phone)) {
-      wx.makePhoneCall({
-        phoneNumber: phone.replace(/^\+?86/, ''),
-        fail: () => {
-          wx.setClipboardData({ data: contact });
-        },
-      });
-      return;
-    }
     wx.setClipboardData({
       data: contact,
-      success: () => wx.showToast({ title: '联系方式已复制', icon: 'none' }),
+      success: () => {
+        wx.showToast({ title: '已复制', icon: 'success' });
+      },
+      fail: () => wx.showToast({ title: '复制失败，请重试', icon: 'none' }),
     });
   },
 
