@@ -10,6 +10,24 @@
         bindinput="onTitleInput"
       />
     </view>
+
+    <view wx:if="{{canManageForumPosts && !editing}}" class="publish-field publish-admin-options">
+      <view class="publish-admin-options__group">
+        <view class="publish-admin-options__label">帖子类型</view>
+        <view class="publish-segmented">
+          <view class="publish-segment {{featureType === 'CONTENT' ? 'publish-segment--active' : ''}}" data-value="CONTENT" bindtap="onFeatureTypeSelect">内容贴</view>
+          <view class="publish-segment {{featureType === 'REGISTRATION' ? 'publish-segment--active' : ''}}" data-value="REGISTRATION" bindtap="onFeatureTypeSelect">活动报名</view>
+        </view>
+      </view>
+      <block wx:if="{{featureType === 'REGISTRATION'}}">
+        <input class="publish-field__input" type="number" placeholder="报名人数上限" value="{{registrationCapacity}}" bindinput="onCapacityInput" />
+        <picker mode="date" value="{{registrationDeadlineAt}}" bindchange="onDeadlineChange"><view class="publish-admin-options__picker">{{registrationDeadlineAt || '请选择报名截止日期'}}</view></picker>
+      </block>
+      <view class="publish-admin-options__group publish-admin-options__group--settings">
+        <view class="publish-admin-options__label">发布设置</view>
+        <view class="publish-admin-options__pin"><text>置顶</text><t-switch value="{{pinned}}" bind:change="onPinnedChange" /></view>
+      </view>
+    </view>
     <view class="publish-field">
       <textarea
         class="publish-field__input publish-field__textarea"
@@ -60,6 +78,12 @@
     >
       + 添加图片或视频
     </view>
+    <view wx:if="{{canManageForumPosts}}" class="attachment-picker">
+      <view class="attachment-picker__head"><text>附件（最多5个，单个20MB）</text><text class="attachment-picker__add" bindtap="onAddAttachment">+ 添加附件</text></view>
+      <view wx:for="{{attachments}}" wx:key="mediaAssetId" class="attachment-picker__item">
+        <text class="attachment-picker__name">{{item.name}}</text><text class="attachment-picker__size">{{item.sizeBytes}} B</text><text class="attachment-picker__remove" data-index="{{index}}" bindtap="onRemoveAttachment">移除</text>
+      </view>
+    </view>
 
     <t-button
       class="publish-submit"
@@ -69,8 +93,8 @@
       bindtap="submit"
       loading="{{submitting}}"
     >
-      发布
+      {{editing ? '保存' : '发布'}}
     </t-button>
   </view>
 </view>
-<auth-login-dialog id="auth-login-dialog" />
+<auth-login-dialog id="auth-login-dialog" bindauthorized="onAuthorized" />

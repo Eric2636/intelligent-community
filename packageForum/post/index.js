@@ -74,11 +74,13 @@ function normalizeForumPost(raw) {
   const me = getMeIds();
   const images = Array.isArray(raw.images) ? raw.images : [];
   const videos = Array.isArray(raw.videos) ? raw.videos : [];
+  const attachments = Array.isArray(raw.attachments) ? raw.attachments : [];
   const replies = (raw.replies || []).map((r) => normalizeReply(r, me));
   return {
     ...raw,
     images,
     videos,
+    attachments,
     replies,
     isAuthor: isSameAuthor(raw.authorId, me),
     authorAvatar: raw.authorAvatar || '',
@@ -95,6 +97,7 @@ Page({
     loading: true,
     submitting: false,
     deletingPost: false,
+    registrationSubmitting: false,
     canPublish: false,
     replyFocus: false,
     replyTarget: null,
@@ -103,6 +106,15 @@ Page({
     replyReactionEmojis: FORUM_REPLY_EMOJI_LIST,
     reactionPanelReplyId: '',
     anchor: '',
+  },
+
+  onOpenAttachment(e) {
+    const item = e.currentTarget.dataset.item || {};
+    if (!item.url) return;
+    wx.downloadFile({ url: item.url, success: (res) => {
+      if (res.statusCode !== 200) { wx.showToast({ title: '附件下载失败', icon: 'none' }); return; }
+      wx.openDocument({ filePath: res.tempFilePath, showMenu: true, fail: () => wx.showToast({ title: '暂不支持打开此文件', icon: 'none' }) });
+    }, fail: () => wx.showToast({ title: '附件下载失败', icon: 'none' }) });
   },
 
   onLoad(options) {
@@ -172,6 +184,24 @@ Page({
         }
       },
     });
+  },
+
+  async onRegistrationAction() {
+    if (!(await ensureMutationReady(this))) return;
+    const { postId, post, registrationSubmitting } = this.data;
+    if (!post || post.featureType !== 'REGISTRATION' || registrationSubmitting) return;
+    const api = post.registration && post.registration.isRegistered ? forumAPI.cancelPostRegistration : forumAPI.registerPost;
+    this.setData({ registrationSubmitting: true });
+    try {
+      const res = await api(postId);
+      if (res.code !== 200) throw new Error(res.message || '操作失败');
+      await this.loadPost({ silent: true });
+      wx.showToast({ title: post.registration && post.registration.isRegistered ? '已取消报名' : '报名成功' });
+    } catch (error) {
+      wx.showToast({ title: error.message || '操作失败', icon: 'none' });
+    } finally {
+      this.setData({ registrationSubmitting: false });
+    }
   },
 
   async onDeleteReply(e) {

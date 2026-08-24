@@ -13,6 +13,96 @@
   color: @gy2;
 }
 
+.post-registration {
+  overflow: hidden;
+  margin-bottom: 24rpx;
+  border: 1rpx solid fade(@color-primary, 20%);
+  border-radius: 12rpx;
+  background: @bg-color-white;
+
+  &__main {
+    padding: 20rpx 20rpx 18rpx;
+  }
+
+  &__head {
+    width: 100%;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16rpx;
+  }
+
+  &__title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+  }
+
+  &__title {
+    font-size: 30rpx;
+    font-weight: 600;
+    color: @gy1;
+  }
+
+  &__capacity,
+  &__deadline {
+    font-size: 24rpx;
+    color: @gy3;
+  }
+
+  &__capacity {
+    white-space: nowrap;
+  }
+
+  &__deadline {
+    display: block;
+    margin-top: 12rpx;
+  }
+
+  &__action {
+    padding: 14rpx 20rpx 16rpx;
+    border-top: 1rpx solid fade(@color-primary, 10%);
+  }
+
+  &__button {
+    width: 100%;
+  }
+
+  &__registered,
+  &__registered-state {
+    display: flex;
+    align-items: center;
+  }
+
+  &__registered {
+    width: 100%;
+    min-height: 64rpx;
+    justify-content: space-between;
+    padding: 0 18rpx;
+    border-radius: 8rpx;
+    background: fade(@color-primary, 7%);
+    color: @color-primary;
+    box-sizing: border-box;
+  }
+
+  &__registered-state {
+    gap: 8rpx;
+    font-size: 26rpx;
+    font-weight: 600;
+  }
+
+  &__cancel {
+    padding: 10rpx 0 10rpx 20rpx;
+    font-size: 24rpx;
+    color: @gy2;
+  }
+}
+
+.post-label { flex-shrink: 0; padding: 0 10rpx; border-radius: 4rpx; font-size: 20rpx; line-height: 32rpx; }
+.post-label--pinned { color: #c53a25; background: #fff0ec; }
+.post-label--announcement { color: #6d4fb3; background: #f1edff; }
+.post-label--registration { color: #246fe5; background: #eaf2ff; }
+
 .post-card {
   padding: 28rpx 28rpx 24rpx;
   background: @bg-color-white;
@@ -66,16 +156,21 @@
     min-width: 0;
   }
 
-  &__time {
-    margin-left: 0;
-  }
-
   &__title {
     display: block;
+    flex: 1;
+    min-width: 0;
     font-size: 38rpx;
     font-weight: 600;
     color: @gy1;
     line-height: 1.35;
+  }
+
+  &__title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10rpx;
     margin-bottom: 18rpx;
   }
 
@@ -122,6 +217,10 @@
 
     text + text {
       margin-left: 0;
+    }
+
+    .post-card__time {
+      margin-left: auto;
     }
   }
 

@@ -11,7 +11,12 @@
     </view>
     <view wx:else class="favorites-list">
       <view class="favorites-item" wx:for="{{list}}" wx:key="id" data-id="{{item.id || item._id}}" bindtap="goPost">
-        <text class="favorites-item__title">{{item.title}}</text>
+        <view class="favorites-item__title-row">
+          <text class="favorites-item__title">{{item.title}}</text>
+          <text wx:if="{{item.pinned}}" class="post-label post-label--pinned">置顶</text>
+          <text wx:if="{{item.postType === 'ANNOUNCEMENT'}}" class="post-label post-label--announcement">社区公告</text>
+          <text wx:if="{{item.featureType === 'REGISTRATION'}}" class="post-label post-label--registration">活动报名</text>
+        </view>
         <template is="forumListMedia" data="{{item: item}}" />
         <view class="favorites-item__meta">
           <text class="favorites-item__time">{{item.createTime}}</text>

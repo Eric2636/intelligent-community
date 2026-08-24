@@ -3,6 +3,10 @@
   "usingComponents": {
     "t-pull-down-refresh": "tdesign-miniprogram/pull-down-refresh/pull-down-refresh",
     "t-empty": "tdesign-miniprogram/empty/empty",
-    "t-button": "tdesign-miniprogram/button/button"
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-icon": "tdesign-miniprogram/icon/icon",
+    "t-tag": "tdesign-miniprogram/tag/tag",
+    "t-action-sheet": "tdesign-miniprogram/action-sheet/action-sheet",
+    "t-popup": "tdesign-miniprogram/popup/popup"
   }
 }
