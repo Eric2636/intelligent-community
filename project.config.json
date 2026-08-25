@@ -3,28 +3,28 @@
   "packOptions": {
     "ignore": [
       {
-        "type": "folder",
-        "value": "Users"
+        "value": "Users",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "docs"
+        "value": "docs",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": ".idea"
+        "value": ".idea",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "node_modules"
+        "value": "node_modules",
+        "type": "folder"
       },
       {
-        "type": "file",
-        "value": "static/icons/community-harmony-source.png"
+        "value": "static/icons/community-harmony-source.png",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "static/icons/community-service-a-source.png"
+        "value": "static/icons/community-service-a-source.png",
+        "type": "file"
       }
     ],
     "include": []
@@ -78,7 +78,7 @@
   },
   "miniprogramRoot": "",
   "compileType": "miniprogram",
-  "libVersion": "3.7.8",
+  "libVersion": "3.14.2",
   "appid": "wx1d34b805b9ede3d5",
   "projectname": "miniprogram-starter",
   "condition": {

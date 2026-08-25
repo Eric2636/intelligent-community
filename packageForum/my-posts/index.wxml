@@ -12,11 +12,25 @@
   >
     <view class="post-list">
       <view class="post-card" wx:for="{{postList}}" wx:key="id" bind:tap="goPost" data-id="{{item.id || item._id}}">
-        <view class="post-title">{{item.title}}</view>
+          <view class="post-card__title-row">
+          <view class="post-card__title-main">
+            <view class="post-title">{{item.title}}</view>
+          </view>
+          <view class="post-card__more" catchtap="onOpenOwnerActions" data-id="{{item.id || item._id}}" aria-role="button" aria-label="更多操作">
+            <t-icon name="more" size="40rpx" color="#1f2329" />
+          </view>
+        </view>
         <view class="post-content">{{item.content}}</view>
         <template is="forumListMedia" data="{{item: item}}" />
         <view class="post-meta">
-          <text class="post-meta__time">{{item.createTime}}</text>
+          <view class="post-meta__left">
+            <view class="post-meta__states">
+              <text wx:if="{{item.pinned}}" class="post-label post-label--pinned">置顶</text>
+              <text wx:if="{{item.postType === 'ANNOUNCEMENT'}}" class="post-label post-label--announcement">社区公告</text>
+              <text wx:if="{{item.featureType === 'REGISTRATION'}}" class="post-label post-label--registration">活动报名</text>
+            </view>
+            <text class="post-meta__time">{{item.createTime}}</text>
+          </view>
           <text class="post-meta__reply-count">{{item.replyCount}} 回复</text>
         </view>
       </view>
@@ -24,4 +38,16 @@
     <t-empty wx:if="{{!loading && postList.length === 0}}" description="暂无发布的帖子" />
   </t-pull-down-refresh>
 </view>
+<t-action-sheet
+  visible="{{ownerActionVisible}}"
+  items="{{ownerActions}}"
+  description="管理这篇帖子"
+  show-cancel
+  bind:selected="onOwnerActionSelected"
+  bind:visible-change="onOwnerActionVisibleChange"
+  bind:close="onOwnerActionClose"
+/>
+<t-popup visible="{{showRegistrationEntries}}" placement="bottom" bind:visible-change="onRegistrationEntriesVisibleChange">
+  <view class="registration-entries"><view class="registration-entries__title">报名名单</view><view wx:if="{{!registrationEntries.length}}" class="registration-entries__empty">暂无报名</view><view wx:for="{{registrationEntries}}" wx:key="userId" class="registration-entry"><image src="{{item.avatar}}" class="registration-entry__avatar" /><view><view>{{item.name || '邻居'}}</view><view class="registration-entry__meta">{{item.phoneNumber}} · {{item.createdAt}}</view></view></view><t-button block bindtap="closeRegistrationEntries">关闭</t-button></view>
+</t-popup>
 <auth-login-dialog id="auth-login-dialog" bindauthorized="onAuthorized" />

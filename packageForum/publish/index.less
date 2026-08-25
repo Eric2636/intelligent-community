@@ -8,6 +8,57 @@
   overflow-x: hidden;
 }
 
+.publish-admin-options {
+  display: flex;
+  flex-direction: column;
+  gap: 28rpx;
+}
+
+.publish-admin-options__group { display: flex; flex-direction: column; gap: 16rpx; }
+.publish-admin-options__group--settings { gap: 12rpx; }
+.publish-admin-options__label { font-size: 28rpx; color: @gy1; font-weight: 500; }
+.publish-admin-options__picker {
+  min-height: 88rpx;
+  padding: 0 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  color: @gy2;
+  background: @bg-color-white;
+  border: 2rpx solid @gray3;
+  border-radius: @radius-sm;
+  box-sizing: border-box;
+}
+.publish-admin-options__picker-text { flex: 1; }
+.publish-admin-options__pin { display: flex; align-items: center; justify-content: space-between; color: @gy1; }
+
+.publish-segmented {
+  display: flex;
+  padding: 6rpx;
+  background: @bg-color-section;
+  border-radius: @radius-sm;
+  box-sizing: border-box;
+}
+
+.publish-segment {
+  flex: 1;
+  min-height: 68rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  color: @gy2;
+  border-radius: 8rpx;
+  box-sizing: border-box;
+}
+
+.publish-segment--active {
+  color: @color-primary;
+  font-weight: 500;
+  background: @bg-color-white;
+  box-shadow: 0 2rpx 8rpx rgba(0, 82, 217, 0.12);
+}
+
 .publish-form {
   background: @bg-color-white;
   border-radius: @radius-card;
@@ -131,4 +182,30 @@
 
 .publish-submit {
   margin-top: 48rpx;
+}
+
+.attachment-picker {
+  margin-top: 12rpx;
+  padding: 20rpx;
+  background: @bg-color-section;
+  border-radius: @radius-sm;
+  &__head { display: flex; justify-content: space-between; font-size: 26rpx; }
+  &__add, &__remove { color: @color-primary; }
+  &__action {
+    min-height: 88rpx;
+    margin-top: 16rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12rpx;
+    color: @color-primary;
+    background: @bg-color-white;
+    border: 2rpx dashed @color-primary;
+    border-radius: @radius-sm;
+    font-size: 28rpx;
+  }
+  &__action--busy { color: @gy2; border-color: @gray3; }
+  &__item { display: flex; align-items: center; gap: 12rpx; margin-top: 16rpx; font-size: 24rpx; }
+  &__name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  &__size { color: @gy3; }
 }

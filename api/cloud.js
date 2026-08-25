@@ -1,5 +1,5 @@
 // 自建后端 HTTP API 调用工具
-import { getToken, request as httpRequest } from '~/api/http';
+import { buildUrl, getToken, request as httpRequest } from '~/api/http';
 import { cacheGet, cacheSet, invalidateHttpCachePrefix } from '~/utils/persistCache';
 import { formatDateTimeFields } from '~/utils/date';
 import { getCurrentUserId } from '~/utils/getOpenid';
@@ -268,6 +268,29 @@ export const taskAPI = {
  * 论坛相关 API
  */
 export const forumAPI = {
+  checkForumAttachment(data) {
+    return httpRequest({ method: 'POST', path: 'api/posts/attachments/check', data, auth: true });
+  },
+
+  uploadForumAttachment(filePath, metadata) {
+    return new Promise((resolve, reject) => {
+      const header = {};
+      const token = getToken();
+      if (token) header.Authorization = `Bearer ${token}`;
+      wx.uploadFile({
+        url: buildUrl('api/posts/attachments/upload'), filePath, name: 'file', header,
+        formData: { filename: metadata.filename, contentType: metadata.contentType, sizeBytes: String(metadata.sizeBytes), sha256: metadata.sha256 },
+        success: (res) => {
+          let body = {};
+          try { body = typeof res.data === 'string' ? JSON.parse(res.data) : res.data; } catch (_) { body = {}; }
+          if (res.statusCode >= 400) { reject(new Error(body.message || '附件上传失败')); return; }
+          resolve(body.data || body);
+        },
+        fail: reject,
+      });
+    });
+  },
+
   // 获取帖子列表（keyword 仅匹配标题模糊，orderBy: time|hot，60s 缓存）
   getPosts(params = {}) {
     const { page = 1, pageSize = 10, keyword, orderBy } = params;
@@ -308,6 +331,38 @@ export const forumAPI = {
       data: { authorName, ...data },
       auth: true,
     }).then((res) => {
+      if (res && res.code === 200) clearPostListCache();
+      return refreshAfterSuccess(res, markForumLists);
+    });
+  },
+
+  updatePost(postId, data) {
+    return httpRequest({ method: 'PATCH', path: `api/posts/${encodeURIComponent(postId)}`, data, auth: true }).then((res) => {
+      if (res && res.code === 200) clearPostListCache();
+      return refreshAfterSuccess(res, markForumLists);
+    });
+  },
+
+  registerPost(postId) {
+    return httpRequest({ method: 'POST', path: `api/posts/${postId}/registration`, auth: true }).then((res) => {
+      if (res && res.code === 200) clearPostListCache();
+      return refreshAfterSuccess(res, markForumLists);
+    });
+  },
+
+  cancelPostRegistration(postId) {
+    return httpRequest({ method: 'DELETE', path: `api/posts/${postId}/registration`, auth: true }).then((res) => {
+      if (res && res.code === 200) clearPostListCache();
+      return refreshAfterSuccess(res, markForumLists);
+    });
+  },
+
+  getPostRegistrationEntries(postId) {
+    return httpRequest({ method: 'GET', path: `api/posts/${postId}/registration/entries`, auth: true }).then(formatDateTimeFields);
+  },
+
+  setPostPinned(postId, pinned) {
+    return httpRequest({ method: 'PATCH', path: `api/posts/${postId}/pin`, data: { pinned: Boolean(pinned) }, auth: true }).then((res) => {
       if (res && res.code === 200) clearPostListCache();
       return refreshAfterSuccess(res, markForumLists);
     });

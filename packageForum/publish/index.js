@@ -1,6 +1,9 @@
-import { forumAPI } from '~/api/cloud';
+import { forumAPI, userAPI } from '~/api/cloud';
 import { chooseAndUploadMedia, MEDIA_LIMITS } from '~/utils/cloudMedia';
-import { ensureMutationReady } from '~/utils/authIdentity';
+import { ensureLoggedIn, ensureMutationReady } from '~/utils/authIdentity';
+import { sha256File } from '~/utils/sha256';
+import { buildForumPostEditPayload } from '~/utils/forumPostPayload';
+import { runForumAttachmentPicker } from '~/utils/forumAttachmentPicker';
 
 Page({
   data: {
@@ -11,6 +14,87 @@ Page({
     submitting: false,
     contentFocus: false,
     showEmojiPanel: false,
+    canManageForumPosts: false,
+    featureType: 'CONTENT',
+    registrationCapacity: '',
+    registrationDeadlineAt: '',
+    pinned: false,
+    attachments: [],
+    attachmentUploading: false,
+    attachmentStage: '',
+    editPostId: '',
+    editing: false,
+  },
+
+  async onLoad(options = {}) {
+    const app = getApp();
+    this._authPageAlive = true;
+    this._onUserInfoChange = () => this.syncForumPermissionFromUserInfo();
+    app.eventBus.on('userInfoChange', this._onUserInfoChange);
+    this.syncForumPermissionFromUserInfo();
+    if (await ensureLoggedIn(this)) {
+      await this.refreshForumPermission();
+      const editPostId = String(options.editPostId || '').trim();
+      if (editPostId && this.data.canManageForumPosts) await this.loadEditPost(editPostId);
+    }
+  },
+
+  onShow() {
+    this.refreshForumPermission();
+  },
+
+  syncForumPermissionFromUserInfo() {
+    const user = getApp().globalData.userInfo || {};
+    const canManageForumPosts = Boolean(user.canManageForumPosts);
+    if (this.data.canManageForumPosts !== canManageForumPosts) {
+      this.setData({ canManageForumPosts });
+    }
+    return canManageForumPosts;
+  },
+
+  async refreshForumPermission() {
+    this.syncForumPermissionFromUserInfo();
+    let token = '';
+    try {
+      token = wx.getStorageSync('access_token') || '';
+    } catch (e) {
+      return this.data.canManageForumPosts;
+    }
+    if (!token) return this.data.canManageForumPosts;
+    if (this._forumPermissionRequest) return this._forumPermissionRequest;
+
+    this._forumPermissionRequest = (async () => {
+      try {
+        const res = await userAPI.getUserInfo();
+        if (!this._authPageAlive || !res || res.code !== 200 || !res.data) {
+          return this.data.canManageForumPosts;
+        }
+        const app = getApp();
+        app.globalData.userInfo = { ...(app.globalData.userInfo || {}), ...res.data };
+        return this.syncForumPermissionFromUserInfo();
+      } catch (err) {
+        console.warn('刷新发帖权限失败:', err);
+        return this.data.canManageForumPosts;
+      } finally {
+        this._forumPermissionRequest = null;
+      }
+    })();
+    return this._forumPermissionRequest;
+  },
+
+  onAuthorized() {
+    return this.refreshForumPermission();
+  },
+
+  async loadEditPost(postId) {
+    try {
+      const res = await forumAPI.getPostDetail(postId);
+      if (!res || res.code !== 200 || !res.data) throw new Error('帖子不存在');
+      const post = res.data;
+      this.setData({ editPostId: postId, editing: true, title: post.title || '', content: post.content || '', mediaImages: Array.isArray(post.images) ? post.images : [], mediaVideos: Array.isArray(post.videos) ? post.videos : [], attachments: Array.isArray(post.attachments) ? post.attachments.map((item) => ({ mediaAssetId: item.mediaAssetId, name: item.name || '附件', sizeBytes: item.sizeBytes || 0, contentType: item.contentType || '' })) : [], featureType: post.featureType || 'CONTENT', pinned: Boolean(post.pinned) });
+    } catch (error) {
+      wx.showToast({ title: error.message || '加载帖子失败', icon: 'none' });
+    }
   },
 
   onTitleInput(e) {
@@ -20,6 +104,11 @@ Page({
   onContentInput(e) {
     this.setData({ content: e.detail.value });
   },
+  onFeatureTypeChange(e) { this.setData({ featureType: e.detail.value }); },
+  onFeatureTypeSelect(e) { this.setData({ featureType: e.currentTarget.dataset.value }); },
+  onCapacityInput(e) { this.setData({ registrationCapacity: e.detail.value }); },
+  onDeadlineChange(e) { this.setData({ registrationDeadlineAt: e.detail.value }); },
+  onPinnedChange(e) { this.setData({ pinned: e.detail.value }); },
   onEmojiHint() {
     this.setData({ showEmojiPanel: !this.data.showEmojiPanel, contentFocus: false });
   },
@@ -69,9 +158,20 @@ Page({
     wx.previewImage({ current, urls });
   },
 
+  async onAddAttachment() {
+    return runForumAttachmentPicker.call(this, { wxApi: wx, hash: sha256File, check: forumAPI.checkForumAttachment, upload: forumAPI.uploadForumAttachment });
+  },
+
+  onRemoveAttachment(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    this.setData({ attachments: this.data.attachments.filter((_, i) => i !== index) });
+  },
+
   async submit() {
     if (!(await ensureMutationReady(this))) return;
-    const { title, content, mediaImages, mediaVideos } = this.data;
+    this.syncForumPermissionFromUserInfo();
+    const { title, content, mediaImages, mediaVideos, canManageForumPosts, featureType, registrationCapacity, registrationDeadlineAt, pinned, attachments, attachmentUploading } = this.data;
+    if (attachmentUploading) { wx.showToast({ title: '附件上传中，请稍候', icon: 'none' }); return; }
     const t = (title || '').trim();
     const c = (content || '').trim();
 
@@ -83,21 +183,41 @@ Page({
       wx.showToast({ title: '请输入内容或添加图片/视频', icon: 'none' });
       return;
     }
+    if (canManageForumPosts && !this.data.editing && featureType === 'REGISTRATION') {
+      if (!/^\d+$/.test(String(registrationCapacity)) || Number(registrationCapacity) < 1) {
+        wx.showToast({ title: '请设置报名人数上限', icon: 'none' });
+        return;
+      }
+      if (!registrationDeadlineAt || new Date(`${registrationDeadlineAt}T23:59:59`).getTime() <= Date.now()) {
+        wx.showToast({ title: '请选择未来的报名截止日期', icon: 'none' });
+        return;
+      }
+    }
 
     this.setData({ submitting: true });
 
     try {
-      const res = await forumAPI.publishPost({
-        title: t,
-        content: c,
-        images: mediaImages,
-        videos: mediaVideos,
-      });
+      const payload = this.data.editing
+        ? buildForumPostEditPayload({ title: t, content: c, mediaImages, mediaVideos, attachments })
+        : {
+          title: t,
+          content: c,
+          images: mediaImages,
+          videos: mediaVideos,
+          ...(canManageForumPosts ? {
+          postType: 'NORMAL',
+          featureType,
+          pinned,
+          attachments: attachments.map((item) => ({ mediaAssetId: item.mediaAssetId })),
+          ...(featureType === 'REGISTRATION' ? { registrationCapacity: Number(registrationCapacity), registrationDeadlineAt: new Date(`${registrationDeadlineAt}T23:59:59`).toISOString() } : {}),
+          } : {}),
+        };
+      const res = this.data.editing ? await forumAPI.updatePost(this.data.editPostId, payload) : await forumAPI.publishPost(payload);
 
       this.setData({ submitting: false });
 
       if (res.code === 200 && res.data) {
-        wx.showToast({ title: '发帖成功' });
+          wx.showToast({ title: this.data.editing ? '保存成功' : '发帖成功' });
         setTimeout(() => {
           wx.navigateBack();
         }, 800);
@@ -119,5 +239,7 @@ Page({
 
   onUnload() {
     this._authPageAlive = false;
+    const app = getApp();
+    if (this._onUserInfoChange) app.eventBus.off('userInfoChange', this._onUserInfoChange);
   },
 });

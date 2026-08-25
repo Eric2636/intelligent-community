@@ -97,20 +97,20 @@
             <text wx:if="{{item.userTagLabel}}" class="identity-tag identity-tag--{{item.userTagType}}">{{item.userTagLabel}}</text>
           </view>
         </view>
-        <text class="post-item__title">{{item.title}}</text>
+        <view class="post-item__title-row">
+          <text class="post-item__title">{{item.title}}</text>
+        </view>
         <template is="forumListMedia" data="{{item: item}}" />
         <view class="post-item__actions">
-          <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
-            <t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" />
-            <text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text>
-          </button>
-          <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
-            <t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" />
-            <text class="post-item__action-count">{{item.replyCount || 0}}</text>
+          <view class="post-item__states">
+            <text wx:if="{{item.pinned}}" class="post-label post-label--pinned">置顶</text>
+            <text wx:if="{{item.postType === 'ANNOUNCEMENT'}}" class="post-label post-label--announcement">社区公告</text>
+            <text wx:if="{{item.featureType === 'REGISTRATION'}}" class="post-label post-label--registration">活动报名</text>
           </view>
-          <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike">
-            <t-icon class="post-item__action-icon" name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
-            <text class="post-item__action-count">{{item.likeCount || 0}}</text>
+          <view class="post-item__action-group">
+            <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop"><t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" /><text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text></button>
+            <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments"><t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" /><text class="post-item__action-count">{{item.replyCount || 0}}</text></view>
+            <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike"><t-icon class="post-item__action-icon" name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" /><text class="post-item__action-count">{{item.likeCount || 0}}</text></view>
           </view>
         </view>
       </view>
@@ -134,20 +134,16 @@
                 <text wx:if="{{item.userTagLabel}}" class="identity-tag identity-tag--{{item.userTagType}}">{{item.userTagLabel}}</text>
               </view>
             </view>
-            <text class="post-item__title">{{item.title}}</text>
+            <view class="post-item__title-row">
+              <text class="post-item__title">{{item.title}}</text>
+            </view>
             <template is="forumListMedia" data="{{item: item}}" />
             <view class="post-item__actions">
-              <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
-                <t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" />
-                <text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text>
-              </button>
-              <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
-                <t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" />
-                <text class="post-item__action-count">{{item.replyCount || 0}}</text>
-              </view>
-              <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike">
-                <t-icon class="post-item__action-icon" name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
-                <text class="post-item__action-count">{{item.likeCount || 0}}</text>
+              <view class="post-item__states"><text wx:if="{{item.pinned}}" class="post-label post-label--pinned">置顶</text><text wx:if="{{item.postType === 'ANNOUNCEMENT'}}" class="post-label post-label--announcement">社区公告</text><text wx:if="{{item.featureType === 'REGISTRATION'}}" class="post-label post-label--registration">活动报名</text></view>
+              <view class="post-item__action-group">
+                <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop"><t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" /><text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text></button>
+                <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments"><t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" /><text class="post-item__action-count">{{item.replyCount || 0}}</text></view>
+                <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike"><t-icon class="post-item__action-icon" name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" /><text class="post-item__action-count">{{item.likeCount || 0}}</text></view>
               </view>
             </view>
           </view>
@@ -169,20 +165,16 @@
               <text wx:if="{{item.userTagLabel}}" class="identity-tag identity-tag--{{item.userTagType}}">{{item.userTagLabel}}</text>
             </view>
           </view>
-          <text class="post-item__title">{{item.title}}</text>
+          <view class="post-item__title-row">
+            <text class="post-item__title">{{item.title}}</text>
+          </view>
           <template is="forumListMedia" data="{{item: item}}" />
           <view class="post-item__actions">
-            <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop">
-              <t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" />
-              <text class="post-item__action-count" style="text-align: left; margin-left: 3rpx;">{{item.shareCount || item.forwardCount || 0}}</text>
-            </button>
-            <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments">
-              <t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" />
-              <text class="post-item__action-count">{{item.replyCount || 0}}</text>
-            </view>
-            <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike">
-              <t-icon class="post-item__action-icon" name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" />
-              <text class="post-item__action-count">{{item.likeCount || 0}}</text>
+            <view class="post-item__states"><text wx:if="{{item.pinned}}" class="post-label post-label--pinned">置顶</text><text wx:if="{{item.postType === 'ANNOUNCEMENT'}}" class="post-label post-label--announcement">社区公告</text><text wx:if="{{item.featureType === 'REGISTRATION'}}" class="post-label post-label--registration">活动报名</text></view>
+            <view class="post-item__action-group">
+              <button class="post-item__action post-item__share-btn" open-type="share" data-id="{{item.id || item._id}}" catchtap="noop"><t-icon class="post-item__action-icon" name="share" size="30rpx" color="#8e8e93" /><text class="post-item__action-count">{{item.shareCount || item.forwardCount || 0}}</text></button>
+              <view class="post-item__action" data-id="{{item.id || item._id}}" catchtap="goPostComments"><t-icon class="post-item__action-icon" name="chat-bubble" size="30rpx" color="#8e8e93" /><text class="post-item__action-count">{{item.replyCount || 0}}</text></view>
+              <view class="post-item__action {{item.isLiked ? 'post-item__action--liked' : ''}}" data-id="{{item.id || item._id}}" catchtap="onListLike"><t-icon class="post-item__action-icon" name="{{item.isLiked ? 'thumb-up-filled' : 'thumb-up'}}" size="30rpx" color="{{item.isLiked ? '#007aff' : '#8e8e93'}}" /><text class="post-item__action-count">{{item.likeCount || 0}}</text></view>
             </view>
           </view>
         </view>

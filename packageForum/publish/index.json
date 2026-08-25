@@ -1,6 +1,9 @@
 {
   "navigationStyle": "custom",
   "usingComponents": {
+    "t-radio-group": "tdesign-miniprogram/radio-group/radio-group",
+    "t-radio": "tdesign-miniprogram/radio/radio",
+    "t-switch": "tdesign-miniprogram/switch/switch",
     "nav": "/components/nav",
     "emoji-panel": "/components/emoji-panel",
     "t-icon": "tdesign-miniprogram/icon/icon",

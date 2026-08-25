@@ -10,6 +10,24 @@
         bindinput="onTitleInput"
       />
     </view>
+
+    <view wx:if="{{canManageForumPosts && !editing}}" class="publish-field publish-admin-options">
+      <view class="publish-admin-options__group">
+        <view class="publish-admin-options__label">活动类型</view>
+        <view class="publish-segmented">
+          <view class="publish-segment {{featureType === 'CONTENT' ? 'publish-segment--active' : ''}}" data-value="CONTENT" bindtap="onFeatureTypeSelect">内容</view>
+          <view class="publish-segment {{featureType === 'REGISTRATION' ? 'publish-segment--active' : ''}}" data-value="REGISTRATION" bindtap="onFeatureTypeSelect">活动报名</view>
+        </view>
+      </view>
+      <block wx:if="{{featureType === 'REGISTRATION'}}">
+        <view class="publish-admin-options__group"><view class="publish-admin-options__label">报名人数上限</view><input class="publish-field__input" type="number" placeholder="请输入报名人数上限" value="{{registrationCapacity}}" bindinput="onCapacityInput" /></view>
+        <view class="publish-admin-options__group"><view class="publish-admin-options__label">报名截止日期</view><picker mode="date" value="{{registrationDeadlineAt}}" bindchange="onDeadlineChange"><view class="publish-admin-options__picker"><t-icon name="calendar" size="34rpx" /><text class="publish-admin-options__picker-text">{{registrationDeadlineAt || '请选择报名截止日期'}}</text><t-icon name="chevron-right" size="32rpx" /></view></picker></view>
+      </block>
+      <view class="publish-admin-options__group publish-admin-options__group--settings">
+        <view class="publish-admin-options__label">发布设置</view>
+        <view class="publish-admin-options__pin"><text>置顶</text><t-switch value="{{pinned}}" bind:change="onPinnedChange" /></view>
+      </view>
+    </view>
     <view class="publish-field">
       <textarea
         class="publish-field__input publish-field__textarea"
@@ -60,6 +78,15 @@
     >
       + 添加图片或视频
     </view>
+    <view wx:if="{{canManageForumPosts}}" class="attachment-picker">
+      <view class="attachment-picker__head"><text>附件（最多5个，单个20MB）</text></view>
+      <view class="attachment-picker__action {{attachmentUploading ? 'attachment-picker__action--busy' : ''}}" bindtap="onAddAttachment">
+        <t-icon name="attach" size="36rpx" /><text wx:if="{{!attachmentUploading}}">添加附件</text><text wx:elif="{{attachmentStage === 'selecting'}}">正在选择文件</text><text wx:elif="{{attachmentStage === 'hashing'}}">正在计算文件哈希</text><text wx:elif="{{attachmentStage === 'checking'}}">正在检查秒传</text><text wx:else>正在上传</text>
+      </view>
+      <view wx:for="{{attachments}}" wx:key="mediaAssetId" class="attachment-picker__item">
+        <text class="attachment-picker__name">{{item.name}}</text><text class="attachment-picker__size">{{item.sizeBytes}} B</text><text class="attachment-picker__remove" data-index="{{index}}" bindtap="onRemoveAttachment">移除</text>
+      </view>
+    </view>
 
     <t-button
       class="publish-submit"
@@ -69,8 +96,8 @@
       bindtap="submit"
       loading="{{submitting}}"
     >
-      发布
+      {{editing ? '保存' : '发布'}}
     </t-button>
   </view>
 </view>
-<auth-login-dialog id="auth-login-dialog" />
+<auth-login-dialog id="auth-login-dialog" bindauthorized="onAuthorized" />

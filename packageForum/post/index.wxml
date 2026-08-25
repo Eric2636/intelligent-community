@@ -11,12 +11,48 @@
           <view class="post-card__author">
             <text>{{post.authorName}}</text>
             <text wx:if="{{post.userTagLabel}}" class="identity-tag identity-tag--{{post.userTagType}}">{{post.userTagLabel}}</text>
-            <text class="post-card__time">{{post.createTime}}</text>
           </view>
         </view>
       </view>
-      <text class="post-card__title">{{post.title}}</text>
+      <view class="post-card__title-row">
+        <text class="post-card__title">{{post.title}}</text>
+        <text wx:if="{{post.pinned}}" class="post-label post-label--pinned">置顶</text>
+        <text wx:if="{{post.postType === 'ANNOUNCEMENT'}}" class="post-label post-label--announcement">社区公告</text>
+        <text wx:if="{{post.featureType === 'REGISTRATION'}}" class="post-label post-label--registration">活动报名</text>
+      </view>
+      <view wx:if="{{post.featureType === 'REGISTRATION' && post.registration}}" class="post-registration">
+        <view class="post-registration__main">
+          <view class="post-registration__head">
+            <view class="post-registration__title-wrap">
+              <t-icon name="calendar-1" size="34rpx" color="#276ee9" />
+              <text class="post-registration__title">活动报名</text>
+            </view>
+            <text class="post-registration__capacity">{{post.registration.registeredCount}} / {{post.registration.capacity}} 人已报名</text>
+          </view>
+          <text class="post-registration__deadline">报名截至 {{post.registration.deadlineAt}}</text>
+        </view>
+        <view class="post-registration__action">
+          <view wx:if="{{post.registration.isRegistered}}" class="post-registration__registered">
+            <view class="post-registration__registered-state"><t-icon name="check-circle" size="30rpx" color="#276ee9" /><text>已报名</text></view>
+            <text class="post-registration__cancel" bindtap="onRegistrationAction">取消报名</text>
+          </view>
+          <t-button wx:elif="{{post.registration.status === 'FULL'}}" class="post-registration__button" block disabled>名额已满</t-button>
+          <t-button wx:elif="{{post.registration.status === 'CLOSED'}}" class="post-registration__button" block disabled>报名已截止</t-button>
+          <t-button wx:else class="post-registration__button" block theme="primary" loading="{{registrationSubmitting}}" disabled="{{registrationSubmitting}}" bindtap="onRegistrationAction">立即报名</t-button>
+        </view>
+      </view>
       <text class="post-card__content" wx:if="{{post.content}}">{{post.content}}</text>
+      <view wx:if="{{post.attachments.length}}" class="post-attachments">
+        <view class="post-attachments__title">附件（{{post.attachments.length}}）</view>
+        <view wx:for="{{post.attachments}}" wx:key="mediaAssetId" class="post-attachments__item" hover-class="post-attachments__item--pressed" data-item="{{item}}" bindtap="onOpenAttachment">
+          <view class="post-attachments__icon"><t-icon name="file" size="38rpx" /></view>
+          <view class="post-attachments__content">
+            <text class="post-attachments__name">{{item.name}}</text>
+            <text class="post-attachments__meta">{{item.displayMeta.secondaryText}}</text>
+          </view>
+          <view class="post-attachments__action"><text>预览</text><t-icon name="chevron-right" size="30rpx" /></view>
+        </view>
+      </view>
       <view class="post-card__media" wx:if="{{post.images.length || post.videos.length}}">
         <view class="post-card__media-grid">
           <block wx:for="{{post.images}}" wx:for-index="imgIdx" wx:key="*this">
@@ -43,6 +79,7 @@
         <text>浏览 {{post.viewCount || 0}}</text>
         <text>回复 {{post.replyCount || 0}}</text>
         <text>点赞 {{post.likeCount || 0}}</text>
+        <text class="post-card__time">{{post.createTime}}</text>
       </view>
       <view class="post-card__actions">
         <view class="post-card__actions-main">
