@@ -43,7 +43,15 @@
       </view>
       <text class="post-card__content" wx:if="{{post.content}}">{{post.content}}</text>
       <view wx:if="{{post.attachments.length}}" class="post-attachments">
-        <view wx:for="{{post.attachments}}" wx:key="mediaAssetId" class="post-attachments__item" data-item="{{item}}" bindtap="onOpenAttachment"><t-icon name="file" size="36rpx" /><text>{{item.name}}</text></view>
+        <view class="post-attachments__title">附件（{{post.attachments.length}}）</view>
+        <view wx:for="{{post.attachments}}" wx:key="mediaAssetId" class="post-attachments__item" hover-class="post-attachments__item--pressed" data-item="{{item}}" bindtap="onOpenAttachment">
+          <view class="post-attachments__icon"><t-icon name="file" size="38rpx" /></view>
+          <view class="post-attachments__content">
+            <text class="post-attachments__name">{{item.name}}</text>
+            <text class="post-attachments__meta">{{item.displayMeta.secondaryText}}</text>
+          </view>
+          <view class="post-attachments__action"><text>预览</text><t-icon name="chevron-right" size="30rpx" /></view>
+        </view>
       </view>
       <view class="post-card__media" wx:if="{{post.images.length || post.videos.length}}">
         <view class="post-card__media-grid">

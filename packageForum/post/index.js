@@ -3,6 +3,7 @@ import { chooseAndUploadMedia, MEDIA_LIMITS } from '~/utils/cloudMedia';
 import { FORUM_REPLY_EMOJI_LIST } from '~/utils/forumReplyEmoji';
 import { ensureMutationReady } from '~/utils/authIdentity';
 import { emitListMutation } from '../../utils/listMutation.js';
+const { forumAttachmentDisplayMeta } = require('../../utils/forumAttachmentDisplay.js');
 
 function firstUrl(list) {
   return Array.isArray(list) && list.length ? String(list[0] || '') : '';
@@ -74,7 +75,9 @@ function normalizeForumPost(raw) {
   const me = getMeIds();
   const images = Array.isArray(raw.images) ? raw.images : [];
   const videos = Array.isArray(raw.videos) ? raw.videos : [];
-  const attachments = Array.isArray(raw.attachments) ? raw.attachments : [];
+  const attachments = Array.isArray(raw.attachments)
+    ? raw.attachments.map((attachment) => ({ ...attachment, displayMeta: forumAttachmentDisplayMeta(attachment) }))
+    : [];
   const replies = (raw.replies || []).map((r) => normalizeReply(r, me));
   return {
     ...raw,

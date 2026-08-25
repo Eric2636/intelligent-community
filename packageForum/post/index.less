@@ -103,6 +103,82 @@
 .post-label--announcement { color: #6d4fb3; background: #f1edff; }
 .post-label--registration { color: #246fe5; background: #eaf2ff; }
 
+.post-attachments {
+  margin-top: @spacing-card;
+
+  &__title {
+    margin-bottom: 12rpx;
+    font-size: @font-size-body-small;
+    font-weight: 600;
+    color: @gy1;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+    min-height: 112rpx;
+    padding: 18rpx @spacing-card-compact;
+    border: 1rpx solid @gray3;
+    border-radius: @radius-sm;
+    background: @bg-color-section;
+    box-sizing: border-box;
+  }
+
+  &__item + &__item {
+    margin-top: 12rpx;
+  }
+
+  &__item--pressed {
+    background: @gray3;
+  }
+
+  &__icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: @radius-sm;
+    color: @color-primary;
+    background: @bg-color-white;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name,
+  &__meta {
+    display: block;
+  }
+
+  &__name {
+    overflow: hidden;
+    font-size: @font-size-body-small;
+    color: @gy1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__meta {
+    margin-top: 6rpx;
+    font-size: @font-size-meta;
+    color: @gy3;
+  }
+
+  &__action {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 2rpx;
+    font-size: @font-size-meta;
+    color: @color-primary;
+  }
+}
+
 .post-card {
   padding: 28rpx 28rpx 24rpx;
   background: @bg-color-white;
