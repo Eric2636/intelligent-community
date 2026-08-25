@@ -9,7 +9,8 @@ test('publish page contains administrator-only functional post controls', () => 
   const view = read('packageForum/publish/index.wxml');
   const script = read('packageForum/publish/index.js');
   assert.match(view, /canManageForumPosts/);
-  assert.match(view, /帖子类型/);
+  assert.match(view, /活动类型/);
+  assert.match(view, /data-value="CONTENT"[^>]*>内容<\/view>/);
   assert.match(view, /报名人数上限/);
   assert.match(script, /userAPI\.getUserInfo\(\)/);
   assert.match(script, /await ensureLoggedIn\(this\)/);
@@ -17,10 +18,10 @@ test('publish page contains administrator-only functional post controls', () => 
   assert.match(script, /new Date\(`\$\{registrationDeadlineAt\}T23:59:59`\)\.toISOString\(\)/);
 });
 
-test('publish page uses a compact segmented control for functional post type', () => {
+test('publish page uses a compact segmented control for activity type', () => {
   const view = read('packageForum/publish/index.wxml');
   const script = read('packageForum/publish/index.js');
-  assert.match(view, /帖子类型/);
+  assert.match(view, /活动类型/);
   assert.equal((view.match(/publish-segmented/g) || []).length, 1);
   assert.match(view, /publish-segment--active/);
   assert.match(view, /bindtap="onFeatureTypeSelect"/);

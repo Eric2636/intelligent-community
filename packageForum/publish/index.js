@@ -3,6 +3,7 @@ import { chooseAndUploadMedia, MEDIA_LIMITS } from '~/utils/cloudMedia';
 import { ensureLoggedIn, ensureMutationReady } from '~/utils/authIdentity';
 import { sha256File } from '~/utils/sha256';
 import { buildForumPostEditPayload } from '~/utils/forumPostPayload';
+import { runForumAttachmentPicker } from '~/utils/forumAttachmentPicker';
 
 Page({
   data: {
@@ -20,6 +21,7 @@ Page({
     pinned: false,
     attachments: [],
     attachmentUploading: false,
+    attachmentStage: '',
     editPostId: '',
     editing: false,
   },
@@ -157,28 +159,7 @@ Page({
   },
 
   async onAddAttachment() {
-    if (!this.data.canManageForumPosts || this.data.attachmentUploading) return;
-    const remain = 5 - this.data.attachments.length;
-    if (remain <= 0) { wx.showToast({ title: '每篇帖子最多5个附件', icon: 'none' }); return; }
-    wx.chooseMessageFile({ count: remain, type: 'file', extension: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'], success: async ({ tempFiles = [] }) => {
-      this.setData({ attachmentUploading: true });
-      try {
-        const added = [];
-        for (const file of tempFiles) {
-          if (Number(file.size) > 20 * 1024 * 1024) throw new Error('单个附件不能超过20MB');
-          const filename = file.name || file.path.split('/').pop() || '附件';
-          const contentType = file.type || 'application/octet-stream';
-          const sha256 = await sha256File(file.path);
-          const checked = await forumAPI.checkForumAttachment({ sha256, filename, contentType, sizeBytes: Number(file.size) });
-          const payload = checked && checked.data ? checked.data : checked;
-          const uploaded = payload && payload.exists ? payload : await forumAPI.uploadForumAttachment(file.path, { sha256, filename, contentType, sizeBytes: Number(file.size) });
-          added.push({ mediaAssetId: uploaded.mediaAssetId || uploaded.id, name: uploaded.name || filename, sizeBytes: uploaded.sizeBytes || file.size, contentType: uploaded.contentType || contentType });
-        }
-        this.setData({ attachments: this.data.attachments.concat(added) });
-      } catch (err) {
-        wx.showToast({ title: err.message || '附件上传失败', icon: 'none' });
-      } finally { this.setData({ attachmentUploading: false }); }
-    } });
+    return runForumAttachmentPicker.call(this, { wxApi: wx, hash: sha256File, check: forumAPI.checkForumAttachment, upload: forumAPI.uploadForumAttachment });
   },
 
   onRemoveAttachment(e) {

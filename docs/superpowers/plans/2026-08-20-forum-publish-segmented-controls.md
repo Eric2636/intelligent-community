@@ -15,7 +15,7 @@
 **Files:**
 - Modify: `test/forum-functional-posts.spec.mjs`
 
-- [ ] Add a failing static UI test requiring two `publish-segmented` groups, labels `展示位置` and `帖子类型`, the selected-state class binding, and the existing `REGISTRATION` conditional block.
+- [ ] Add a failing static UI test requiring two `publish-segmented` groups, labels `展示位置` and `活动类型`, options `内容` and `活动报名`, the selected-state class binding, and the existing `REGISTRATION` conditional block.
 - [ ] Run `node --test test/forum-functional-posts.spec.mjs` and confirm the new assertion fails because the old radio markup remains.
 
 ### Task 2: Replace presentation markup and styles
