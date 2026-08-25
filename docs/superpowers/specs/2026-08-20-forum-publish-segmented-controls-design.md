@@ -7,7 +7,7 @@ Replace the administrator-only stacked radio rows on the Mini Program publish pa
 ## Interaction
 
 - `展示位置` presents `普通帖` and `社区公告` in one equal-width segmented group.
-- `帖子类型` presents `内容贴` and `活动报名` in a second segmented group.
+- `活动类型` presents `内容` and `活动报名` in a second segmented group.
 - The existing `postType` and `featureType` values remain unchanged; only the presentation and labels change.
 - Selecting `活动报名` expands the existing capacity and deadline fields.
 - `置顶` is grouped under `发布设置`, keeping it visually separate from classification choices.

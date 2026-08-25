@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 在社区首页、我的帖子、我的收藏和帖子详情中，以固定顺序和不同颜色显示置顶、社区公告、活动报名标签。
+**Goal:** 在社区首页、我的帖子、我的收藏和帖子详情中，显示独立的置顶状态和互斥的社区公告/活动报名类型标签。
 
-**Architecture:** 仅在现有 WXML 标题容器中按帖子字段条件渲染标签，不增加接口或数据转换。每个页面定义相同的三种本地样式：橙红置顶、紫色公告、蓝色活动报名；标题容器改为可换行的弹性布局，避免长标题挤压标签。
+**Architecture:** 公告是特殊帖子；`postType` 表示普通帖子/公告，`featureType` 的业务名称是“活动类型”，当前为内容/活动报名，未来仅扩展 `featureType`。现有 WXML 标题容器按字段条件渲染标签。
 
 **Tech Stack:** 微信小程序 WXML、LESS、TDesign Mini Program、Node 内置测试。
 
@@ -159,7 +159,7 @@ Expected: 所有测试通过，ESLint 与 diff 检查退出码为 0。
 
 - [ ] **Step 2: 在微信开发者工具中检查四个状态**
 
-验证普通内容帖不显示功能标签；置顶活动帖显示“置顶、活动报名”；公告内容帖显示“社区公告”；置顶公告活动帖显示“置顶、社区公告、活动报名”。
+验证普通内容帖子不显示类型标签；置顶活动帖显示“置顶、活动报名”；公告显示“社区公告”；置顶公告显示“置顶、社区公告”。系统不得产生或展示“公告活动报名”组合。
 
 - [ ] **Step 3: 保留为本地 dev 分支改动**
 
